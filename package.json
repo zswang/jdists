@@ -1,10 +1,10 @@
 {
   "name": "jdists",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "JS 区块进行预处理工具",
   "main": "src/jdists.js",
   "bin": {
-    "eg": "bin/jdists"
+    "jdists": "bin/jdists"
   },
   "repository": {
     "type": "git",
