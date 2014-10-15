@@ -1,0 +1,36 @@
+{
+  "name": "jdists",
+  "version": "0.0.1",
+  "description": "JS 区块进行预处理工具",
+  "main": "src/jdists.js",
+  "bin": {
+    "eg": "bin/jdists"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zswang/jdists.git"
+  },
+  "keywords": [
+    "javascript",
+    "region",
+    "block"
+  ],
+  "author": "zswang<wjhu111@21cn.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zswang/jdists/issues"
+  },
+  "homepage": "https://github.com/zswang/jdists",
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*",
+    "jshint": "*"
+  },
+  "dependencies": {
+    "optimist": "0.6.1"
+  },
+  "scripts": {
+    "test": "mocha -R spec && npm run coverage",
+    "lint": "jshint src/*.js *.json"
+  }
+}

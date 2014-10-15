@@ -1,0 +1,26 @@
+<html>
+<head>
+<style>
+/*<debug>*/
+h1 {
+  color: red;
+}
+/*</debug>*/
+</style>
+</head>
+<body>
+  <!--debug-->
+  <h1>debug</h1>
+  <!--/debug-->
+</body>
+<script>
+void function() {
+  /*<debug>*/
+  var h1 = document.querySelector('h1');
+  h1.innerHTML += ' 2014';
+  /*</debug>*/
+
+  /*<include base.js>*/
+}();
+</script>
+</html>

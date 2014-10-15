@@ -1,0 +1,44 @@
+#!/usr/bin/env node
+'use strict';
+
+var jdists = require('../.');
+var util = require('util');
+var optimist = require('optimist');
+var fs = require('fs');
+
+var argv = optimist
+  .usage('$0 input1.js [input2.js] [options]')
+  .alias('r', 'remove')
+  .describe('r', 'remove region.')
+  .default('r', 'debug,test')
+  .string('r')
+  .alias("o", "output")
+  .describe('o', 'output file.')
+  .string('o')
+  .alias("v", "version")
+  .describe("v", "Print version number and exit.")
+  .wrap(80)
+  .argv
+;
+
+if (argv.version) {
+  var json = require("../package.json");
+  util.puts(json.name + ' ' + json.version);
+  return;
+}
+
+if (argv._.length < 1) {
+  util.puts('The input file is not specified.');
+  return;
+}
+
+var contents = [];
+argv._.forEach(function(filename) {
+  contents.push(jdists.build(filename, argv.r));
+});
+var content = contents.join('\n');
+if (argv.output) {
+  fs.writeFileSync(argv.output, content);
+} else {
+  console.log(content);
+}
