@@ -11,6 +11,12 @@ describe('fixtures', function() {
   }).forEach(function(input) {
     var output = input.replace(/\.input\.(js|html|css)$/, '.output.$1');
     it(input, function() {
+      if (/\.throw\./.test(input)) { // 出现异常
+        (function() {
+          jdists.build(path.join(dirname, input));
+        }).should.throw();
+        return;
+      }
       assert.equal(
         jdists.build(path.join(dirname, input)),
         fs.readFileSync(path.join(dirname, output))

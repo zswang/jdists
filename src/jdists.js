@@ -11,8 +11,11 @@ void function() {
   var fs = require('fs');
   var path = require('path');
 
+  var cache; // 文件缓存
+  var chain; // 引用链
+
   /**
-   * 编译文件
+   * 加载文件并编译
    * @param{String} filename 文件名
    * @param{String} remove 需要移除的块列表，默认为：'debug,test'
    * @return{String} 返回处理后文件内容
@@ -21,9 +24,13 @@ void function() {
     if (!fs.existsSync(filename)) {
       return '';
     }
+    if (chain.indexOf(filename) >= 0) {
+      throw new Error('Circular reference file.');
+    }
+    chain.push(filename); // 记录引用链
+
     var removeList = String(remove || 'debug,test').split(','); // 需要移除的块
     var dirname = path.dirname(filename); // 目录名，计算相对路径用
-    var cache = {};
 
     var removeRegion = function (all, region) {
       if (removeList.indexOf(region) >= 0) {
@@ -47,9 +54,10 @@ void function() {
         }
       }
       var result = '';
+      filename = path.resolve(dirname, filename);
       if (cache[filename] || fs.existsSync(filename)) {
         if (!cache[filename]) {
-          cache[filename] = build(path.resolve(dirname, filename), remove);
+          cache[filename] = build(filename, remove);
         }
         var content = cache[filename];
         content.replace(
@@ -91,9 +99,14 @@ void function() {
         return JSON.stringify(text);
       }
     );
-
+    chain.pop(); // 移除引用链
     return result;
   };
 
-  exports.build = build;
+  exports.build = function (filename, remove) {
+    cache = {}; // 文件缓存
+    chain = []; // 引用链
+    return build(filename, remove);
+  };
+
 }();
