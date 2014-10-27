@@ -423,6 +423,7 @@ void function() {
   var buildFile = function(filename, options) {
     options = options || {};
     options.remove = options.remove || 'debug,test';
+    options.trigger = options.trigger || 'release';
     options.removeList = String(options.remove).split(',');
 
     blocks = {};
