@@ -2,7 +2,17 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <!--replace type="concat" dest="all.js?t={{md5}}"-->
+  <!--replace type="concat" js="all.js?t={{md5}}"-->
+  <link rel="stylesheet" type="text/css" href="base.css">
+  <link rel="stylesheet" type="text/css" href="button.css">
+  <style type="text/css">
+.body {
+  border: 1px solid red;
+  /*<replace
+  font-size: 32px;
+  /replace>*/
+}
+  </style>
   <script src="base.js"></script>
   <script type="text/javascript" src="replace.js"></script>
   <script>

@@ -1,0 +1,7 @@
+.btn {
+  display: inline-block;
+  width: 75px;
+  height: 25px;
+  color: white;
+  background: red;
+}
