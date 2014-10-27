@@ -34,11 +34,14 @@ if (argv._.length < 1) {
 
 var contents = [];
 argv._.forEach(function(filename) {
-  contents.push(jdists.build(filename, argv.r));
+  contents.push(jdists.build(filename, {
+    remove: argv.r
+  }));
 });
 var content = contents.join('\n');
 if (argv.output) {
   fs.writeFileSync(argv.output, content);
+  util.puts('jdists output complete.');
 } else {
   console.log(content);
 }
