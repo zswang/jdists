@@ -11,7 +11,6 @@ void function() {
   var fs = require('fs');
   var path = require('path');
 
-  var cache; // 代码块缓存
   var chain; // 引用链
 
   var blocks; // key: filename, value: blocks
@@ -24,9 +23,9 @@ void function() {
    * @return 返回内容的 md5 值，以十六进制小写输出
    */
   function md5(content) {
-    var md5 = crypto.createHash('md5');
-    md5.update(content);
-    return md5.digest('hex');
+    var hash = crypto.createHash('md5');
+    hash.update(content);
+    return hash.digest('hex');
   }
 
   /**
@@ -63,7 +62,7 @@ void function() {
     if (/^(\s+[\w\/\\\-\.]+)*$/.test(attrText)) { // a b c
       var index = 0;
       attrText.replace(/[\w\/\\\-\.]+/g, function(value) {
-        value = decodeHTML(value)
+        value = decodeHTML(value);
         result[index] = value;
         if (/^(replace|include)$/.test(tag)) {
           var key = ['file', 'block', 'encoding'][index];
@@ -81,15 +80,15 @@ void function() {
       });
     }
 
-    if (/^(\*|&)$/.test(result['file'])) { // file="&" 当前文件
-      result['file'] = '';
+    if (/^(\*|&)$/.test(result.file)) { // file="&" 当前文件
+      result.file = '';
     }
-    if (result['file']) {
-      result['@filename'] = path.resolve(dirname, result['file']); // 计算绝对路径
+    if (result.file) {
+      result['@filename'] = path.resolve(dirname, result.file); // 计算绝对路径
     }
-    if (tag === 'script' && result['src'] &&
-      /^[^:]+$/.test(result['src'])) {
-      result['@filename'] = path.resolve(dirname, result['src']); // 计算绝对路径
+    if (tag === 'script' && result.src &&
+      /^[^:]+$/.test(result.src)) {
+      result['@filename'] = path.resolve(dirname, result.src); // 计算绝对路径
     }
     return result;
   };
@@ -206,7 +205,7 @@ void function() {
         content: content
       });
 
-      if (attrs['file'] && /^(replace|include)$/.test(tag)) { // 需要引入文件
+      if (attrs.file && /^(replace|include)$/.test(tag)) { // 需要引入文件
         loadFile(attrs['@filename'], options);
       }
 
@@ -243,9 +242,9 @@ void function() {
       switch (tag) {
         case 'replace':
         case 'include':
-          if (attrs['block'] || attrs['file']) {
+          if (attrs.block || attrs.file) {
             var blockfile = attrs['@filename'] || filename; // 默认当前文件名
-            var blockname = attrs['block'] || ''; // 默认全部文件
+            var blockname = attrs.block || ''; // 默认全部文件
 
             var key = [blockfile, blockname].join();
             var block = blocks[key];
@@ -271,7 +270,7 @@ void function() {
                 block.content = block.nodes.map(function(node) {
                   if (!node.completed) {
                     node.content = buildBlock(node.content, readBlock, true);
-                    if (node.attrs['type'] === 'comment') {
+                    if (node.attrs.type === 'comment') {
                       if (/^\s*</.test(node.content)) {
                         node.content = node.content.replace(/^\s*<!--([^]*)-->\s*$/, '$1');
                       } else {
@@ -288,20 +287,20 @@ void function() {
             }
             content = block.content;
           }
-          if (attrs['type'] === 'concat' && attrs['dest']) {
+          if (attrs.type === 'concat' && attrs.dest) {
             var lines = [];
             content = String(content).replace(
               /<script((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/script>/g,
               function (all, attrText, content) {
                 var attrs = getAttrs('script', attrText, dirname);
-                if (attrs['src']) {
-                  if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(attrs['type'])) {
+                if (attrs.src) {
+                  if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(attrs.type)) {
                     loadFile(attrs['@filename'], options);
                     lines.push(replaceFile(attrs['@filename'], options));
                     return '';
                   }
                 } else {
-                  if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(attrs['type'])) {
+                  if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(attrs.type)) {
                     lines.push(buildBlock(content, readBlock, true));
                     return '';
                   }
@@ -311,7 +310,7 @@ void function() {
             );
             if (lines.length) {
               var body = lines.join('\n');
-              var dest = String(attrs['dest']).replace(/\{\{(\w+)\}\}/g, function(all, key) {
+              var dest = String(attrs.dest).replace(/\{\{(\w+)\}\}/g, function(all, key) {
                 switch (key) {
                   case 'md5':
                     return md5(body);
@@ -329,7 +328,7 @@ void function() {
             }
           }
 
-          switch (attrs['encoding']) {
+          switch (attrs.encoding) {
             case 'base64':
               return (new Buffer(content)).toString('base64');
             case 'string':
