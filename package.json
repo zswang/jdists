@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "JS 区块进行预处理工具",
   "main": "src/jdists.js",
   "bin": {
@@ -27,7 +27,7 @@
     "jshint": "*"
   },
   "dependencies": {
-    "optimist": "0.6.2"
+    "optimist": "0.6.1"
   },
   "scripts": {
     "test": "mocha -R spec && npm run coverage",

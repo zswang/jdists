@@ -9,8 +9,11 @@ var fs = require('fs');
 var argv = optimist
   .usage('$0 input1.js [input2.js] [options]')
   .alias('r', 'remove')
-  .describe('r', 'remove region.')
+  .describe('r', 'remove block.')
   .default('r', 'debug,test')
+  .alias('t', 'trigger')
+  .describe('t', 'trigger block.')
+  .default('t', 'release')
   .string('r')
   .alias("o", "output")
   .describe('o', 'output file.')
@@ -35,7 +38,8 @@ if (argv._.length < 1) {
 var contents = [];
 argv._.forEach(function(filename) {
   contents.push(jdists.build(filename, {
-    remove: argv.r
+    remove: argv.r,
+    trigger: argv.t
   }));
 });
 var content = contents.join('\n');

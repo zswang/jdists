@@ -79,6 +79,9 @@ void function() {
         return '';
       });
     }
+    if (result.trigger) {
+      result.trigger = result.trigger.split(',');
+    }
 
     if (/^(\*|&)$/.test(result.file)) { // file="&" 当前文件
       result.file = '';
@@ -191,8 +194,14 @@ void function() {
 
     var dirname = path.dirname(filename);
 
-    var readBlock = function(all, tag, attrText, content) {
+    var readBlock = function(all, tag, attrText, content, pos) {
       var attrs = getAttrs(tag, attrText, dirname);
+
+      if (attrs.trigger &&
+        attrs.trigger.indexOf(options.trigger) < 0) {
+        return all;
+      }
+
       var key = [filename, tag];
       /*<debug>*/
       // console.log('loadFile()::readBlock() key: %j', key);
@@ -205,6 +214,7 @@ void function() {
       };
 
       blocks[key].nodes.push({
+        pos: pos,
         attrs: attrs,
         content: content
       });
@@ -214,7 +224,7 @@ void function() {
       }
 
       buildBlock(content, readBlock); // 处理嵌套
-      return '';
+      return new Array(all.length + 1).join(' ');
     };
 
     blocks[[filename, '']].content = fs.readFileSync(filename);
@@ -242,6 +252,11 @@ void function() {
       }
 
       var attrs = getAttrs(tag, attrText, dirname);
+
+      if (attrs.trigger &&
+        attrs.trigger.indexOf(options.trigger) < 0) {
+        return all;
+      }
 
       switch (tag) {
         case 'replace':
@@ -271,6 +286,9 @@ void function() {
                   block.content = replaceFile(block.filename, options);
                 }
               } else {
+                block.nodes.sort(function(a, b) { // 保证代码顺序
+                  return a.pos - b.pos;
+                });
                 block.content = block.nodes.map(function(node) {
                   if (!node.completed) {
                     node.content = buildBlock(node.content, readBlock, true);
