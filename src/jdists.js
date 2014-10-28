@@ -176,7 +176,7 @@ void function() {
           }
           return all;
         });
-        dest = dest.replace(/\?.*$/, '') // 替换 ? 后面的内容
+        dest = dest.replace(/\?.*$/, ''); // 替换 ? 后面的内容
 
         output = dest;
         if (options.output) { // 计算相对路径 dist
@@ -206,7 +206,7 @@ void function() {
           }
           return all;
         });
-        dest = dest.replace(/\?.*$/, '') // 替换 ? 后面的内容
+        dest = dest.replace(/\?.*$/, ''); // 替换 ? 后面的内容
 
         output = dest;
         if (options.output) { // 计算相对路径 dist
