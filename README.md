@@ -1,9 +1,3 @@
-# jdists 前端代码块预处理工具
-
-标签： jdists
-
----
-
 # jdists(```<>```) 前端代码块预处理工具
 
 [![Build Status](https://img.shields.io/travis/zswang/jdists/master.svg)](https://travis-ci.org/zswang/jdists)
@@ -62,6 +56,7 @@ fprintf("variant=%d", variant);
 * 能 include 二进制文件，变为 base64 字符串，方便转成 dataUri。
 * 自动合并 css 或 js 文件，能够输出合并文件并能打 md5 戳。
 * 能够处理 `注释模板`，避免被压缩工具移除
+
 ```javascript
 var render = jhtmls.render(function () {
 /*!
@@ -85,7 +80,7 @@ var render = jhtmls.render(function () {
 <div>测试版本</div>
 <!--/debug-->
 ```
-* 在 css 中：
+* 在 js 中：
 
 ```js
 /*<debug>*/
@@ -93,7 +88,7 @@ console.log('测试版本');
 /*</debug>*/
 ```
 
-* 在 js 中：
+* 在 css 中：
 
 ```css
 .version {
@@ -114,7 +109,7 @@ console.log('测试版本');
 /release-->
 ```
 
-* 在 css 中：
+* 在 js 中：
 
 ```js
 /*<release
@@ -122,7 +117,7 @@ console.log('测试版本');
 /release>*/
 ```
 
-* 在 js 中：
+* 在 css 中：
 
 ```css
 .version {
