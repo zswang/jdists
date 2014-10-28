@@ -40,6 +40,7 @@ var filenames = [];
 argv._.forEach(function(filename) {
   filenames.push(filename);
   contents.push(jdists.build(filename, {
+    output: argv.output,
     remove: argv.r,
     trigger: argv.t
   }));

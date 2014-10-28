@@ -165,7 +165,7 @@ void function() {
         return all;
       }
     );
-    var body, dest;
+    var body, dest, output;
     if (js.length) {
       body = js.join('\n');
       if (attrs.js) { // 导出 js
@@ -176,10 +176,18 @@ void function() {
           }
           return all;
         });
+        dest = dest.replace(/\?.*$/, '') // 替换 ? 后面的内容
+
+        output = dest;
+        if (options.output) { // 计算相对路径 dist
+          output = path.resolve(path.dirname(options.output), output);
+          dest = path.relative(path.dirname(options.output), output);
+        }
+
         fs.writeFileSync(
           path.resolve(
             dirname,
-            dest.replace(/\?.*$/, '') // 替换 ? 后面的内容
+            output
           ),
           body
         );
@@ -198,10 +206,18 @@ void function() {
           }
           return all;
         });
+        dest = dest.replace(/\?.*$/, '') // 替换 ? 后面的内容
+
+        output = dest;
+        if (options.output) { // 计算相对路径 dist
+          output = path.resolve(path.dirname(options.output), output);
+          dest = path.relative(path.dirname(options.output), output);
+        }
+
         fs.writeFileSync(
           path.resolve(
             dirname,
-            dest.replace(/\?.*$/, '') // 替换 ? 后面的内容
+            output
           ),
           body
         );
