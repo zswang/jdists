@@ -1,11 +1,17 @@
-# jdists(<>) 前端代码块预处理工具
+# jdists 前端代码块预处理工具
+
+标签： jdists
+
+---
+
+# jdists(```<>```) 前端代码块预处理工具
 
 [![Build Status](https://img.shields.io/travis/zswang/jdists/master.svg)](https://travis-ci.org/zswang/jdists)
 [![NPM version](https://img.shields.io/npm/v/jdists.svg)](http://badge.fury.io/js/jdists)
 
 ## 什么是 jdists
 
-项目地址：<https://github.com/zswang/jdists>
+项目地址：[https://github.com/zswang/jdists](https://github.com/zswang/jdists)
 
 ### 关于命名
 
@@ -143,15 +149,15 @@ console.log('测试版本');
 ----|----|----|----
 file|文件|1.js,1.png|包括二进制文件
 block|代码块||只能是文本文件
-block::tag |标签|`<a>`|
-block::attribute|代码块属性|`<a encoding="md5">`|f
+block::tag |标签|```<a>```|
+block::attribute|代码块属性|```<a encoding="md5">```|
 
 
 ### 标准代码块
 
 tag|功能|示例
 ---|----|----
-include|引入文件或代码块|`<!--include file="all.js" /-->`
+include|引入文件或代码块|```<!--include file="all.js" /-->```
 replace|将当期代码块替换成文件或代码块|
 remove|将当期代码移除|
 
@@ -348,13 +354,15 @@ void function() {
 }();
 ```
 
-参考实例：<https://github.com/zswang/jfpss/blob/master/src/tools.jdists>
+这样就可以用静态页面开发 UI 组件了。
+
+参考实例：[https://github.com/zswang/jfpss/blob/master/src/tools.jdists](https://github.com/zswang/jfpss/blob/master/src/tools.jdists)
 
 ## 后续
 
 * 加入自动内联代码。
 * 提供 fis、grunt、gulp 插件。
 
-** 如果你觉得不错，请 star 项目，感谢关注 **
+**如果你觉得不错，请 star 项目，感谢关注**
 
-项目地址：<https://github.com/zswang/jdists>
+项目地址：[https://github.com/zswang/jdists](https://github.com/zswang/jdists)
