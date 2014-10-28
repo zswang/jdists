@@ -1,0 +1,19 @@
+body, div, ul, span, li {
+  padding: 0;
+  margin: 0;
+}
+.btn {
+  display: inline-block;
+  width: 75px;
+  height: 25px;
+  color: white;
+  background: red;
+}
+
+.body {
+  border: 1px solid red;
+  
+  font-size: 32px;
+
+}
+  

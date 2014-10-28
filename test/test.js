@@ -13,12 +13,16 @@ describe('fixtures', function() {
     it(input, function() {
       if (/\.throw\./.test(input)) { // 出现异常
         (function() {
-          jdists.build(path.join(dirname, input));
+          jdists.build(path.join(dirname, input), {
+            output: output
+          });
         }).should.throw();
         return;
       }
       assert.equal(
-        jdists.build(path.join(dirname, input)),
+        jdists.build(path.join(dirname, input), {
+          output: output
+        }),
         fs.readFileSync(path.join(dirname, output))
       );
     });

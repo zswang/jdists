@@ -188,30 +188,22 @@ function() {
 
       var body = items.join('\n');
       if (dest) { // 导出文件
-        var search = '';
-        String(dest).replace(/\{\{(\w+)\}\}/g, function(all, key) {
-          switch (key) {
+        dest = String(dest).replace(/\{\{(\w+)\}\}/g, function(all, key) {
+          switch (key) { // 计算 md5 戳
             case 'md5':
               return md5(body);
           }
           return all;
-        }).replace(/^([^?]*)(\?.*)?$/, function(all, $1, $2) {
-          dest = $1;
-          search = $2;
         });
-
-        var output = dest; // 输出文件
-
+        var output = dest.replace(/\?.*$/, '');
         if (options.output) { // 计算相对路径 dist
-          output = path.resolve(path.dirname(options.output), output);
-          dest = path.relative(path.dirname(options.output), output) + search;
+          output = path.resolve(path.dirname(options.output), output); // 相对于输出路径
+          output = path.resolve(dirname, output); // 相对于当前路径
+
+          forceDirSync(path.dirname(output)); // 确保路径存在
+          fs.writeFileSync(output, body); // 没有指定输出文件，则不实际输出
         }
 
-        output = path.resolve(dirname, output); // 输出文件，相对于当前路径
-
-        forceDirSync(path.dirname(output)); // 确保路径存在
-
-        fs.writeFileSync(output, body);
         if (type === 'js') {
           content += '\n<script src="' + dest + '"></script>\n';
         } else {
