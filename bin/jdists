@@ -36,7 +36,9 @@ if (argv._.length < 1) {
 }
 
 var contents = [];
+var filenames = [];
 argv._.forEach(function(filename) {
+  filenames.push(filename);
   contents.push(jdists.build(filename, {
     remove: argv.r,
     trigger: argv.t
@@ -45,7 +47,7 @@ argv._.forEach(function(filename) {
 var content = contents.join('\n');
 if (argv.output) {
   fs.writeFileSync(argv.output, content);
-  util.puts('jdists output complete.');
+  util.puts(util.format('%j jdists output complete.', filenames));
 } else {
   console.log(content);
 }

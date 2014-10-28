@@ -1,6 +1,7 @@
 void function() {
 
   'use strict';
+
   /**
    * jdists
    * 代码区域处理的工具
@@ -309,100 +310,99 @@ void function() {
             }
             content = block.content;
           }
-          if (attrs.type === 'concat') {
-            var js = [];
-            var css = [];
-            content = String(content).replace(
-              /<script((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/script>/gi,
-              function (all, attrText, content) {
-                var attrs = getAttrs('script', attrText, dirname);
-                if (attrs.src) {
-                  if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(attrs.type)) {
-                    loadFile(attrs['@filename'], options);
-                    js.push(replaceFile(attrs['@filename'], options));
-                    return '';
-                  }
-                } else {
-                  if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(attrs.type)) {
-                    js.push(buildBlock(content, readBlock, true));
-                    return '';
-                  }
-                }
-                return all;
-              }
-            ).replace( // 样式表需要保证顺序
-              /<link((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>|<style((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/style>/ig,
-              function (all, attrText, attrText2, content2) {
-                var attrs;
-                if (attrText) {
-                  attrs = getAttrs('link', attrText, dirname);
-                  if (attrs.href) {
-                    if (/^(|undefined|text\/css)$/i.test(attrs.type)) {
+
+          switch (attrs.encoding) {
+            case 'concat':
+              var js = [];
+              var css = [];
+              content = String(content).replace(
+                /<script((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/script>/gi,
+                function (all, attrText, content) {
+                  var attrs = getAttrs('script', attrText, dirname);
+                  if (attrs.src) {
+                    if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(attrs.type)) {
                       loadFile(attrs['@filename'], options);
-                      css.push(replaceFile(attrs['@filename'], options));
+                      js.push(replaceFile(attrs['@filename'], options));
+                      return '';
+                    }
+                  } else {
+                    if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(attrs.type)) {
+                      js.push(buildBlock(content, readBlock, true));
                       return '';
                     }
                   }
+                  return all;
                 }
-                if (content2) {
-                  attrs = getAttrs('style', attrText2, dirname);
-                  if (/^(|undefined|text\/css)$/i.test(attrs.type)) {
-                    css.push(buildBlock(content2, readBlock, true));
-                    return '';
+              ).replace( // 样式表需要保证顺序
+                /<link((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>|<style((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/style>/ig,
+                function (all, attrText, attrText2, content2) {
+                  var attrs;
+                  if (attrText) {
+                    attrs = getAttrs('link', attrText, dirname);
+                    if (attrs.href) {
+                      if (/^(|undefined|text\/css)$/i.test(attrs.type)) {
+                        loadFile(attrs['@filename'], options);
+                        css.push(replaceFile(attrs['@filename'], options));
+                        return '';
+                      }
+                    }
                   }
-                }
-                return all;
-              }
-            );
-
-            var body, dest;
-            if (js.length) {
-              body = js.join('\n');
-              if (attrs.js) { // 导出 js
-                dest = String(attrs.js).replace(/\{\{(\w+)\}\}/g, function(all, key) {
-                  switch (key) {
-                    case 'md5':
-                      return md5(body);
+                  if (content2) {
+                    attrs = getAttrs('style', attrText2, dirname);
+                    if (/^(|undefined|text\/css)$/i.test(attrs.type)) {
+                      css.push(buildBlock(content2, readBlock, true));
+                      return '';
+                    }
                   }
                   return all;
-                });
-                fs.writeFileSync(
-                  path.resolve(
-                    dirname,
-                    dest.replace(/\?.*$/, '') // 替换 ? 后面的内容
-                  ),
-                  body
-                );
-                content += '\n<script src="' + dest + '"></script>\n';
-              } else {
-                content += '\n<script>\n' + body + '</script>';
+                }
+              );
+              var body, dest;
+              if (js.length) {
+                body = js.join('\n');
+                if (attrs.js) { // 导出 js
+                  dest = String(attrs.js).replace(/\{\{(\w+)\}\}/g, function(all, key) {
+                    switch (key) {
+                      case 'md5':
+                        return md5(body);
+                    }
+                    return all;
+                  });
+                  fs.writeFileSync(
+                    path.resolve(
+                      dirname,
+                      dest.replace(/\?.*$/, '') // 替换 ? 后面的内容
+                    ),
+                    body
+                  );
+                  content += '\n<script src="' + dest + '"></script>\n';
+                } else {
+                  content += '\n<script>\n' + body + '</script>';
+                }
               }
-            }
-            if (css.length) {
-              body = css.join('\n');
-              if (attrs.css) { // 导出 css 文件
-                dest = String(attrs.css).replace(/\{\{(\w+)\}\}/g, function(all, key) {
-                  switch (key) {
-                    case 'md5':
-                      return md5(body);
-                  }
-                  return all;
-                });
-                fs.writeFileSync(
-                  path.resolve(
-                    dirname,
-                    dest.replace(/\?.*$/, '') // 替换 ? 后面的内容
-                  ),
-                  body
-                );
-                content += '\n<link rel="stylesheet" type="text/css" href="' + dest + '">\n';
-              } else {
-                content += '\n<style>\n' + body + '</style>';
+              if (css.length) {
+                body = css.join('\n');
+                if (attrs.css) { // 导出 css 文件
+                  dest = String(attrs.css).replace(/\{\{(\w+)\}\}/g, function(all, key) {
+                    switch (key) {
+                      case 'md5':
+                        return md5(body);
+                    }
+                    return all;
+                  });
+                  fs.writeFileSync(
+                    path.resolve(
+                      dirname,
+                      dest.replace(/\?.*$/, '') // 替换 ? 后面的内容
+                    ),
+                    body
+                  );
+                  content += '\n<link rel="stylesheet" type="text/css" href="' + dest + '">\n';
+                } else {
+                  content += '\n<style>\n' + body + '</style>';
+                }
               }
-            }
-          }
-
-          switch (attrs.encoding) {
+              break;
             case 'base64':
               return (new Buffer(content)).toString('base64');
             case 'string':
