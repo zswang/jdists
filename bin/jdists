@@ -5,6 +5,7 @@ var jdists = require('../.');
 var util = require('util');
 var optimist = require('optimist');
 var fs = require('fs');
+var path = require('path');
 
 var argv = optimist
   .usage('$0 input1.js [input2.js] [options]')
@@ -47,6 +48,7 @@ argv._.forEach(function(filename) {
 });
 var content = contents.join('\n');
 if (argv.output) {
+  jdists.forceDirSync(path.dirname(argv.output));
   fs.writeFileSync(argv.output, content);
   util.puts(util.format('%j jdists output complete.', filenames));
 } else {

@@ -1,4 +1,6 @@
-void function() {
+void
+
+function() {
 
   'use strict';
 
@@ -17,6 +19,17 @@ void function() {
   var blocks; // key: filename, value: blocks
 
   var crypto = require('crypto');
+
+  /*
+   * 保证目录存在
+   * @param{String} dir 目录
+   */
+  function forceDirSync(dir) {
+    if (!fs.existsSync(dir)) {
+      forceDirSync(path.dirname(dir));
+      fs.mkdirSync(dir);
+    }
+  }
 
   /**
    * 计算 md5
@@ -121,8 +134,10 @@ void function() {
   };
 
   var processorConcat = function(content, attrs, dirname, options, tag, readBlock) {
-    var js = [];
-    var css = [];
+    var js = []; // 所有 js 文件内容
+    var css = []; // 所有 css 文件内容
+
+    // 解析静态资源
     content = String(content).replace(
       /<script((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/script>/gi,
       function(all, attrText, content) {
@@ -165,67 +180,55 @@ void function() {
         return all;
       }
     );
-    var body, dest, output;
-    if (js.length) {
-      body = js.join('\n');
-      if (attrs.js) { // 导出 js
-        dest = String(attrs.js).replace(/\{\{(\w+)\}\}/g, function(all, key) {
+
+    var runConcat = function(type, items, dest) {
+      if (!items.length) { // 未找到资源
+        return;
+      }
+
+      var body = items.join('\n');
+      if (dest) { // 导出文件
+        var search = '';
+        String(dest).replace(/\{\{(\w+)\}\}/g, function(all, key) {
           switch (key) {
             case 'md5':
               return md5(body);
           }
           return all;
+        }).replace(/^([^?]*)(\?.*)?$/, function(all, $1, $2) {
+          dest = $1;
+          search = $2;
         });
-        dest = dest.replace(/\?.*$/, ''); // 替换 ? 后面的内容
 
-        output = dest;
+        var output = dest; // 输出文件
+
         if (options.output) { // 计算相对路径 dist
           output = path.resolve(path.dirname(options.output), output);
-          dest = path.relative(path.dirname(options.output), output);
+          dest = path.relative(path.dirname(options.output), output) + search;
         }
 
-        fs.writeFileSync(
-          path.resolve(
-            dirname,
-            output
-          ),
-          body
-        );
-        content += '\n<script src="' + dest + '"></script>\n';
-      } else {
-        content += '\n<script>\n' + body + '</script>';
-      }
-    }
-    if (css.length) {
-      body = css.join('\n');
-      if (attrs.css) { // 导出 css 文件
-        dest = String(attrs.css).replace(/\{\{(\w+)\}\}/g, function(all, key) {
-          switch (key) {
-            case 'md5':
-              return md5(body);
-          }
-          return all;
-        });
-        dest = dest.replace(/\?.*$/, ''); // 替换 ? 后面的内容
+        output = path.resolve(dirname, output); // 输出文件，相对于当前路径
 
-        output = dest;
-        if (options.output) { // 计算相对路径 dist
-          output = path.resolve(path.dirname(options.output), output);
-          dest = path.relative(path.dirname(options.output), output);
+        forceDirSync(path.dirname(output)); // 确保路径存在
+
+        fs.writeFileSync(output, body);
+        if (type === 'js') {
+          content += '\n<script src="' + dest + '"></script>\n';
+        } else {
+          content += '\n<link rel="stylesheet" type="text/css" href="' + dest + '">\n';
         }
-
-        fs.writeFileSync(
-          path.resolve(
-            dirname,
-            output
-          ),
-          body
-        );
-        content += '\n<link rel="stylesheet" type="text/css" href="' + dest + '">\n';
       } else {
-        content += '\n<style>\n' + body + '</style>';
+        if (type === 'js') {
+          content += '\n<script>\n' + body + '</script>';
+        } else {
+          content += '\n<style>\n' + body + '</style>';
+        }
       }
-    }
+    };
+
+    runConcat('js', js, attrs.js);
+    runConcat('css', css, attrs.css);
+
     return content;
   };
 
@@ -506,5 +509,6 @@ void function() {
 
   exports.build = buildFile;
   exports.setEncoding = setEncoding;
+  exports.forceDirSync = forceDirSync;
 
 }();
