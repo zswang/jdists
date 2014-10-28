@@ -363,6 +363,4 @@ void function() {
 * 加入自动内联代码。
 * 提供 fis、grunt、gulp 插件。
 
-**如果你觉得不错，请 star 项目，感谢关注**
-
 项目地址：[https://github.com/zswang/jdists](https://github.com/zswang/jdists)
