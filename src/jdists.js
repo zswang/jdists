@@ -29,26 +29,45 @@ void function() {
     return hash.digest('hex');
   }
 
+  var htmlDecodeDict = {
+    'quot': '"',
+    'lt': '<',
+    'gt': '>',
+    'amp': '&',
+    'nbsp': ' '
+  };
+
   /**
    * HTML解码
    * @param {String} html
    */
   function decodeHTML(html) {
-    var htmlDecodeDict = {
-      'quot': '"',
-      'lt': '<',
-      'gt': '>',
-      'amp': '&',
-      'nbsp': ' '
-    };
     return String(html).replace(
       /&((quot|lt|gt|amp|nbsp)|#x([a-f\d]+)|#(\d+));/ig,
-      function(all, group, key, hex, dec){
+      function(all, group, key, hex, dec) {
         return key ? htmlDecodeDict[key.toLowerCase()] :
           hex ? String.fromCharCode(parseInt(hex, 16)) :
           String.fromCharCode(+dec);
       }
     );
+  }
+
+  var htmlEncodeDict = {
+    '"': 'quot',
+    '<': 'lt',
+    '>': 'gt',
+    '&': 'amp',
+    ' ': 'nbsp'
+  };
+
+  /**
+   * HTML编码
+   * @param {String} text 文本
+   */
+  function encodeHTML(text) {
+    return String(text).replace(/["<>& ]/g, function(all) {
+      return '&' + htmlEncodeDict[all] + ';';
+    });
   }
 
   /**
@@ -101,6 +120,117 @@ void function() {
     return result;
   };
 
+  var processorConcat = function(content, attrs, dirname, options, tag, readBlock) {
+    var js = [];
+    var css = [];
+    content = String(content).replace(
+      /<script((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/script>/gi,
+      function(all, attrText, content) {
+        var attrs = getAttrs('script', attrText, dirname);
+        if (attrs.src) {
+          if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(attrs.type)) {
+            loadFile(attrs['@filename'], options);
+            js.push(replaceFile(attrs['@filename'], options));
+            return '';
+          }
+        } else {
+          if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(attrs.type)) {
+            js.push(buildBlock(content, readBlock, true));
+            return '';
+          }
+        }
+        return all;
+      }
+    ).replace( // 样式表需要保证顺序
+      /<link((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>|<style((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/style>/ig,
+      function(all, attrText, attrText2, content2) {
+        var attrs;
+        if (attrText) {
+          attrs = getAttrs('link', attrText, dirname);
+          if (attrs.href) {
+            if (/^(|undefined|text\/css)$/i.test(attrs.type)) {
+              loadFile(attrs['@filename'], options);
+              css.push(replaceFile(attrs['@filename'], options));
+              return '';
+            }
+          }
+        }
+        if (content2) {
+          attrs = getAttrs('style', attrText2, dirname);
+          if (/^(|undefined|text\/css)$/i.test(attrs.type)) {
+            css.push(buildBlock(content2, readBlock, true));
+            return '';
+          }
+        }
+        return all;
+      }
+    );
+    var body, dest;
+    if (js.length) {
+      body = js.join('\n');
+      if (attrs.js) { // 导出 js
+        dest = String(attrs.js).replace(/\{\{(\w+)\}\}/g, function(all, key) {
+          switch (key) {
+            case 'md5':
+              return md5(body);
+          }
+          return all;
+        });
+        fs.writeFileSync(
+          path.resolve(
+            dirname,
+            dest.replace(/\?.*$/, '') // 替换 ? 后面的内容
+          ),
+          body
+        );
+        content += '\n<script src="' + dest + '"></script>\n';
+      } else {
+        content += '\n<script>\n' + body + '</script>';
+      }
+    }
+    if (css.length) {
+      body = css.join('\n');
+      if (attrs.css) { // 导出 css 文件
+        dest = String(attrs.css).replace(/\{\{(\w+)\}\}/g, function(all, key) {
+          switch (key) {
+            case 'md5':
+              return md5(body);
+          }
+          return all;
+        });
+        fs.writeFileSync(
+          path.resolve(
+            dirname,
+            dest.replace(/\?.*$/, '') // 替换 ? 后面的内容
+          ),
+          body
+        );
+        content += '\n<link rel="stylesheet" type="text/css" href="' + dest + '">\n';
+      } else {
+        content += '\n<style>\n' + body + '</style>';
+      }
+    }
+    return content;
+  };
+
+  var processors = {
+    base64: function(content) {
+      return (new Buffer(content)).toString('base64');
+    },
+    md5: function(content) {
+      return md5(content);
+    },
+    concat: processorConcat,
+    url: function(content) {
+      return encodeURIComponent(content);
+    },
+    html: function(content) {
+      return encodeHTML(content);
+    },
+    string: function(content) {
+      return JSON.stringify(content);
+    }
+  };
 
   /**
    * 编译块
@@ -116,53 +246,53 @@ void function() {
     //   return onread.call(block, arguments);
     // };
     content = String(content).replace(
-        /<!--(include)((?:\s+[\w\/\\\-\.]+)*)\s*\/?-->/g,
-        onread
-      ).replace(
-        /<!--(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?-->/g,
-        onread
-      ).replace(
-        /<!--([\w-_]+)((?:\s+[\w\/\\\-\.]+)*)\s*-->([^]*?)<!--\/\1-->/g,
-        onread
-      ).replace(
-        /<!--([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*-->([^]*?)<!--\/\1-->/g,
-        onread
-      ).replace(
-        /\/\*<(include)((?:\s+[\w\/\\\-\.]+)*)\s*\/?>\*\//g,
-        onread
-      ).replace(
-        /\/\*<(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>\*\//g,
-        onread
-      ).replace(
-        /\/\*<([\w-_]+)((?:\s+[\w\/\\\-\.]+)*)\s*>\*\/([^]*?)\/\*<\/\1>\*\//g,
-        onread
-      ).replace(
-        /\/\*<([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*>\*\/([^]*?)\/\*<\/\1>\*\//g,
-        onread
-      ).replace(
-        /<!--([\w-_]+)((?:[ \f\t\v]+[\w\/\\\-\.]+)*)$([^]*?)^[ \f\t\v]*\/\1-->/gm,
-        onread
-      ).replace(
-        /\/\*<([\w-_]+)((?:[ \f\t\v]+[\w\/\\\-\.]+)*)$([^]*?)^[ \f\t\v]*\/\1>\*\//gm,
-        onread
-      ).replace(
-        /<!--([\w-_]+)((?:[ \f\t\v]*[\w-_.]+[ \f\t\v]*=[ \f\t\v]*"[^"]+")*)$([^]*?)^[ \f\t\v]*\/\1-->/gm,
-        onread
-      ).replace(
-        /\/\*<([\w-_]+)((?:[ \f\t\v]*[\w-_.]+[ \f\t\v]*=[ \f\t\v]*"[^"]+")*)$([^]*?)^[ \f\t\v]*\/\1>\*\//gm,
-        onread
+      /<!--(include)((?:\s+[\w\/\\\-\.]+)*)\s*\/?-->/g,
+      onread
+    ).replace(
+      /<!--(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?-->/g,
+      onread
+    ).replace(
+      /<!--([\w-_]+)((?:\s+[\w\/\\\-\.]+)*)\s*-->([^]*?)<!--\/\1-->/g,
+      onread
+    ).replace(
+      /<!--([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*-->([^]*?)<!--\/\1-->/g,
+      onread
+    ).replace(
+      /\/\*<(include)((?:\s+[\w\/\\\-\.]+)*)\s*\/?>\*\//g,
+      onread
+    ).replace(
+      /\/\*<(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>\*\//g,
+      onread
+    ).replace(
+      /\/\*<([\w-_]+)((?:\s+[\w\/\\\-\.]+)*)\s*>\*\/([^]*?)\/\*<\/\1>\*\//g,
+      onread
+    ).replace(
+      /\/\*<([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*>\*\/([^]*?)\/\*<\/\1>\*\//g,
+      onread
+    ).replace(
+      /<!--([\w-_]+)((?:[ \f\t\v]+[\w\/\\\-\.]+)*)$([^]*?)^[ \f\t\v]*\/\1-->/gm,
+      onread
+    ).replace(
+      /\/\*<([\w-_]+)((?:[ \f\t\v]+[\w\/\\\-\.]+)*)$([^]*?)^[ \f\t\v]*\/\1>\*\//gm,
+      onread
+    ).replace(
+      /<!--([\w-_]+)((?:[ \f\t\v]*[\w-_.]+[ \f\t\v]*=[ \f\t\v]*"[^"]+")*)$([^]*?)^[ \f\t\v]*\/\1-->/gm,
+      onread
+    ).replace(
+      /\/\*<([\w-_]+)((?:[ \f\t\v]*[\w-_.]+[ \f\t\v]*=[ \f\t\v]*"[^"]+")*)$([^]*?)^[ \f\t\v]*\/\1>\*\//gm,
+      onread
+    );
+
+    if (isReplace) {
+      content = content.replace(
+        /function\s*\(\s*\)\s*\{\s*\/\*\!?([\s\S]*?)\*\/[\s;]*\}/g, // 处理函数注释字符串
+        function(all, text) {
+          return JSON.stringify(text);
+        }
       );
+    }
 
-      if (isReplace) {
-        content = content.replace(
-          /function\s*\(\s*\)\s*\{\s*\/\*\!?([\s\S]*?)\*\/[\s;]*\}/g, // 处理函数注释字符串
-          function(all, text) {
-            return JSON.stringify(text);
-          }
-        );
-      }
-
-      return content;
+    return content;
   };
 
   /**
@@ -230,7 +360,7 @@ void function() {
 
     blocks[[filename, '']].content = fs.readFileSync(filename);
 
-    return buildBlock(blocks[[filename,'']].content, readBlock);
+    return buildBlock(blocks[[filename, '']].content, readBlock);
   };
 
   /**
@@ -311,104 +441,9 @@ void function() {
             content = block.content;
           }
 
-          switch (attrs.encoding) {
-            case 'concat':
-              var js = [];
-              var css = [];
-              content = String(content).replace(
-                /<script((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/script>/gi,
-                function (all, attrText, content) {
-                  var attrs = getAttrs('script', attrText, dirname);
-                  if (attrs.src) {
-                    if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(attrs.type)) {
-                      loadFile(attrs['@filename'], options);
-                      js.push(replaceFile(attrs['@filename'], options));
-                      return '';
-                    }
-                  } else {
-                    if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(attrs.type)) {
-                      js.push(buildBlock(content, readBlock, true));
-                      return '';
-                    }
-                  }
-                  return all;
-                }
-              ).replace( // 样式表需要保证顺序
-                /<link((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>|<style((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/style>/ig,
-                function (all, attrText, attrText2, content2) {
-                  var attrs;
-                  if (attrText) {
-                    attrs = getAttrs('link', attrText, dirname);
-                    if (attrs.href) {
-                      if (/^(|undefined|text\/css)$/i.test(attrs.type)) {
-                        loadFile(attrs['@filename'], options);
-                        css.push(replaceFile(attrs['@filename'], options));
-                        return '';
-                      }
-                    }
-                  }
-                  if (content2) {
-                    attrs = getAttrs('style', attrText2, dirname);
-                    if (/^(|undefined|text\/css)$/i.test(attrs.type)) {
-                      css.push(buildBlock(content2, readBlock, true));
-                      return '';
-                    }
-                  }
-                  return all;
-                }
-              );
-              var body, dest;
-              if (js.length) {
-                body = js.join('\n');
-                if (attrs.js) { // 导出 js
-                  dest = String(attrs.js).replace(/\{\{(\w+)\}\}/g, function(all, key) {
-                    switch (key) {
-                      case 'md5':
-                        return md5(body);
-                    }
-                    return all;
-                  });
-                  fs.writeFileSync(
-                    path.resolve(
-                      dirname,
-                      dest.replace(/\?.*$/, '') // 替换 ? 后面的内容
-                    ),
-                    body
-                  );
-                  content += '\n<script src="' + dest + '"></script>\n';
-                } else {
-                  content += '\n<script>\n' + body + '</script>';
-                }
-              }
-              if (css.length) {
-                body = css.join('\n');
-                if (attrs.css) { // 导出 css 文件
-                  dest = String(attrs.css).replace(/\{\{(\w+)\}\}/g, function(all, key) {
-                    switch (key) {
-                      case 'md5':
-                        return md5(body);
-                    }
-                    return all;
-                  });
-                  fs.writeFileSync(
-                    path.resolve(
-                      dirname,
-                      dest.replace(/\?.*$/, '') // 替换 ? 后面的内容
-                    ),
-                    body
-                  );
-                  content += '\n<link rel="stylesheet" type="text/css" href="' + dest + '">\n';
-                } else {
-                  content += '\n<style>\n' + body + '</style>';
-                }
-              }
-              break;
-            case 'base64':
-              return (new Buffer(content)).toString('base64');
-            case 'string':
-              return JSON.stringify(content);
-            case 'url':
-              return encodeURIComponent(content);
+          var processor = processors[attrs.encoding];
+          if (processor) { // 编码处理器
+            content = processor(content, attrs, dirname, options, tag, readBlock);
           }
           return content;
         case 'remove': // 必然移除的
@@ -442,5 +477,18 @@ void function() {
     return result;
   };
 
+  /**
+   * 添加一个编码器
+   * @param{Function} processor 处理器 function(content, attrs, dirname, options, tag)
+   */
+  var setEncoding = function(encoding, processor) {
+    if (!encoding || !processor) {
+      return;
+    }
+    processors[encoding] = processor;
+  };
+
   exports.build = buildFile;
+  exports.setEncoding = setEncoding;
+
 }();
