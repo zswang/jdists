@@ -4,6 +4,8 @@ var fs = require('fs');
 var util = require('util');
 var path = require('path');
 
+jdists.setEncoding('inline', require('../src/encoding/processor-inline'));
+
 describe('fixtures', function() {
   var dirname = 'test/fixtures';
   var items = fs.readdirSync(dirname).filter(function(item) {
@@ -23,7 +25,7 @@ describe('fixtures', function() {
         jdists.build(path.join(dirname, input), {
           output: output
         }),
-        fs.readFileSync(path.join(dirname, output))
+        String(fs.readFileSync(path.join(dirname, output)))
       );
     });
   });

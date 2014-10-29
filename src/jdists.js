@@ -97,11 +97,16 @@ function() {
       attrText.replace(/[\w\/\\\-\.]+/g, function(value) {
         value = decodeHTML(value);
         result[index] = value;
+        var key;
         if (/^(replace|include)$/.test(tag)) {
-          var key = ['file', 'block', 'encoding'][index];
-          if (key) {
-            result[key] = value;
-          }
+          key = ['file', 'block', 'encoding', 'trigger'][index];
+        } else if (tag === 'remove') {
+          key = ['trigger'][index];
+        } else {
+          key = ['type', 'trigger'][index];
+        }
+        if (key) {
+          result[key] = value;
         }
         index++;
         return '';
@@ -133,6 +138,9 @@ function() {
     return result;
   };
 
+  /**
+   * 资源合并处理器
+   */
   var processorConcat = function(content, attrs, dirname, options, tag, readBlock) {
     var js = []; // 所有 js 文件内容
     var css = []; // 所有 css 文件内容
@@ -224,6 +232,10 @@ function() {
     return content;
   };
 
+  /**
+   * 编码处理器集合
+   * function(content, attrs, dirname, options, tag, readBlock)
+   */
   var processors = {
     base64: function(content) {
       return (new Buffer(content)).toString('base64');
@@ -231,7 +243,6 @@ function() {
     md5: function(content) {
       return md5(content);
     },
-    concat: processorConcat,
     url: function(content) {
       return encodeURIComponent(content);
     },
@@ -240,7 +251,8 @@ function() {
     },
     string: function(content) {
       return JSON.stringify(content);
-    }
+    },
+    concat: processorConcat
   };
 
   /**
