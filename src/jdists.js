@@ -233,13 +233,6 @@ function() {
   };
 
   /**
-   * 内联资源处理器
-   */
-  var processorInline = function(content, attrs, dirname, options, tag) {
-    /* TODO */
-  };
-
-  /**
    * 编码处理器集合
    * function(content, attrs, dirname, options, tag, readBlock)
    */
@@ -259,8 +252,7 @@ function() {
     string: function(content) {
       return JSON.stringify(content);
     },
-    concat: processorConcat,
-    inline: processorInline
+    concat: processorConcat
   };
 
   /**
