@@ -12,6 +12,12 @@ h1 {
   <!--debug-->
   <h1>debug</h1>
   <!--/debug-->
+  <!--include letter.txt-->
+  <!--include letter.txt -->
+  <!--include letter.txt/-->
+  <!--include letter.txt /-->
+  <!--include file="letter.txt" /-->
+  <!--include file="not.exist"/-->
 </body>
 <script>
 void function() {
@@ -21,6 +27,10 @@ void function() {
   /*</debug>*/
 
   /*<include base.js>*/
+  /*<include base.js/>*/
+  /*<include base.js />*/
+  /*<include file="base.js">*/
+  /*<include file="base.js"/>*/
 }();
 </script>
 </html>

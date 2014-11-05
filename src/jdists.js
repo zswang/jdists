@@ -196,9 +196,12 @@ function() {
 
       var body = items.join('\n');
       if (dest) { // 导出文件
-        dest = String(dest).replace(/\{\{(\w+)\}\}/g, function(all, key) {
+        dest = String(dest).replace(/\{\{(\w+)(?:,(\d+))?\}\}/g, function(all, key, len) {
           switch (key) { // 计算 md5 戳
             case 'md5':
+              if (len) {
+                return md5(body).substring(0, len);
+              }
               return md5(body);
           }
           return all;
@@ -252,6 +255,9 @@ function() {
     string: function(content) {
       return JSON.stringify(content);
     },
+    escape: function(content) {
+      return escape(content);
+    },
     concat: processorConcat
   };
 
@@ -264,39 +270,35 @@ function() {
    */
   var buildBlock = function(content, onread, isReplace) {
 
-    // var read = function() {
-    //   var args = ;
-    //   return onread.call(block, arguments);
-    // };
     content = String(content).replace(
-      /<!--(include)((?:\s+[\w\/\\\-\.]+)*)\s*\/?-->/g,
+      /<!--(include)((?:\s+\w[\w\/\\\-\.]*?)*)\s*\/?-->/g,
       onread
     ).replace(
       /<!--(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?-->/g,
       onread
     ).replace(
-      /<!--([\w-_]+)((?:\s+[\w\/\\\-\.]+)*)\s*-->([^]*?)<!--\/\1-->/g,
+      /<!--([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)\s*-->([^]*?)<!--\/\1-->/g,
       onread
     ).replace(
       /<!--([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*-->([^]*?)<!--\/\1-->/g,
       onread
     ).replace(
-      /\/\*<(include)((?:\s+[\w\/\\\-\.]+)*)\s*\/?>\*\//g,
+      /\/\*<(include)((?:\s+\w[\w\/\\\-\.]*?)*)\s*\/?>\*\//g,
       onread
     ).replace(
       /\/\*<(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>\*\//g,
       onread
     ).replace(
-      /\/\*<([\w-_]+)((?:\s+[\w\/\\\-\.]+)*)\s*>\*\/([^]*?)\/\*<\/\1>\*\//g,
+      /\/\*<([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)\s*>\*\/([^]*?)\/\*<\/\1>\*\//g,
       onread
     ).replace(
       /\/\*<([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*>\*\/([^]*?)\/\*<\/\1>\*\//g,
       onread
     ).replace(
-      /<!--([\w-_]+)((?:[ \f\t\v]+[\w\/\\\-\.]+)*)$([^]*?)^[ \f\t\v]*\/\1-->/gm,
+      /<!--([\w-_]+)((?:[ \f\t\v]+\w[\w\/\\\-\.]*?)*)$([^]*?)^[ \f\t\v]*\/\1-->/gm,
       onread
     ).replace(
-      /\/\*<([\w-_]+)((?:[ \f\t\v]+[\w\/\\\-\.]+)*)$([^]*?)^[ \f\t\v]*\/\1>\*\//gm,
+      /\/\*<([\w-_]+)((?:[ \f\t\v]+\w[\w\/\\\-\.]*?)*)$([^]*?)^[ \f\t\v]*\/\1>\*\//gm,
       onread
     ).replace(
       /<!--([\w-_]+)((?:[ \f\t\v]*[\w-_.]+[ \f\t\v]*=[ \f\t\v]*"[^"]+")*)$([^]*?)^[ \f\t\v]*\/\1-->/gm,
@@ -335,6 +337,8 @@ function() {
       isFile: true
     };
     if (!fs.existsSync(filename)) {
+      console.warn('File "%s" not exists.', filename);
+      blocks[[filename, '']].content = '';
       return;
     }
 
@@ -467,6 +471,10 @@ function() {
           var processor = processors[attrs.encoding];
           if (processor) { // 编码处理器
             content = processor(content, attrs, dirname, options, tag, readBlock);
+          }
+          if (attrs.slice) {
+            var params = attrs.slice.split(',');
+            content = content.slice(params[0], params[1]);
           }
           return content;
         case 'remove': // 必然移除的

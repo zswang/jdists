@@ -17,11 +17,11 @@ j **dist** s 就是 `js` 里插入了一个 `dist` （分发），避免和其�
 一个页面从开发到上线基本会经历三个阶段：
 
 * 本机开发调试
-    * 打印一些变量和执行状态、模拟数据接口
+		* 打印一些变量和执行状态、模拟数据接口
 * 内网测试
-    * 跳过某些步骤、使用内网环境
+		* 跳过某些步骤、使用内网环境
 * 公网上线
-    * 移除调试代码、使用线上环境。
+		* 移除调试代码、使用线上环境。
 
 其实前端代码和其他语言代码都需要编译，目前已经有很多成熟的工具来完成编译的事情。
 比如：fis、grunt、gulp，基本都是依赖配置文件，将项目代码进行编译到相应版本。
@@ -92,9 +92,9 @@ console.log('测试版本');
 
 ```css
 .version {
-  font-size: 12px;
+	font-size: 12px;
 /*<debug>*/
-  color: red;
+	color: red;
 /*</debug>*/
 }
 ```
@@ -121,9 +121,9 @@ console.log('测试版本');
 
 ```css
 .version {
-  font-size: 12px;
+	font-size: 12px;
 /*<release
-  color: red;
+	color: red;
 /release>*/
 }
 ```
@@ -161,11 +161,14 @@ remove|将当前代码移除|
 属性名|含义|例子|备注
 ------|----|----|----
 encoding|编码|encoding="base64"|默认"original"，可扩展
+slice|裁剪|slice="1,-1"|参考 String.slice() 函数
 file|文件名|file="all.js"|默认当前文件
 type|类型|type="comment"|默认"original"，"comment"：去掉包裹代码块的注释
 trigger|触发器|trigger="release,LAN"|默认"release"，存在这些触发器时才生效
-js|js 文件|js="dist/all.js?{{md5}}"|输出的 js 文件名
-css|css 文件|css="dist/all.css?{{md5}}"|输出的 css 文件名
+js|js 文件|js="all_{{md5,7}}.js"|输出的 js 文件名
+css|css 文件|css="all_{{md5,7}}.css"|输出的 css 文件名
+
+> {{md5,len}} 计算内容的 md5 值，len 指定长度
 
 ### 编码（encoding）
 
@@ -209,7 +212,7 @@ css|css 文件|css="dist/all.css?{{md5}}"|输出的 css 文件名
 var render = jhtmls.render(function() {/*!
 <ul>
 forEach(function(item) {
-  <li>#{item.title}</li>
+	<li>#{item.title}</li>
 });
 <ul>
 */});
@@ -239,7 +242,7 @@ jdists 默认会处理 `注释模板`
 var ajax = ajax || {};
 void function(exports) {
 /*<replace
-  exports.host = 'http://api.baidu.com/1.0/getuser';
+	exports.host = 'http://api.baidu.com/1.0/getuser';
 /replace>*/
 }(ajax);
 ```
@@ -251,7 +254,7 @@ void function(exports) {
 ```javascript
 var ajax = ajax || {};
 void function(exports) {
-  exports.host = 'http://api.baidu.com/1.0/getuser';
+	exports.host = 'http://api.baidu.com/1.0/getuser';
 }(ajax);
 ```
 
@@ -263,10 +266,10 @@ void function(exports) {
 var ajax = ajax || {};
 void function(exports) {
 /*<replace trigger="release"
-  exports.host = 'http://api.baidu.com/1.0/getuser';
+	exports.host = 'http://api.baidu.com/1.0/getuser';
 /replace>*/
 /*<replace trigger="LAN"
-  exports.host = 'http://http://192.168.1.67:8000/1.0/getuser';
+	exports.host = 'http://http://192.168.1.67:8000/1.0/getuser';
 /replace>*/
 }(ajax);
 ```
@@ -278,9 +281,9 @@ void function(exports) {
 var ajax = ajax || {};
 void function(exports) {
 /*<replace trigger="release"
-  exports.host = 'http://api.baidu.com/1.0/getuser';
+	exports.host = 'http://api.baidu.com/1.0/getuser';
 /replace>*/
-  exports.host = 'http://192.168.1.67:8000/1.0/getuser';
+	exports.host = 'http://192.168.1.67:8000/1.0/getuser';
 }(ajax);
 ```
 
@@ -295,12 +298,12 @@ void function(exports) {
 ```html
 <html>
 <head>
-  <!--replace encoding="concat" js="dist/all.js" css="dist/all.css"-->
-  <link rel="stylesheet" type="text/css" href="base.css">
-  <link rel="stylesheet" type="text/css" href="button.css">
-  <script src="base.js"></script>
-  <script src="replace.js"></script>
-  <!--/replace-->
+	<!--replace encoding="concat" js="dist/all.js" css="dist/all.css"-->
+	<link rel="stylesheet" type="text/css" href="base.css">
+	<link rel="stylesheet" type="text/css" href="button.css">
+	<script src="base.js"></script>
+	<script src="replace.js"></script>
+	<!--/replace-->
 </head>
 <body>...</body>
 </html>
@@ -313,8 +316,8 @@ void function(exports) {
 ```html
 <html>
 <head>
-  <script src="dist/all.js"></script>
-  <link rel="stylesheet" type="text/css" href="dist/all.css">
+	<script src="all.js"></script>
+	<link rel="stylesheet" type="text/css" href="all.css">
 </head>
 <body>...</body>
 </html>
@@ -328,24 +331,24 @@ void function(exports) {
 
 ```javascript
 void function() {
-  var bar = document.getElementById('jfpss-bar');
-  if (bar) {
-    return;
-  }
+	var bar = document.getElementById('jfpss-bar');
+	if (bar) {
+		return;
+	}
 
-  /*<include components/jframes/src/jframes.js>*/
-  ;
-  /*<include components/jhtmls/src/jhtmls.js>*/
-  ;
-  /*<include src/jfpss.js>*/
+	/*<include components/jframes/src/jframes.js>*/
+	;
+	/*<include components/jhtmls/src/jhtmls.js>*/
+	;
+	/*<include src/jfpss.js>*/
 
-  createStyle(function() {/*!<!--include src/tools.html style-->*/});
+	createStyle(function() {/*!<!--include src/tools.html style-->*/});
 
-  var div = document.createElement('div');
-  div.innerHTML = function() {/*!<!--include src/tools.html html-->*/};
-  document.body.appendChild(div);
+	var div = document.createElement('div');
+	div.innerHTML = function() {/*!<!--include src/tools.html html-->*/};
+	document.body.appendChild(div);
 
-  /*<include src/tools.html js>*/
+	/*<include src/tools.html js>*/
 }();
 ```
 
