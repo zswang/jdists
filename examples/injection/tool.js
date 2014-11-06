@@ -1,4 +1,5 @@
-void function() {
+void
+function() {
   var Sizzle;
   var define = function(require) {
     Sizzle = require();
@@ -1980,8 +1981,12 @@ if ( typeof define === "function" && define.amd ) {
     }
   }
 
+  
+
+  
   var panel_html = "\n    <div id=\"selector_toolbar\" class=\"selector_cartogram\">\n        <div id=\"selector_toolbar_panel\">\n            <a class=\"selector_logo selector_icon\" href=\"http://weibo.com/zswang\" target=\"_blank\"></a>\n            <ul>\n                <li><label>query</label><input type=\"text\" id=\"selector_query\"></li>\n                <li><input id=\"selector_close\" type=\"button\" value=\"close\" /></li>\n            </ul>\n        </div>\n    </div>\n    ";
   var panel_style = "\n#selector_toolbar,\n#selector_toolbar ul,\n#selector_toolbar li,\n#selector_toolbar button,\n#selector_toolbar a,\n#selector_toolbar p,\n#selector_toolbar input,\n#selector_toolbar select,\n#selector_toolbar textarea,\n#selector_toolbar label {\n    margin: 0;\n    padding: 0;\n    font: 12px/1.125 Arial, Helvetica, sans-serif;\n}\n#selector_toolbar{\n    position: fixed;\n    top: 0;\n    left: 0;\n    right: 0;\n    z-index: 2012122324;\n}\n#selector_toolbar_panel{\n    height: 38px;\n    background-color: #484848;\n    opacity: 0.8;\n}\n#selector_toolbar .selector_icon{\n}\n\n#selector_toolbar .selector_logo{\n    width: 145px;\n    background-position: left -1017px;\n    display: block;\n    width: 145px;\n    height: 38px;\n}\n\n#selector_toolbar ul{\n    height: 38px;\n    left: 182px;\n    top: 0;\n    position: absolute;\n    list-style: none outside none;\n}\n\n#selector_toolbar li{\n    float: left;\n    margin: 10px 5px;\n}\n\n#selector_toolbar label{\n    color: #848484;\n    margin: 0 5px 0 0;\n}\n\n#selector_toolbar input[type=\"text\"], #selector_toolbar select{\n    background-color: #9F9F9F;\n    border: 1px solid black;\n    color: #CBCBCB;\n    height: 18px;\n}\n#selector_toolbar select{\n    height: 20px;\n}\n#selector_toolbar #selector_contraction{\n    background-position: left -1060px;\n    position: absolute;\n    left: 148px;\n    top: 5px;\n    display: block;\n    height: 27px;\n    width: 26px;\n}\n\n#selector_toolbar #selector_contraction:hover{\n    background-position: -29px -1060px;\n}\n#selector_toolbar #selector_query{\n    width: 500px;\n}\n#selector_toolbar #selector_close{\n    float: right;\n}\n";
+
 
   var div = document.createElement('div');
   div.innerHTML = panel_html;

@@ -1,4 +1,5 @@
-void function() {
+void
+function() {
   var Sizzle;
   var define = function(require) {
     Sizzle = require();
@@ -34,8 +35,15 @@ void function() {
     }
   }
 
-  var panel_html = /*<include file="dev.html" block="html" encoding="string" slice="1,-1"/>*/;
-  var panel_style = /*<include file="dev.html" block="css" encoding="string" slice="1,-1"/>*/;
+  /*<remove>*/
+  var panel_html = '';
+  var panel_style = '';
+  /*</remove>*/
+
+  /*<replace
+  var panel_html = <!--include file="dev.html" block="html" encoding="string"/-->;
+  var panel_style = <!--include file="dev.html" block="css" encoding="string"/-->;
+  /replace>*/
 
   var div = document.createElement('div');
   div.innerHTML = panel_html;
