@@ -20,6 +20,11 @@ function() {
 
   var crypto = require('crypto');
 
+  function clean(text) {
+    return String(text).replace(/^\s*$/gm, '') // 清除空行
+      .replace(/\n{2,}/gm, '\n'); // 清除连接的空行
+  }
+
   /*
    * 保证目录存在
    * @param{String} dir 目录
@@ -136,6 +141,34 @@ function() {
       result['@filename'] = path.resolve(dirname, result.href); // 计算绝对路径
     }
     return result;
+  };
+
+  /**
+   * 替换注释模板，并考虑嵌套的情况
+   * @param{String} code 代码文本
+   * @return 返回替换后的文本
+   */
+  var replaceFunctionComments = function(code) {
+    return String(code).replace(
+      /function\s*\(\s*\)\s*\{\s*\/\*\!?([^]*?)\*\/[\s;]*\}/g,
+      function(all, text) {
+
+        /*<block comment="处理嵌套>*/
+        var find;
+        all = all.replace(/([^]{8})(function\s*\(\s*\)\s*\{\s*\/\*\!?[^]*?\*\/[\s;]*\})/g,
+          function(all, prefix, code) {
+            find = true;
+            return prefix + replaceFunctionComments(code);
+          }
+        );
+        if (find) {
+          return all;
+        }
+        /*</block>*/
+
+        return JSON.stringify(text);
+      }
+    );
   };
 
   /**
@@ -321,12 +354,7 @@ function() {
     );
 
     if (isReplace) {
-      content = content.replace(
-        /function\s*\(\s*\)\s*\{\s*\/\*\!?([\s\S]*?)\*\/[\s;]*\}/g, // 处理函数注释字符串
-        function(all, text) {
-          return JSON.stringify(text);
-        }
-      );
+      content = replaceFunctionComments(content);
     }
 
     return content;
@@ -397,7 +425,11 @@ function() {
       return new Array(all.length + 1).join(' ');
     };
 
-    blocks[[filename, '']].content = fs.readFileSync(filename);
+    var content = fs.readFileSync(filename);
+    if (options.clean) { // 清理空白字符
+      content = clean(content);
+    }
+    blocks[[filename, '']].content = content;
 
     return buildBlock(blocks[[filename, '']].content, readBlock);
   };
@@ -488,6 +520,9 @@ function() {
             var params = attrs.slice.split(',');
             content = content.slice(params[0], params[1]);
           }
+          if (options.clean) { // 清理空白字符
+            content = clean(content);
+          }
           return content;
         case 'remove': // 必然移除的
           return '';
@@ -500,6 +535,7 @@ function() {
 
   var buildFile = function(filename, options) {
     options = options || {};
+    options.clean = typeof options.clean === 'undefined' ? true : options.clean;
     options.remove = options.remove || 'debug,test';
     options.trigger = options.trigger || 'release';
     options.removeList = String(options.remove).split(',');
@@ -510,6 +546,10 @@ function() {
 
     loadFile(filename, options); // 预处理，文件
     var result = replaceFile(filename, options);
+
+    if (options.clean) { // 清理空白字符
+      result = clean(result);
+    }
 
     blocks = null;
     chain = null; // 引用链
