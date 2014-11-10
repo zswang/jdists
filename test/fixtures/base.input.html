@@ -12,13 +12,14 @@ h1 {
   <!--debug-->
   <h1>debug</h1>
   <!--/debug-->
-  <!--include letter.txt-->
   <!--include letter.txt -->
+  <!--include file="letter.txt" slice="1,-1"-->
   <!--include letter.txt/-->
   <!--include letter.txt /-->
   <!--include file="letter.txt" /-->
   <!--include file="not.exist"/-->
 </body>
+  <!--replace><div>可以写在一行</div></replace-->
 <script>
 void function() {
   /*<debug>*/
@@ -31,6 +32,7 @@ void function() {
   /*<include base.js />*/
   /*<include file="base.js">*/
   /*<include file="base.js"/>*/
+  /*<replace>console.log('可以写在一行');</replace>*/
 }();
 </script>
 </html>

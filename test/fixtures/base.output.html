@@ -7,12 +7,13 @@
 <body>
   
   abcdefghijklmnopqrstuvwxyz
-  abcdefghijklmnopqrstuvwxyz
+  bcdefghijklmnopqrstuvwxy
   abcdefghijklmnopqrstuvwxyz
   abcdefghijklmnopqrstuvwxyz
   abcdefghijklmnopqrstuvwxyz
   
 </body>
+  <div>可以写在一行</div>
 <script>
 void function() {
   
@@ -32,6 +33,7 @@ var render = jhtmls.render("\n<ul>\nforEach(function(item) {\n  \n  <li>#{item.t
   console.log('hello world!');
 
 var render = jhtmls.render("\n<ul>\nforEach(function(item) {\n  \n  <li>#{item.title}</li>\n});\n<ul>\n");
+  console.log('可以写在一行');
 }();
 </script>
 </html>
