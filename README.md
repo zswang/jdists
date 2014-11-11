@@ -72,7 +72,7 @@ var render = jhtmls.render(function () {
 */});
 ```
 
-jdist 处理后 --->
+jdists 处理后 --->
 
 ```js
 var render = jhtmls.render('<div title="#{title}">#{content}</div>');
@@ -87,7 +87,7 @@ instance.get(/*,*/function(a, b, c) {
 });
 ```
 
-jdist 处理后 --->
+jdists 处理后 --->
 
 ```js
 instance.get(['a', 'b', 'c'], function(a, b, c) {
@@ -166,9 +166,13 @@ console.log('测试版本');
 <!--debug begin-->
 <div>测试版本</div>
 <!--debug end-->
+
+<!--start debug-->
+<div>测试版本</div>
+<!--end debug-->
 ```
 
-* 使用 `being` / `end` 的方式，主要的问题是容易遗忘，该前缀还是后缀
+* 使用 `begin` | `start` / `end` 的方式，容易遗忘：前缀还是后缀、`begin` 还是 `start`
 
 ## 基本概念
 
@@ -178,7 +182,7 @@ file|文件|1.js,1.png|包括二进制文件
 block|代码块||只能是文本文件
 block::tag |标签|```<a>```|
 block::attribute|代码块属性|```<a encoding="md5">```|
-
+encoding|编码器|将代码块进行编码处理
 
 ### 标准代码块
 
@@ -195,6 +199,7 @@ remove|将当前代码移除|
 encoding|编码|encoding="base64"|默认"original"，可扩展
 slice|裁剪|slice="1,-1"|参考 String.slice() 函数
 file|文件名|file="all.js"|默认当前文件
+block|代码名|block="hello"|引入的块名
 type|类型|type="comment"|默认"original"，"comment"：去掉包裹代码块的注释
 trigger|触发器|trigger="release,LAN"|默认"release"，存在这些触发器时才生效
 js|js 文件|js="all_{{md5,7}}.js"|输出的 js 文件名
