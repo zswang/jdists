@@ -17,11 +17,17 @@ j **dist** s 就是 `js` 里插入了一个 `dist` （分发），避免和其�
 一个页面从开发到上线基本会经历三个阶段：
 
 * 本机开发调试
-		* 打印一些变量和执行状态、模拟数据接口
+
+	* 打印一些变量和执行状态、模拟数据接口
+
 * 内网测试
-		* 跳过某些步骤、使用内网环境
+
+	* 跳过某些步骤、使用内网环境
+
 * 公网上线
-		* 移除调试代码、使用线上环境。
+
+	* 移除调试代码、使用线上环境。
+
 
 其实前端代码和其他语言代码都需要编译，目前已经有很多成熟的工具来完成编译的事情。
 比如：fis、grunt、gulp，基本都是依赖配置文件，将项目代码进行编译到相应版本。
@@ -55,14 +61,40 @@ fprintf("variant=%d", variant);
 * 能够替换代码块的内容。
 * 能 include 二进制文件，变为 base64 字符串，方便转成 dataUri。
 * 自动合并 css 或 js 文件，能够输出合并文件并能打 md5 戳。
-* 能够处理 `注释模板`，避免被压缩工具移除
+* 能够处理一些 `黑魔法`，避免被压缩工具影响
 
-```javascript
+比如：`注释模板`
+
+```js
 var render = jhtmls.render(function () {
 /*!
 <div title="#{title}">#{content}</div>
 */});
 ```
+
+jdist 处理后 --->
+
+```js
+var render = jhtmls.render('<div title="#{title}">#{content}</div>');
+```
+
+
+比如：`参数自识别`
+
+```js
+instance.get(/*,*/function(a, b, c) {
+	// TODO
+});
+```
+
+jdist 处理后 --->
+
+```js
+instance.get(['a', 'b', 'c'], function(a, b, c) {
+	// TODO
+});
+```
+
 * 能够扩展替换规则。
 
 ## 设计思路
@@ -104,17 +136,17 @@ console.log('测试版本');
 * 在 html 中：
 
 ```html
-<!--release
+<!--release>
 <div>线上版本</div>
-/release-->
+</release-->
 ```
 
 * 在 js 中：
 
 ```js
-/*<release
+/*<release>
 console.log('测试版本');
-/release>*/
+</release>*/
 ```
 
 * 在 css 中：
@@ -122,9 +154,9 @@ console.log('测试版本');
 ```css
 .version {
 	font-size: 12px;
-/*<release
+/*<release>
 	color: red;
-/release>*/
+</release>*/
 }
 ```
 
@@ -191,9 +223,9 @@ css|css 文件|css="all_{{md5,7}}.css"|输出的 css 文件名
 
 * 依赖 npm 环境
 
-* 安装 `$npm install jdists -g`
+* 安装 `$ npm install jdists -g`
 
-* 命令格式 `$jdists input1 [input2] [-output output] [-remove debug,test]`
+* 命令格式 `$ jdists input1 [input2] [-output output] [-remove debug,test]`
 
 * 命令参数
 
@@ -202,13 +234,14 @@ css|css 文件|css="all_{{md5,7}}.css"|输出的 css 文件名
 -output|-o|指定输出文件|默认输出到控制台
 -remove|-r|指定移除的代码块|默认 "debug,test"
 -trigger|-t|指定触发器|默认 "release"
+-clean|-c|清除空白行|默认 true
 -version|-v|打印当前版本|
 
 ### 处理 js 中的 `注释模板`
 
 假设文件 `js/base.js` 内容为：
 
-```javascript
+```js
 var render = jhtmls.render(function() {/*!
 <ul>
 forEach(function(item) {
@@ -220,16 +253,16 @@ forEach(function(item) {
 
 如上可以省去拼接字符串的工作，直观好维护。但经过带压缩后就变成：
 
-```javascript
+```js
 var render=jhtmls.render(function(){});
 ```
-怎么避免 `注释模板` 被替换？
+怎么避免 `注释模板` 被压缩代码的工具移除？
 
 `$jdists js/base.js -o dist/js/base.js`
 
 生成的文件是：
 
-```javascript
+```js
 var render = jhtmls.render('<ul>\nforEach(function(item) {\n  <li>#{item.title}</li>\n});\n<ul>');
 ```
 jdists 默认会处理 `注释模板`
@@ -238,12 +271,12 @@ jdists 默认会处理 `注释模板`
 
 假设文件 `js/net.js` 内容为：
 
-```javascript
+```js
 var ajax = ajax || {};
 void function(exports) {
-/*<replace
+/*<replace>
 	exports.host = 'http://api.baidu.com/1.0/getuser';
-/replace>*/
+</replace>*/
 }(ajax);
 ```
 
@@ -251,7 +284,7 @@ void function(exports) {
 
 生成的文件是：
 
-```javascript
+```js
 var ajax = ajax || {};
 void function(exports) {
 	exports.host = 'http://api.baidu.com/1.0/getuser';
@@ -262,27 +295,27 @@ void function(exports) {
 
 假设文件 `js/net.js` 内容为：
 
-```javascript
+```js
 var ajax = ajax || {};
 void function(exports) {
-/*<replace trigger="release"
+/*<replace trigger="release">
 	exports.host = 'http://api.baidu.com/1.0/getuser';
-/replace>*/
-/*<replace trigger="LAN"
+</replace>*/
+/*<replace trigger="LAN">
 	exports.host = 'http://http://192.168.1.67:8000/1.0/getuser';
-/replace>*/
+</replace>*/
 }(ajax);
 ```
 `$jdists js/net.js -o dist/js/net.js -t LAN`
 
 生成的文件是：
 
-```javascript
+```js
 var ajax = ajax || {};
 void function(exports) {
-/*<replace trigger="release"
+/*<replace trigger="release">
 	exports.host = 'http://api.baidu.com/1.0/getuser';
-/replace>*/
+</replace>*/
 	exports.host = 'http://192.168.1.67:8000/1.0/getuser';
 }(ajax);
 ```
@@ -329,7 +362,7 @@ void function(exports) {
 
 通过 jdists 可以将零散的代码和静态资源，拼凑为一个完整的组件
 
-```javascript
+```js
 void function() {
 	var bar = document.getElementById('jfpss-bar');
 	if (bar) {
