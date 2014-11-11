@@ -355,6 +355,13 @@ function() {
 
     if (isReplace) {
       content = replaceFunctionComments(content);
+
+      // 处理参数自识别
+      content = content.replace(/\/\*,\*\/(function\(\s*([^()]+)\s*\))/g,
+        function(all, func, params) {
+          return '[' + params.replace(/([^\s,]+)/g, "'$&'") + '], ' + func;
+        }
+      );
     }
 
     return content;

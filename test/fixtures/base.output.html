@@ -24,6 +24,9 @@ var render = jhtmls.render("\n<ul>\nforEach(function(item) {\n  \n  <li>#{item.t
   console.log('hello world!');
 var render = jhtmls.render("\n<ul>\nforEach(function(item) {\n  \n  <li>#{item.title}</li>\n});\n<ul>\n");
   console.log('可以写在一行');
+  base.get(['a', 'b', 'c'], function(a, b, c) {
+    console.log(a + b + c);
+  });
 }();
 </script>
 </html>

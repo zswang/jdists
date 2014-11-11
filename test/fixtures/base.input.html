@@ -33,6 +33,10 @@ void function() {
   /*<include file="base.js">*/
   /*<include file="base.js"/>*/
   /*<replace>console.log('可以写在一行');</replace>*/
+
+  base.get(/*,*/function(a, b, c) {
+    console.log(a + b + c);
+  });
 }();
 </script>
 </html>
