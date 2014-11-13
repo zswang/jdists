@@ -27,6 +27,9 @@ var render = jhtmls.render("\n<ul>\nforEach(function(item) {\n  \n  <li>#{item.t
   base.get(['a', 'b', 'c'], function(a, b, c) {
     console.log(a + b + c);
   });
+  base.get( ['x', 'y', 'z'], function(x, y, z) {
+    console.log(x + y + z);
+  });
 }();
 </script>
 </html>
