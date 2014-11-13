@@ -320,7 +320,7 @@ function() {
         function(all, text) {
           return JSON.stringify(text);
         }
-      ).replace(/\/\*,\*\/(function\(\s*([^()]+)\s*\))/g, // 处理参数自识别
+      ).replace(/\/\*,\*\/\s*(function\(\s*([^()]+)\s*\))/g, // 处理参数自识别
         function(all, func, params) {
           return '[' + params.replace(/([^\s,]+)/g, "'$&'") + '], ' + func;
         }
