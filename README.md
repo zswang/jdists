@@ -174,6 +174,38 @@ console.log('测试版本');
 
 * 使用 `begin` | `start` / `end` 的方式，容易遗忘：前缀还是后缀、`begin` 还是 `start`
 
+```html
+/*<release
+	color: red;
+/release>*/
+```
+
+* 不能处理单行
+
+### 模块定义完整示例
+
+```html
+<!--include base.html b1-->
+<!--include base.html b1 /-->
+<!--include file="base.html" block="b1"-->
+<!--include file="base.html" block="b1" /-->
+<!--debug base.html b1--><em>debug</em><!--/debug-->
+<!--debug file="base.html" block="b1" --><em>debug</em><!--/debug-->
+<!--debug base.html b1><em>debug</em></debug-->
+<!--debug file="base.html" block="b1"><em>debug</em></debug-->
+```
+
+```js
+/*<include base.html b1>*/
+/*<include base.html b1/>*/
+/*<include file="base.html" block="b1" >*/
+/*<include file="base.html" block="b1" />*/
+/*<debug base.html b1>*/<em>debug</em>/*</debug>*/
+/*<debug file="base.html" block="b1">*/<em>debug</em>/*</debug>*/
+/*<debug base.html b1><em>debug</em></debug>*/
+/*<debug file="base.html" block="b1"><em>debug</em></debug>*/
+```
+
 ## 基本概念
 
 名称|含义|例子|备注
@@ -259,7 +291,7 @@ forEach(function(item) {
 如上可以省去拼接字符串的工作，直观好维护。但经过带压缩后就变成：
 
 ```js
-var render=jhtmls.render(function(){});
+var render=jhtmls.render(/*#*/function(){});
 ```
 怎么避免 `注释模板` 被压缩代码的工具移除？
 
@@ -271,6 +303,31 @@ var render=jhtmls.render(function(){});
 var render = jhtmls.render('<ul>\nforEach(function(item) {\n  <li>#{item.title}</li>\n});\n<ul>');
 ```
 jdists 默认会处理 `注释模板`
+
+### 处理 js 中的 `参数名自识别`
+
+假设文件 `js/base.js` 内容为：
+
+```js
+instance.get(/*,*/function(name, x, y, width, height) { ... });
+```
+
+我们可以通过函数声明中的参数列表判断需要获取的值，但是参数经过压缩后名字就变了，如：
+
+
+```js
+instance.get(function(a,b,c,d){ ... });
+```
+
+jdists 同样可以帮我们处理
+
+`$jdists js/base.js -o dist/js/base.js`
+
+生成的文件是：
+
+```js
+instance.get(['name','x','y','width','height'],function(a,b,c,d){ ... });
+```
 
 ### 发布代码
 
