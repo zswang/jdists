@@ -144,34 +144,6 @@ function() {
   };
 
   /**
-   * 替换注释模板，并考虑嵌套的情况
-   * @param{String} code 代码文本
-   * @return 返回替换后的文本
-   */
-  var replaceFunctionComments = function(code) {
-    return String(code).replace(
-      /function\s*\(\s*\)\s*\{\s*\/\*\!?([^]*?)\*\/[\s;]*\}/g,
-      function(all, text) {
-
-        /*<block comment="处理嵌套>*/
-        var find;
-        all = all.replace(/([^]{8})(function\s*\(\s*\)\s*\{\s*\/\*\!?[^]*?\*\/[\s;]*\})/g,
-          function(all, prefix, code) {
-            find = true;
-            return prefix + replaceFunctionComments(code);
-          }
-        );
-        if (find) {
-          return all;
-        }
-        /*</block>*/
-
-        return JSON.stringify(text);
-      }
-    );
-  };
-
-  /**
    * 资源合并处理器
    */
   var processorConcat = function(content, attrs, dirname, options, tag, readBlock) {
@@ -302,62 +274,53 @@ function() {
    * @return 返回编译后的内容
    */
   var buildBlock = function(content, onread, isReplace) {
-
+    // @group
+    // fl, tag, attrs, fr, content, end
     content = String(content).replace(
-      /<!--(include)((?:\s+\w[\w\/\\\-\.]*?)*)\s*\/?-->/g,
+      /(<!--)(include)((?:\s+\w[\w\/\\\-\.]*?)*)()()(\s*\/?-->)/g,
       onread
     ).replace(
-      /<!--(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?-->/g,
+      /(<!--)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)()()(\s*\/?-->)/g,
       onread
     ).replace(
-      /<!--([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)\s*-->([^]*?)<!--\/\1-->/g,
+      /(<!--)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*-->)([^]*?)(<!--\/\2-->)/g,
       onread
     ).replace(
-      /<!--([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*-->([^]*?)<!--\/\1-->/g,
+      /(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*-->)([^]*?)(<!--\/\2-->)/g,
       onread
     ).replace(
-      /\/\*<(include)((?:\s+\w[\w\/\\\-\.]*?)*)\s*\/?>\*\//g,
+      /(\/\*<)(include)((?:\s+\w[\w\/\\\-\.]*?)*)()()(\s*\/?>\*\/)/g,
       onread
     ).replace(
-      /\/\*<(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>\*\//g,
+      /(\/\*<)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)()()(\s*\/?>\*\/)/g,
       onread
     ).replace(
-      /\/\*<([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)\s*>\*\/([^]*?)\/\*<\/\1>\*\//g,
+      /(\/\*<)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/g,
       onread
     ).replace(
-      /\/\*<([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*>\*\/([^]*?)\/\*<\/\1>\*\//g,
+      /(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/g,
       onread
     ).replace(
-      /<!--([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)\s*>([^]*?)<\/\1-->/g,
+      /(<!--)([\w-_]+)((?:\s+\w(?:[\w\/\\\-\.]*?\w)?)*)(\s*>)([^]*?)(<\/\2-->)/g,
       onread
     ).replace(
-      /<!--([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*>([^]*?)<\/\1-->/g,
+      /(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>)([^]*?)(<\/\2-->)/g,
       onread
     ).replace(
-      /\/\*<([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)\s*>([^]*?)<\/\1>\*\//g,
+      /(\/\*<)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*>\s*)([^]*?)(\s*<\/\2>\*\/)/g,
       onread
     ).replace(
-      /\/\*<([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*>([^]*?)<\/\1>\*\//g,
-      onread
-    ).replace(
-      /<!--([\w-_]+)((?:[ \f\t\v]+\w[\w\/\\\-\.]*?)*)$([^]*?)^[ \f\t\v]*\/\1-->/gm,
-      onread
-    ).replace(
-      /\/\*<([\w-_]+)((?:[ \f\t\v]+\w[\w\/\\\-\.]*?)*)$([^]*?)^[ \f\t\v]*\/\1>\*\//gm,
-      onread
-    ).replace(
-      /<!--([\w-_]+)((?:[ \f\t\v]*[\w-_.]+[ \f\t\v]*=[ \f\t\v]*"[^"]+")*)$([^]*?)^[ \f\t\v]*\/\1-->/gm,
-      onread
-    ).replace(
-      /\/\*<([\w-_]+)((?:[ \f\t\v]*[\w-_.]+[ \f\t\v]*=[ \f\t\v]*"[^"]+")*)$([^]*?)^[ \f\t\v]*\/\1>\*\//gm,
+      /(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>)([^]*?)(<\/\2>\*\/)/g,
       onread
     );
 
     if (isReplace) {
-      content = replaceFunctionComments(content);
-
-      // 处理参数自识别
-      content = content.replace(/\/\*,\*\/(function\(\s*([^()]+)\s*\))/g,
+      content = String(content).replace( // 处理注释模板
+        /\/\*#\*\/function\s*\(\s*\)\s*\{\s*\/\*\!?([^]*?)\*\/[\s;]*\}/g,
+        function(all, text) {
+          return JSON.stringify(text);
+        }
+      ).replace(/\/\*,\*\/(function\(\s*([^()]+)\s*\))/g, // 处理参数自识别
         function(all, func, params) {
           return '[' + params.replace(/([^\s,]+)/g, "'$&'") + '], ' + func;
         }
@@ -399,7 +362,7 @@ function() {
 
     var dirname = path.dirname(filename);
 
-    var readBlock = function(all, tag, attrText, content, pos) {
+    var readBlock = function(all, fl, tag, attrText, fr, content, end, pos) {
       var attrs = getAttrs(tag, attrText, dirname);
 
       if (attrs.trigger &&
@@ -455,7 +418,7 @@ function() {
 
     var dirname = path.dirname(filename);
 
-    var readBlock = function(all, tag, attrText, content) {
+    var readBlock = function(all, fl, tag, attrText, fr, content, end) {
       if (options.removeList.indexOf(tag) >= 0) {
         return '';
       }
@@ -534,7 +497,8 @@ function() {
         case 'remove': // 必然移除的
           return '';
       }
-      return all;
+
+      return fl + tag + attrText + fr + buildBlock(content, readBlock, true) + end;
     };
 
     return buildBlock(blocks[[filename, '']].content, readBlock, true);

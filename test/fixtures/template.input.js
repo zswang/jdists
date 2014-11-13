@@ -4,7 +4,7 @@ void function() {
    */
 
   var dict = {
-    a: function() {
+    a: /*#*/function() {
       /*!
 <div>hello</div>
       */
