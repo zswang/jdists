@@ -40,6 +40,12 @@ void function() {
   base.get( /*,*/ function(x, y, z) {
     console.log(x + y + z);
   });
+
+  /*<start>*/
+  define('start', /*,*/ function(require, monkey, alog, element) {
+    console.log(typeof alog);
+  });
+  /*</start>*/
 }();
 </script>
 </html>

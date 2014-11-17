@@ -7,7 +7,7 @@ function() {
   /**
    * jdists
    * 代码区域处理的工具
-   * @author 王集鹄(wangjihu,http://weibo.com/zswang)
+   * @author 王集鹄(wangjihconcatu,http://weibo.com/zswang)
    * @version 2014-10-16
    */
 
@@ -484,7 +484,7 @@ function() {
 
           var processor = processors[attrs.encoding];
           if (processor) { // 编码处理器
-            content = processor(content, attrs, dirname, options, tag, readBlock);
+            content = processor(content, attrs, dirname, options, tag, readBlock, buildFile);
           }
           if (attrs.slice) {
             var params = attrs.slice.split(',');

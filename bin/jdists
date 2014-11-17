@@ -8,6 +8,7 @@ var fs = require('fs');
 var path = require('path');
 
 jdists.setEncoding('inline', require('../src/encoding/processor-inline'));
+jdists.setEncoding('require', require('../src/encoding/processor-require'));
 
 var argv = optimist
   .usage('$0 input1.js [input2.js] [options]')

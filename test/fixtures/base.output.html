@@ -30,6 +30,11 @@ var render = jhtmls.render("\n<ul>\nforEach(function(item) {\n  \n  <li>#{item.t
   base.get( ['x', 'y', 'z'], function(x, y, z) {
     console.log(x + y + z);
   });
+  /*<start>*/
+  define('start', ['require', 'monkey', 'alog', 'element'], function(require, monkey, alog, element) {
+    console.log(typeof alog);
+  });
+  /*</start>*/
 }();
 </script>
 </html>
