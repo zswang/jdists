@@ -17,11 +17,17 @@ j **dist** s 就是 `js` 里插入了一个 `dist` （分发），避免和其�
 一个页面从开发到上线基本会经历三个阶段：
 
 * 本机开发调试
-    * 打印一些变量和执行状态、模拟数据接口
+
+	* 打印一些变量和执行状态、模拟数据接口
+
 * 内网测试
-    * 跳过某些步骤、使用内网环境
+
+	* 跳过某些步骤、使用内网环境
+
 * 公网上线
-    * 移除调试代码、使用线上环境。
+
+	* 移除调试代码、使用线上环境。
+
 
 其实前端代码和其他语言代码都需要编译，目前已经有很多成熟的工具来完成编译的事情。
 比如：fis、grunt、gulp，基本都是依赖配置文件，将项目代码进行编译到相应版本。
@@ -55,14 +61,40 @@ fprintf("variant=%d", variant);
 * 能够替换代码块的内容。
 * 能 include 二进制文件，变为 base64 字符串，方便转成 dataUri。
 * 自动合并 css 或 js 文件，能够输出合并文件并能打 md5 戳。
-* 能够处理 `注释模板`，避免被压缩工具移除
+* 能够处理一些 `黑魔法`，避免被压缩工具影响
 
-```javascript
+比如：`注释模板`
+
+```js
 var render = jhtmls.render(function () {
 /*!
 <div title="#{title}">#{content}</div>
 */});
 ```
+
+jdists 处理后 --->
+
+```js
+var render = jhtmls.render('<div title="#{title}">#{content}</div>');
+```
+
+
+比如：`参数自识别`
+
+```js
+instance.get(/*,*/function(a, b, c) {
+	// TODO
+});
+```
+
+jdists 处理后 --->
+
+```js
+instance.get(['a', 'b', 'c'], function(a, b, c) {
+	// TODO
+});
+```
+
 * 能够扩展替换规则。
 
 ## 设计思路
@@ -92,9 +124,9 @@ console.log('测试版本');
 
 ```css
 .version {
-  font-size: 12px;
+	font-size: 12px;
 /*<debug>*/
-  color: red;
+	color: red;
 /*</debug>*/
 }
 ```
@@ -104,27 +136,27 @@ console.log('测试版本');
 * 在 html 中：
 
 ```html
-<!--release
+<!--release>
 <div>线上版本</div>
-/release-->
+</release-->
 ```
 
 * 在 js 中：
 
 ```js
-/*<release
+/*<release>
 console.log('测试版本');
-/release>*/
+</release>*/
 ```
 
 * 在 css 中：
 
 ```css
 .version {
-  font-size: 12px;
-/*<release
-  color: red;
-/release>*/
+	font-size: 12px;
+/*<release>
+	color: red;
+</release>*/
 }
 ```
 
@@ -134,9 +166,45 @@ console.log('测试版本');
 <!--debug begin-->
 <div>测试版本</div>
 <!--debug end-->
+
+<!--start debug-->
+<div>测试版本</div>
+<!--end debug-->
 ```
 
-* 使用 `being` / `end` 的方式，主要的问题是容易遗忘，该前缀还是后缀
+* 使用 `begin` | `start` / `end` 的方式，容易遗忘：前缀还是后缀、`begin` 还是 `start`
+
+```html
+/*<release
+	color: red;
+/release>*/
+```
+
+* 不能处理单行
+
+### 模块定义完整示例
+
+```html
+<!--include base.html b1-->
+<!--include base.html b1 /-->
+<!--include file="base.html" block="b1"-->
+<!--include file="base.html" block="b1" /-->
+<!--debug base.html b1--><em>debug</em><!--/debug-->
+<!--debug file="base.html" block="b1" --><em>debug</em><!--/debug-->
+<!--debug base.html b1><em>debug</em></debug-->
+<!--debug file="base.html" block="b1"><em>debug</em></debug-->
+```
+
+```js
+/*<include base.html b1>*/
+/*<include base.html b1/>*/
+/*<include file="base.html" block="b1" >*/
+/*<include file="base.html" block="b1" />*/
+/*<debug base.html b1>*/<em>debug</em>/*</debug>*/
+/*<debug file="base.html" block="b1">*/<em>debug</em>/*</debug>*/
+/*<debug base.html b1><em>debug</em></debug>*/
+/*<debug file="base.html" block="b1"><em>debug</em></debug>*/
+```
 
 ## 基本概念
 
@@ -146,7 +214,7 @@ file|文件|1.js,1.png|包括二进制文件
 block|代码块||只能是文本文件
 block::tag |标签|```<a>```|
 block::attribute|代码块属性|```<a encoding="md5">```|
-
+encoding|编码器|将代码块进行编码处理
 
 ### 标准代码块
 
@@ -161,11 +229,15 @@ remove|将当前代码移除|
 属性名|含义|例子|备注
 ------|----|----|----
 encoding|编码|encoding="base64"|默认"original"，可扩展
+slice|裁剪|slice="1,-1"|参考 String.slice() 函数
 file|文件名|file="all.js"|默认当前文件
+block|代码名|block="hello"|引入的块名
 type|类型|type="comment"|默认"original"，"comment"：去掉包裹代码块的注释
 trigger|触发器|trigger="release,LAN"|默认"release"，存在这些触发器时才生效
-js|js 文件|js="dist/all.js?{{md5}}"|输出的 js 文件名
-css|css 文件|css="dist/all.css?{{md5}}"|输出的 css 文件名
+js|js 文件|js="all_{{md5,7}}.js"|输出的 js 文件名
+css|css 文件|css="all_{{md5,7}}.css"|输出的 css 文件名
+
+> {{md5,len}} 计算内容的 md5 值，len 指定长度
 
 ### 编码（encoding）
 
@@ -188,9 +260,9 @@ css|css 文件|css="dist/all.css?{{md5}}"|输出的 css 文件名
 
 * 依赖 npm 环境
 
-* 安装 `$npm install jdists -g`
+* 安装 `$ npm install jdists -g`
 
-* 命令格式 `$jdists input1 [input2] [-output output] [-remove debug,test]`
+* 命令格式 `$ jdists input1 [input2] [-output output] [-remove debug,test]`
 
 * 命令参数
 
@@ -199,17 +271,18 @@ css|css 文件|css="dist/all.css?{{md5}}"|输出的 css 文件名
 -output|-o|指定输出文件|默认输出到控制台
 -remove|-r|指定移除的代码块|默认 "debug,test"
 -trigger|-t|指定触发器|默认 "release"
+-clean|-c|清除空白行|默认 true
 -version|-v|打印当前版本|
 
 ### 处理 js 中的 `注释模板`
 
 假设文件 `js/base.js` 内容为：
 
-```javascript
+```js
 var render = jhtmls.render(function() {/*!
 <ul>
 forEach(function(item) {
-  <li>#{item.title}</li>
+	<li>#{item.title}</li>
 });
 <ul>
 */});
@@ -217,30 +290,55 @@ forEach(function(item) {
 
 如上可以省去拼接字符串的工作，直观好维护。但经过带压缩后就变成：
 
-```javascript
-var render=jhtmls.render(function(){});
+```js
+var render=jhtmls.render(/*#*/function(){});
 ```
-怎么避免 `注释模板` 被替换？
+怎么避免 `注释模板` 被压缩代码的工具移除？
 
 `$jdists js/base.js -o dist/js/base.js`
 
 生成的文件是：
 
-```javascript
+```js
 var render = jhtmls.render('<ul>\nforEach(function(item) {\n  <li>#{item.title}</li>\n});\n<ul>');
 ```
 jdists 默认会处理 `注释模板`
+
+### 处理 js 中的 `参数名自识别`
+
+假设文件 `js/base.js` 内容为：
+
+```js
+instance.get(/*,*/function(name, x, y, width, height) { ... });
+```
+
+我们可以通过函数声明中的参数列表判断需要获取的值，但是参数经过压缩后名字就变了，如：
+
+
+```js
+instance.get(function(a,b,c,d){ ... });
+```
+
+jdists 同样可以帮我们处理
+
+`$jdists js/base.js -o dist/js/base.js`
+
+生成的文件是：
+
+```js
+instance.get(['name','x','y','width','height'],function(a,b,c,d){ ... });
+```
 
 ### 发布代码
 
 假设文件 `js/net.js` 内容为：
 
-```javascript
+```js
 var ajax = ajax || {};
 void function(exports) {
-/*<replace
-  exports.host = 'http://api.baidu.com/1.0/getuser';
-/replace>*/
+/*<replace>
+	exports.host = 'http://api.baidu.com/1.0/getuser';
+</replace>*/
 }(ajax);
 ```
 
@@ -248,10 +346,10 @@ void function(exports) {
 
 生成的文件是：
 
-```javascript
+```js
 var ajax = ajax || {};
 void function(exports) {
-  exports.host = 'http://api.baidu.com/1.0/getuser';
+	exports.host = 'http://api.baidu.com/1.0/getuser';
 }(ajax);
 ```
 
@@ -259,28 +357,28 @@ void function(exports) {
 
 假设文件 `js/net.js` 内容为：
 
-```javascript
+```js
 var ajax = ajax || {};
 void function(exports) {
-/*<replace trigger="release"
-  exports.host = 'http://api.baidu.com/1.0/getuser';
-/replace>*/
-/*<replace trigger="LAN"
-  exports.host = 'http://http://192.168.1.67:8000/1.0/getuser';
-/replace>*/
+/*<replace trigger="release">
+	exports.host = 'http://api.baidu.com/1.0/getuser';
+</replace>*/
+/*<replace trigger="LAN">
+	exports.host = 'http://http://192.168.1.67:8000/1.0/getuser';
+</replace>*/
 }(ajax);
 ```
 `$jdists js/net.js -o dist/js/net.js -t LAN`
 
 生成的文件是：
 
-```javascript
+```js
 var ajax = ajax || {};
 void function(exports) {
-/*<replace trigger="release"
-  exports.host = 'http://api.baidu.com/1.0/getuser';
-/replace>*/
-  exports.host = 'http://192.168.1.67:8000/1.0/getuser';
+/*<replace trigger="release">
+	exports.host = 'http://api.baidu.com/1.0/getuser';
+</replace>*/
+	exports.host = 'http://192.168.1.67:8000/1.0/getuser';
 }(ajax);
 ```
 
@@ -295,12 +393,12 @@ void function(exports) {
 ```html
 <html>
 <head>
-  <!--replace encoding="concat" js="dist/all.js" css="dist/all.css"-->
-  <link rel="stylesheet" type="text/css" href="base.css">
-  <link rel="stylesheet" type="text/css" href="button.css">
-  <script src="base.js"></script>
-  <script src="replace.js"></script>
-  <!--/replace-->
+	<!--replace encoding="concat" js="dist/all.js" css="dist/all.css"-->
+	<link rel="stylesheet" type="text/css" href="base.css">
+	<link rel="stylesheet" type="text/css" href="button.css">
+	<script src="base.js"></script>
+	<script src="replace.js"></script>
+	<!--/replace-->
 </head>
 <body>...</body>
 </html>
@@ -313,8 +411,8 @@ void function(exports) {
 ```html
 <html>
 <head>
-  <script src="dist/all.js"></script>
-  <link rel="stylesheet" type="text/css" href="dist/all.css">
+	<script src="all.js"></script>
+	<link rel="stylesheet" type="text/css" href="all.css">
 </head>
 <body>...</body>
 </html>
@@ -326,26 +424,26 @@ void function(exports) {
 
 通过 jdists 可以将零散的代码和静态资源，拼凑为一个完整的组件
 
-```javascript
+```js
 void function() {
-  var bar = document.getElementById('jfpss-bar');
-  if (bar) {
-    return;
-  }
+	var bar = document.getElementById('jfpss-bar');
+	if (bar) {
+		return;
+	}
 
-  /*<include components/jframes/src/jframes.js>*/
-  ;
-  /*<include components/jhtmls/src/jhtmls.js>*/
-  ;
-  /*<include src/jfpss.js>*/
+	/*<include components/jframes/src/jframes.js>*/
+	;
+	/*<include components/jhtmls/src/jhtmls.js>*/
+	;
+	/*<include src/jfpss.js>*/
 
-  createStyle(function() {/*!<!--include src/tools.html style-->*/});
+	createStyle(function() {/*!<!--include src/tools.html style-->*/});
 
-  var div = document.createElement('div');
-  div.innerHTML = function() {/*!<!--include src/tools.html html-->*/};
-  document.body.appendChild(div);
+	var div = document.createElement('div');
+	div.innerHTML = function() {/*!<!--include src/tools.html html-->*/};
+	document.body.appendChild(div);
 
-  /*<include src/tools.html js>*/
+	/*<include src/tools.html js>*/
 }();
 ```
 

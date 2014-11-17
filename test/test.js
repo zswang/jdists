@@ -5,6 +5,7 @@ var util = require('util');
 var path = require('path');
 
 jdists.setEncoding('inline', require('../src/encoding/processor-inline'));
+jdists.setEncoding('require', require('../src/encoding/processor-require'));
 
 describe('fixtures', function() {
   var dirname = 'test/fixtures';

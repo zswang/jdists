@@ -8,6 +8,7 @@ var fs = require('fs');
 var path = require('path');
 
 jdists.setEncoding('inline', require('../src/encoding/processor-inline'));
+jdists.setEncoding('require', require('../src/encoding/processor-require'));
 
 var argv = optimist
   .usage('$0 input1.js [input2.js] [options]')
@@ -21,6 +22,9 @@ var argv = optimist
   .alias("o", "output")
   .describe('o', 'output file.')
   .string('o')
+  .alias("clean", "clean")
+  .describe('c', 'clean white space.')
+  .boolean('c')
   .alias("v", "version")
   .describe("v", "Print version number and exit.")
   .wrap(80)

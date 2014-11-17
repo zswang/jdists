@@ -1,6 +1,6 @@
 console.log('hello world!');
 
-var render = jhtmls.render(function() {
+var render = jhtmls.render(/*#*/function() {
 /*!
 <ul>
 forEach(function(item) {

@@ -7,7 +7,7 @@ function() {
   /**
    * jdists
    * 代码区域处理的工具
-   * @author 王集鹄(wangjihu,http://weibo.com/zswang)
+   * @author 王集鹄(wangjihconcatu,http://weibo.com/zswang)
    * @version 2014-10-16
    */
 
@@ -19,6 +19,11 @@ function() {
   var blocks; // key: filename, value: blocks
 
   var crypto = require('crypto');
+
+  function clean(text) {
+    return String(text).replace(/^\s*$/gm, '') // 清除空行
+      .replace(/\n{2,}/gm, '\n'); // 清除连接的空行
+  }
 
   /*
    * 保证目录存在
@@ -196,9 +201,12 @@ function() {
 
       var body = items.join('\n');
       if (dest) { // 导出文件
-        dest = String(dest).replace(/\{\{(\w+)\}\}/g, function(all, key) {
+        dest = String(dest).replace(/\{\{(\w+)(?:,(\d+))?\}\}/g, function(all, key, len) {
           switch (key) { // 计算 md5 戳
             case 'md5':
+              if (len) {
+                return md5(body).substring(0, len);
+              }
               return md5(body);
           }
           return all;
@@ -252,6 +260,9 @@ function() {
     string: function(content) {
       return JSON.stringify(content);
     },
+    escape: function(content) {
+      return escape(content);
+    },
     concat: processorConcat
   };
 
@@ -263,54 +274,55 @@ function() {
    * @return 返回编译后的内容
    */
   var buildBlock = function(content, onread, isReplace) {
-
-    // var read = function() {
-    //   var args = ;
-    //   return onread.call(block, arguments);
-    // };
+    // @group
+    // fl, tag, attrs, fr, content, end
     content = String(content).replace(
-      /<!--(include)((?:\s+[\w\/\\\-\.]+)*)\s*\/?-->/g,
+      /(<!--)(include)((?:\s+\w[\w\/\\\-\.]*?)*)()()(\s*\/?-->)/g,
       onread
     ).replace(
-      /<!--(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?-->/g,
+      /(<!--)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)()()(\s*\/?-->)/g,
       onread
     ).replace(
-      /<!--([\w-_]+)((?:\s+[\w\/\\\-\.]+)*)\s*-->([^]*?)<!--\/\1-->/g,
+      /(<!--)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*-->)([^]*?)(<!--\/\2-->)/g,
       onread
     ).replace(
-      /<!--([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*-->([^]*?)<!--\/\1-->/g,
+      /(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*-->)([^]*?)(<!--\/\2-->)/g,
       onread
     ).replace(
-      /\/\*<(include)((?:\s+[\w\/\\\-\.]+)*)\s*\/?>\*\//g,
+      /(\/\*<)(include)((?:\s+\w[\w\/\\\-\.]*?)*)()()(\s*\/?>\*\/)/g,
       onread
     ).replace(
-      /\/\*<(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>\*\//g,
+      /(\/\*<)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)()()(\s*\/?>\*\/)/g,
       onread
     ).replace(
-      /\/\*<([\w-_]+)((?:\s+[\w\/\\\-\.]+)*)\s*>\*\/([^]*?)\/\*<\/\1>\*\//g,
+      /(\/\*<)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/g,
       onread
     ).replace(
-      /\/\*<([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*>\*\/([^]*?)\/\*<\/\1>\*\//g,
+      /(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/g,
       onread
     ).replace(
-      /<!--([\w-_]+)((?:[ \f\t\v]+[\w\/\\\-\.]+)*)$([^]*?)^[ \f\t\v]*\/\1-->/gm,
+      /(<!--)([\w-_]+)((?:\s+\w(?:[\w\/\\\-\.]*?\w)?)*)(\s*>)([^]*?)(<\/\2-->)/g,
       onread
     ).replace(
-      /\/\*<([\w-_]+)((?:[ \f\t\v]+[\w\/\\\-\.]+)*)$([^]*?)^[ \f\t\v]*\/\1>\*\//gm,
+      /(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>)([^]*?)(<\/\2-->)/g,
       onread
     ).replace(
-      /<!--([\w-_]+)((?:[ \f\t\v]*[\w-_.]+[ \f\t\v]*=[ \f\t\v]*"[^"]+")*)$([^]*?)^[ \f\t\v]*\/\1-->/gm,
+      /(\/\*<)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*>\s*)([^]*?)(\s*<\/\2>\*\/)/g,
       onread
     ).replace(
-      /\/\*<([\w-_]+)((?:[ \f\t\v]*[\w-_.]+[ \f\t\v]*=[ \f\t\v]*"[^"]+")*)$([^]*?)^[ \f\t\v]*\/\1>\*\//gm,
+      /(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>)([^]*?)(<\/\2>\*\/)/g,
       onread
     );
 
     if (isReplace) {
-      content = content.replace(
-        /function\s*\(\s*\)\s*\{\s*\/\*\!?([\s\S]*?)\*\/[\s;]*\}/g, // 处理函数注释字符串
+      content = String(content).replace( // 处理注释模板
+        /\/\*#\*\/function\s*\(\s*\)\s*\{\s*\/\*\!?([^]*?)\*\/[\s;]*\}/g,
         function(all, text) {
           return JSON.stringify(text);
+        }
+      ).replace(/\/\*,\*\/\s*(function\(\s*([^()]+)\s*\))/g, // 处理参数自识别
+        function(all, func, params) {
+          return '[' + params.replace(/([^\s,]+)/g, "'$&'") + '], ' + func;
         }
       );
     }
@@ -335,6 +347,8 @@ function() {
       isFile: true
     };
     if (!fs.existsSync(filename)) {
+      console.warn('File "%s" not exists.', filename);
+      blocks[[filename, '']].content = '';
       return;
     }
 
@@ -348,7 +362,7 @@ function() {
 
     var dirname = path.dirname(filename);
 
-    var readBlock = function(all, tag, attrText, content, pos) {
+    var readBlock = function(all, fl, tag, attrText, fr, content, end, pos) {
       var attrs = getAttrs(tag, attrText, dirname);
 
       if (attrs.trigger &&
@@ -381,7 +395,11 @@ function() {
       return new Array(all.length + 1).join(' ');
     };
 
-    blocks[[filename, '']].content = fs.readFileSync(filename);
+    var content = fs.readFileSync(filename);
+    if (options.clean) { // 清理空白字符
+      content = clean(content);
+    }
+    blocks[[filename, '']].content = content;
 
     return buildBlock(blocks[[filename, '']].content, readBlock);
   };
@@ -400,7 +418,7 @@ function() {
 
     var dirname = path.dirname(filename);
 
-    var readBlock = function(all, tag, attrText, content) {
+    var readBlock = function(all, fl, tag, attrText, fr, content, end) {
       if (options.removeList.indexOf(tag) >= 0) {
         return '';
       }
@@ -466,13 +484,21 @@ function() {
 
           var processor = processors[attrs.encoding];
           if (processor) { // 编码处理器
-            content = processor(content, attrs, dirname, options, tag, readBlock);
+            content = processor(content, attrs, dirname, options, tag, readBlock, buildFile);
+          }
+          if (attrs.slice) {
+            var params = attrs.slice.split(',');
+            content = content.slice(params[0], params[1]);
+          }
+          if (options.clean) { // 清理空白字符
+            content = clean(content);
           }
           return content;
         case 'remove': // 必然移除的
           return '';
       }
-      return all;
+
+      return fl + tag + attrText + fr + buildBlock(content, readBlock, true) + end;
     };
 
     return buildBlock(blocks[[filename, '']].content, readBlock, true);
@@ -480,6 +506,7 @@ function() {
 
   var buildFile = function(filename, options) {
     options = options || {};
+    options.clean = typeof options.clean === 'undefined' ? true : options.clean;
     options.remove = options.remove || 'debug,test';
     options.trigger = options.trigger || 'release';
     options.removeList = String(options.remove).split(',');
@@ -490,6 +517,10 @@ function() {
 
     loadFile(filename, options); // 预处理，文件
     var result = replaceFile(filename, options);
+
+    if (options.clean) { // 清理空白字符
+      result = clean(result);
+    }
 
     blocks = null;
     chain = null; // 引用链

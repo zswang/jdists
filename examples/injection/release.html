@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>注入工具条示例</title>
+</head>
+<body>
+    <ul>
+        <li class="c1 d1"></li>
+        <li class="c1 d2"></li>
+        <li class="c1 d3"></li>
+        <li class="c1 d4"></li>
+    </ul>
+    <ul>
+        <li class="c2 d1"></li>
+        <li class="c2 d2"></li>
+        <li class="c2 d3"></li>
+        <li class="c2 d4"></li>
+    </ul>
+    <ol>
+        <li class="c3 d1"></li>
+        <li class="c3 d2"></li>
+        <li class="c3 d3"></li>
+        <li class="c3 d4"></li>
+    </ol>
+    <ol>
+        <li id="l1" class="c4 d1"></li>
+        <li id="l2" class="c4 d2"></li>
+        <li id="l3" class="c4 d3"></li>
+        <li id="l4" class="c4 d4"></li>
+    </ol>
+    <script>
+void function (){
+    /**
+     * HTML编码
+     * @param {String} text
+     */
+    function encodeHTML(text){
+        return String(text).replace(/["<>& ]/g, function(all){
+            return "&" + {
+                '"': 'quot',
+                '<': 'lt',
+                '>': 'gt',
+                '&': 'amp',
+                ' ': 'nbsp'
+            }[all] + ";";
+        });
+    }
+
+    var items = document.getElementsByTagName('li');
+    for (var i = 0, l = items.length; i < l; i++){
+        items[i].innerHTML = encodeHTML(items[i].parentNode.tagName +
+            '<li class="' + items[i].className + '"' + (items[i].id ? ' id="' + items[i].id + '"' : '') + '></li>');
+    }
+}()
+    </script>
+</body>
+<script src="tool.js"></script>
+</html>

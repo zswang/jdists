@@ -1,10 +1,10 @@
 void function () {
-  /*<replace trigger="LAN"
+  /*<replace trigger="LAN">
 ajax.host = 'host://192.168.1.55:8000/getuser';
-  /replace>*/
-  /*<replace trigger="release"
+  </replace>*/
+  /*<replace trigger="release">
 ajax.host = 'host://api.baidu.com/getuser';
-  /replace>*/
+  </replace>*/
   /*<remove trigger="release,LAN">*/
 ajax.host = 'host://localhost:8000/getuser';
   /*</remove>*/
@@ -14,11 +14,11 @@ console.log('Informal version.');
   /*</remove>*/
 
   var a = 0;
-  /*<number trigger="LAN"
+  /*<number trigger="LAN">
   a += 10;
-  /number>*/
-  /*<number
+  </number>*/
+  /*<number>
   a += 12;
-  /number>*/
+  </number>*/
   /*<include block="number"/>*/
 }();

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+<body>
+</body>
+<!--remove-->
+<script src="http://s1.bdstatic.com/r/www/cache/ecom/esl/1-8-6/esl.js"></script>
+<!--/remove-->
+<script>
+/*<include file="define.js">*/
+
+/*<remove>*/
+define('start', function() {
+/*</remove>*/
+
+/*<replace encoding="require" base="modules" insert="_moduleId = '{{name}}';">*/
+  var base = require('base');
+  base.log();
+/*</replace>*/
+
+/*<remove>*/
+});
+/*</remove>*/
+
+
+/*<remove>*/
+require.config({
+    baseUrl: 'modules'
+});
+require(['start']);
+/*</remove>*/
+</script>
+</html>
