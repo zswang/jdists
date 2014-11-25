@@ -98,16 +98,26 @@ define(function(require, exports) {
   }
   exports.format = format;
 });
+_moduleId = '/../min';
+define(function(require, exports) {
+  exports.min = function() {
+    return Math.min.apply(null, arguments);
+  };
+});
 _moduleId = 'base';
 define(function(require, exports) {
   var utils = require('utils');
+  var min = require('../min').min;
   exports.log = function() {
     console.log(utils.format('#{name}', {
       name: 'zswang'
     }));
+    console.log('min:', min(1, 2, 0));
   };
 });
   var base = require('base');
   base.log();
+  var utils = require('utils');
+  console.log(utils.format('hello #{name}', { name: 'zswang' }));
 </script>
 </html>

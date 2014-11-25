@@ -14,6 +14,7 @@ function() {
     var modules = {
       '@': {
         name: '@',
+        dirname: path.relative(path.join(dirname, attrs.base), dirname),
         dependencies: [],
         rank: 0 // 被依赖多少次
       }
@@ -30,28 +31,37 @@ function() {
     }
 
     function process(content, current) {
-      String(content).replace(/require\s*\(\s*(['"])([^'"]+)\1\s*\)/g,
+      return String(content).replace(/require\s*\(\s*(['"])([^'"]+)\1\s*\)/g,
         function(all, quote, moduleName) {
+          if (/^\./.test(moduleName)) { // 有 ‘.’ 相对于当前文件
+            var t = path.resolve(dirname, attrs.base, // 绝对路径
+              current.dirname, moduleName
+            );
+            t = path.relative(path.join(dirname, attrs.base), t); // 相对路径
+            moduleName = '/' + t;
+          }
           if (!modules[moduleName]) {
             var module = modules[moduleName] = {
               name: moduleName,
+              dirname: path.dirname(moduleName),
               dependencies: [], // 依赖
               rank: 0
             };
             if (current.dependencies.indexOf(moduleName) < 0) {
               current.dependencies.push(moduleName);
             }
+
             var filename = path.join(dirname, attrs.base, moduleName + '.js');
             module.content = buildFile(filename, options);
             process(module.content, module);
           }
           updateRank(module);
-          return '';
+          return 'require(' + quote + moduleName + quote + ')';
         }
       );
     }
 
-    process(content, modules['@']);
+    content = process(content, modules['@']);
     var moduleList = [];
     for (var name in modules) {
       if (name !== '@') {
