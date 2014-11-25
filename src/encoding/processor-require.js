@@ -52,8 +52,7 @@ function() {
             }
 
             var filename = path.join(dirname, attrs.base, moduleName + '.js');
-            module.content = buildFile(filename, options);
-            process(module.content, module);
+            module.content = process(buildFile(filename, options), module);
           }
           updateRank(module);
           return 'require(' + quote + moduleName + quote + ')';
