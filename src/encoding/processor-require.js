@@ -8,7 +8,7 @@ function() {
   var path = require('path');
 
   /**
-   * 内联资源处理器
+   * require 处理器
    */
   module.exports = function(content, attrs, dirname, options, tag, readBlock, buildFile) {
     var modules = {
