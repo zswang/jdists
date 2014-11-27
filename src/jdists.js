@@ -316,7 +316,7 @@ function() {
 
     if (isReplace) {
       content = String(content).replace( // 处理注释模板
-        /\/\*#\*\/function\s*\(\s*\)\s*\{\s*\/\*\!?([^]*?)\*\/[\s;]*\}/g,
+        /\/\*#\*\/\s*function\s*\(\s*\)\s*\{\s*\/\*\!?([^]*?)\*\/[\s;]*\}/g,
         function(all, text) {
           return JSON.stringify(text);
         }
