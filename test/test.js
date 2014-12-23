@@ -8,6 +8,7 @@ jdists.setEncoding('inline', require('../src/encoding/processor-inline'));
 jdists.setEncoding('require', require('../src/encoding/processor-require'));
 jdists.setEncoding('zero', require('../src/encoding/processor-zero'));
 jdists.setEncoding('concat', require('../src/encoding/processor-concat'));
+jdists.setEncoding('relative', require('../src/encoding/processor-relative'));
 
 describe('fixtures', function() {
   var dirname = 'test/fixtures';

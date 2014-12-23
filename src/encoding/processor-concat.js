@@ -15,10 +15,21 @@
   var buildBlock = jdists.buildBlock;
   var md5 = jdists.md5;
 
+  var copyCache = {}; // 已经复制过的内容
+
   var copy = function(src, dst, cb) {
+    if (copyCache[[src, dst]] || src === dst) {
+      cb(null);
+      return;
+    }
+    copyCache[[src, dst]] = true;
+    /*<debug>*/
+    // console.log('src: %j, dst: %j', src, dst);
+    /*</debug>*/
+
     function copy(err) {
       if (!err) {
-        return cb(util.format('file %j exists.', dst));
+        return cb(util.format('File %j exists.', dst));
       }
 
       fs.stat(src, function(err) {
@@ -27,7 +38,7 @@
         }
         var is = fs.createReadStream(src);
         var os = fs.createWriteStream(dst);
-        util.pump(is, os, cb);
+        is.pipe(os, cb);
       });
     }
 
@@ -37,7 +48,7 @@
   /**
    * 资源合并处理器
    */
-  module.exports = function(content, attrs, dirname, options, tag, readBlock) {
+  module.exports = function(content, attrs, dirname, options, tag, readBlock, buildFile, sourceFile) {
     var js = []; // 所有 js 文件内容
     var css = []; // 所有 css 文件内容
 
@@ -45,16 +56,43 @@
     content = String(content).replace(
       /<script((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/script>/gi,
       function(all, attrText, content) {
+        var copyResource = function(t) {
+          if (!attrs.img || !attrs.js) { // 不需要复制
+            return t;
+          }
+          return String(t).replace(/\/\*@\*\/\s*(?:'|")([^'"]+\.(png|jpg|gif|jpeg|svg))('|")/g,
+            function(all, filename) {
+              var img = path.join(attrs.img, filename); // img 文件
+              if (options.output) { // 计算相对路径 dist
+                var input = path.join(path.dirname(sourceFile), filename);
+                var output = path.resolve(path.dirname(options.output), img); // 相对于输出路径
+                /*<debug>*/
+                // console.log('input: %j, output: %j', input, output);
+                // return;
+                /*</debug>*/
+
+                forceDirSync(path.dirname(output)); // 确保路径存在
+                copy(input, output, function(err) {
+                  if (err) {
+                    util.puts(err);
+                  }
+                });
+              }
+
+              return JSON.stringify(img);
+            }
+          );
+        };
         var a = getAttrs('script', attrText, dirname);
         if (a.src) {
           if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(a.type)) {
             loadFile(a['@filename'], options);
-            js.push(replaceFile(a['@filename'], options));
+            js.push(copyResource(replaceFile(a['@filename'], options)));
             return '';
           }
         } else {
           if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(a.type)) {
-            js.push(buildBlock(content, readBlock, true));
+            js.push(copyResource(buildBlock(content, readBlock, true)));
             return '';
           }
         }

@@ -311,7 +311,6 @@
    * @return 返回替换后的内容
    */
   var replaceFile = function(filename, options) {
-
     if (!blocks[[filename, '']]) {
       return '';
     }
@@ -387,7 +386,7 @@
 
           var processor = processors[attrs.encoding];
           if (processor) { // 编码处理器
-            content = processor(content, attrs, dirname, options, tag, readBlock, buildFile);
+            content = processor(content, attrs, dirname, options, tag, readBlock, buildFile, filename);
           }
           if (attrs.slice) {
             var params = attrs.slice.split(',');
@@ -438,7 +437,7 @@
 
   /**
    * 添加一个编码器
-   * @param{Function} processor 处理器 function(content, attrs, dirname, options, tag)
+   * @param{Function} processor 处理器 function(content, attrs, dirname, options, tag, readBlock, buildFile, input)
    */
   var setEncoding = function(encoding, processor) {
     if (!encoding || !processor) {
