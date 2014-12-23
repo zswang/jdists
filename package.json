@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "0.3.10",
+  "version": "0.4.0",
   "description": "JS 区块进行预处理工具",
   "main": "src/jdists.js",
   "bin": {
@@ -31,6 +31,6 @@
   },
   "scripts": {
     "test": "mocha -R spec && npm run coverage",
-    "lint": "jshint src/*.js *.json"
+    "lint": "jshint src/**/*.js"
   }
 }

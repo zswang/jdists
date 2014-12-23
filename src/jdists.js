@@ -1,6 +1,4 @@
-void
-
-function() {
+(function() {
 
   'use strict';
 
@@ -144,103 +142,6 @@ function() {
   };
 
   /**
-   * 资源合并处理器
-   */
-  var processorConcat = function(content, attrs, dirname, options, tag, readBlock) {
-    var js = []; // 所有 js 文件内容
-    var css = []; // 所有 css 文件内容
-
-    // 解析静态资源
-    content = String(content).replace(
-      /<script((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/script>/gi,
-      function(all, attrText, content) {
-        var attrs = getAttrs('script', attrText, dirname);
-        if (attrs.src) {
-          if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(attrs.type)) {
-            loadFile(attrs['@filename'], options);
-            js.push(replaceFile(attrs['@filename'], options));
-            return '';
-          }
-        } else {
-          if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(attrs.type)) {
-            js.push(buildBlock(content, readBlock, true));
-            return '';
-          }
-        }
-        return all;
-      }
-    ).replace( // 样式表需要保证顺序
-      /<link((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>|<style((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/style>/ig,
-      function(all, attrText, attrText2, content2) {
-        var attrs;
-        if (attrText) {
-          attrs = getAttrs('link', attrText, dirname);
-          if (attrs.href) {
-            if (/^(|undefined|text\/css)$/i.test(attrs.type)) {
-              loadFile(attrs['@filename'], options);
-              css.push(replaceFile(attrs['@filename'], options));
-              return '';
-            }
-          }
-        }
-        if (content2) {
-          attrs = getAttrs('style', attrText2, dirname);
-          if (/^(|undefined|text\/css)$/i.test(attrs.type)) {
-            css.push(buildBlock(content2, readBlock, true));
-            return '';
-          }
-        }
-        return all;
-      }
-    );
-
-    var runConcat = function(type, items, dest) {
-      if (!items.length) { // 未找到资源
-        return;
-      }
-
-      var body = items.join('\n');
-      if (dest) { // 导出文件
-        dest = String(dest).replace(/\{\{(\w+)(?:,(\d+))?\}\}/g, function(all, key, len) {
-          switch (key) { // 计算 md5 戳
-            case 'md5':
-              if (len) {
-                return md5(body).substring(0, len);
-              }
-              return md5(body);
-          }
-          return all;
-        });
-        var output = dest.replace(/\?.*$/, '');
-        if (options.output) { // 计算相对路径 dist
-          output = path.resolve(path.dirname(options.output), output); // 相对于输出路径
-          output = path.resolve(dirname, output); // 相对于当前路径
-
-          forceDirSync(path.dirname(output)); // 确保路径存在
-          fs.writeFileSync(output, body); // 没有指定输出文件，则不实际输出
-        }
-
-        if (type === 'js') {
-          content += '\n<script src="' + dest + '"></script>\n';
-        } else {
-          content += '\n<link rel="stylesheet" type="text/css" href="' + dest + '">\n';
-        }
-      } else {
-        if (type === 'js') {
-          content += '\n<script>\n' + body + '</script>';
-        } else {
-          content += '\n<style>\n' + body + '</style>';
-        }
-      }
-    };
-
-    runConcat('js', js, attrs.js);
-    runConcat('css', css, attrs.css);
-
-    return content;
-  };
-
-  /**
    * 编码处理器集合
    * function(content, attrs, dirname, options, tag, readBlock)
    */
@@ -262,8 +163,7 @@ function() {
     },
     escape: function(content) {
       return escape(content);
-    },
-    concat: processorConcat
+    }
   };
 
   /**
@@ -435,6 +335,9 @@ function() {
         case 'include':
           if (attrs.block || attrs.file) {
             var blockfile = attrs['@filename'] || filename; // 默认当前文件名
+
+            dirname = path.dirname(blockfile); // 目录按块文件计算 《《《
+
             var blockname = attrs.block || ''; // 默认全部文件
 
             var key = [blockfile, blockname].join();
@@ -493,6 +396,8 @@ function() {
           if (options.clean) { // 清理空白字符
             content = clean(content);
           }
+
+          dirname = path.dirname(filename); // 恢复目录 《《《
           return content;
         case 'remove': // 必然移除的
           return '';
@@ -545,5 +450,10 @@ function() {
   exports.build = buildFile;
   exports.setEncoding = setEncoding;
   exports.forceDirSync = forceDirSync;
+  exports.getAttrs = getAttrs;
+  exports.replaceFile = replaceFile;
+  exports.loadFile = loadFile;
+  exports.buildBlock = buildBlock;
+  exports.md5 = md5;
 
-}();
+})();

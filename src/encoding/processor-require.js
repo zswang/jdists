@@ -1,6 +1,4 @@
-void
-
-function() {
+(function() {
 
   'use strict';
 
@@ -40,8 +38,9 @@ function() {
             t = path.relative(path.join(dirname, attrs.base), t); // 相对路径
             moduleName = '/' + t;
           }
+          var module;
           if (!modules[moduleName]) {
-            var module = modules[moduleName] = {
+            module = modules[moduleName] = {
               name: moduleName,
               dirname: path.dirname(moduleName),
               dependencies: [], // 依赖
@@ -89,4 +88,4 @@ function() {
     return lines.join('\n');
   };
 
-}();
+})();
