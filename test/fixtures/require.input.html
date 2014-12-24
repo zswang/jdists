@@ -19,11 +19,15 @@ define('start', function() {
 /*<replace encoding="require" base="modules" insert="_moduleId = '{{name}}';">*/
   var base = require('base');
   base.log();
+
+  var utils = require('utils');
+  console.log(utils.format('hello #{name}', { name: 'zswang' }));
 /*</replace>*/
 
 /*<remove>*/
 });
 /*</remove>*/
+
 
 
 /*<remove>*/

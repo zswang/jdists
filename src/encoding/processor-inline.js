@@ -1,6 +1,4 @@
-void
-
-function() {
+(function() {
 
   'use strict';
 
@@ -24,4 +22,4 @@ function() {
     );
   };
 
-}();
+})();

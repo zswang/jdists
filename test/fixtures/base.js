@@ -12,3 +12,13 @@ forEach(function(item) {
 <ul>
 */
 });
+
+var renderUrl = jhtmls.render( /*#*/ function() {
+/*!
+<ul>
+forEach(function(item) {
+  <li><a href="#{item.url}">#{item.title}</a></li>
+});
+<ul>
+*/
+});

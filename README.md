@@ -66,7 +66,7 @@ fprintf("variant=%d", variant);
 比如：`注释模板`
 
 ```js
-var render = jhtmls.render(function () {
+var render = jhtmls.render( /*#*/ function () {
 /*!
 <div title="#{title}">#{content}</div>
 */});
@@ -82,7 +82,7 @@ var render = jhtmls.render('<div title="#{title}">#{content}</div>');
 比如：`参数自识别`
 
 ```js
-instance.get(/*,*/function(a, b, c) {
+instance.get( /*,*/ function(a, b, c) {
 	// TODO
 });
 ```
@@ -291,7 +291,7 @@ forEach(function(item) {
 如上可以省去拼接字符串的工作，直观好维护。但经过带压缩后就变成：
 
 ```js
-var render=jhtmls.render(/*#*/function(){});
+var render=jhtmls.render( /*#*/ function(){});
 ```
 怎么避免 `注释模板` 被压缩代码的工具移除？
 
@@ -309,7 +309,7 @@ jdists 默认会处理 `注释模板`
 假设文件 `js/base.js` 内容为：
 
 ```js
-instance.get(/*,*/function(name, x, y, width, height) { ... });
+instance.get( /*,*/ function(name, x, y, width, height) { ... });
 ```
 
 我们可以通过函数声明中的参数列表判断需要获取的值，但是参数经过压缩后名字就变了，如：

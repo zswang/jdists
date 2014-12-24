@@ -15,19 +15,27 @@
 void function() {
   console.log('hello world!');
 var render = jhtmls.render("\n<ul>\nforEach(function(item) {\n  \n  <li>#{item.title}</li>\n});\n<ul>\n");
+var renderUrl = jhtmls.render( "\n<ul>\nforEach(function(item) {\n  <li><a href=\"#{item.url}\">#{item.title}</a></li>\n});\n<ul>\n");
   console.log('hello world!');
 var render = jhtmls.render("\n<ul>\nforEach(function(item) {\n  \n  <li>#{item.title}</li>\n});\n<ul>\n");
+var renderUrl = jhtmls.render( "\n<ul>\nforEach(function(item) {\n  <li><a href=\"#{item.url}\">#{item.title}</a></li>\n});\n<ul>\n");
   console.log('hello world!');
 var render = jhtmls.render("\n<ul>\nforEach(function(item) {\n  \n  <li>#{item.title}</li>\n});\n<ul>\n");
+var renderUrl = jhtmls.render( "\n<ul>\nforEach(function(item) {\n  <li><a href=\"#{item.url}\">#{item.title}</a></li>\n});\n<ul>\n");
   console.log('hello world!');
 var render = jhtmls.render("\n<ul>\nforEach(function(item) {\n  \n  <li>#{item.title}</li>\n});\n<ul>\n");
+var renderUrl = jhtmls.render( "\n<ul>\nforEach(function(item) {\n  <li><a href=\"#{item.url}\">#{item.title}</a></li>\n});\n<ul>\n");
   console.log('hello world!');
 var render = jhtmls.render("\n<ul>\nforEach(function(item) {\n  \n  <li>#{item.title}</li>\n});\n<ul>\n");
+var renderUrl = jhtmls.render( "\n<ul>\nforEach(function(item) {\n  <li><a href=\"#{item.url}\">#{item.title}</a></li>\n});\n<ul>\n");
   console.log('可以写在一行');
   base.get(['a', 'b', 'c'], function(a, b, c) {
     console.log(a + b + c);
   });
   base.get( ['x', 'y', 'z'], function(x, y, z) {
+    console.log(x + y + z);
+  });
+  base.get( ['x', 'y', 'z'], function calc(x, y, z) {
     console.log(x + y + z);
   });
   /*<start>*/

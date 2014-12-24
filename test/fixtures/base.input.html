@@ -40,6 +40,9 @@ void function() {
   base.get( /*,*/ function(x, y, z) {
     console.log(x + y + z);
   });
+  base.get( /*,*/ function calc(x, y, z) {
+    console.log(x + y + z);
+  });
 
   /*<start>*/
   define('start', /*,*/ function(require, monkey, alog, element) {

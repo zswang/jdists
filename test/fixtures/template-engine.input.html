@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!--replace encoding="template" engine="jhtmls" data="{ &quot;title&quot;: &quot;hello world!&quot; }">
+  <title>#{title}</title>
+  </replace-->
+</head>
+<body>
+  <!--replace
+    encoding="template"
+    engine="jhtmls"
+    data="../../package.json">
+  <h1>#{name}</h1>
+  <h2>keywords</h2>
+  <ul>
+  keywords.forEach(function(item) {
+    <li>#{item}</li>
+  });
+  </ul>
+  </replace-->
+
+  <h2>dependencies</h2>
+  <!--replace
+    encoding="template"
+    engine="ejs"
+    data="../../package.json">
+  <ul>
+    <% for (var key in dependencies) { %>
+    <li><%= key %> : <%= dependencies[key] %></li>
+    <% } %>
+  </ul>
+  </replace-->
+  <!--replace
+    encoding="template"
+    engine="ejs"
+    data="{ &quot;encoding&quot;: &quot;base64&quot; }">
+    /*<replace encoding="<%= encoding %>">*/
+    hello
+    /*</replace>*/
+  </replace-->
+</body>
+</html>
