@@ -176,46 +176,52 @@
   var buildBlock = function(content, onread, isReplace) {
     // @group
     // fl, tag, attrs, fr, content, end
-    content = String(content).replace(
-      /(<!--)(include)((?:\s+\w[\w\/\\\-\.]*?)*)()()(\s*\/?-->)/g,
-      onread
-    ).replace(
-      /(<!--)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)()()(\s*\/?-->)/g,
-      onread
-    ).replace(
-      /(<!--)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*-->)([^]*?)(<!--\/\2-->)/g,
-      onread
-    ).replace(
-      /(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*-->)([^]*?)(<!--\/\2-->)/g,
-      onread
-    ).replace(
-      /(\/\*<)(include)((?:\s+\w[\w\/\\\-\.]*?)*)()()(\s*\/?>\*\/)/g,
-      onread
-    ).replace(
-      /(\/\*<)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)()()(\s*\/?>\*\/)/g,
-      onread
-    ).replace(
-      /(\/\*<)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/g,
-      onread
-    ).replace(
-      /(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/g,
-      onread
-    ).replace(
-      /(<!--)([\w-_]+)((?:\s+\w(?:[\w\/\\\-\.]*?\w)?)*)(\s*>)([^]*?)(<\/\2-->)/g,
-      onread
-    ).replace(
-      /(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>)([^]*?)(<\/\2-->)/g,
-      onread
-    ).replace(
-      /(\/\*<)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*>\s*)([^]*?)(\s*<\/\2>\*\/)/g,
-      onread
-    ).replace(
-      /(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>)([^]*?)(<\/\2>\*\/)/g,
-      onread
-    );
+    var regexList = [
+      /^(<!--)(include)((?:\s+\w[\w\/\\\-\.]*?)*)()()(\s*\/?-->)/,
+      /^(<!--)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)()()(\s*\/?-->)/,
+      /^(<!--)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*-->)([^]*?)(<!--\/\2-->)/,
+      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*-->)([^]*?)(<!--\/\2-->)/,
+      /^(<!--)([\w-_]+)((?:\s+\w(?:[\w\/\\\-\.]*?\w)?)*)(\s*>)([^]*?)(<\/\2-->)/,
+      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>)([^]*?)(<\/\2-->)/,
+      /^(\/\*<)(include)((?:\s+\w[\w\/\\\-\.]*?)*)()()(\s*\/?>\*\/)/,
+      /^(\/\*<)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)()()(\s*\/?>\*\/)/,
+      /^(\/\*<)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/,
+      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/,
+      /^(\/\*<)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*>\s*)([^]*?)(\s*<\/\2>\*\/)/,
+      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>)([^]*?)(<\/\2>\*\/)/
+    ];
+    var result = '';
+    var start = 0;
+    while (start < content.length) {
+      var a = content.substring(start).indexOf('<!--');
+      var b = content.substring(start).indexOf('/*');
+      if (a < 0 && b < 0) { // 没有找到语法
+        break;
+      }
+
+      var pointer = start + Math.min(a < 0 ? Infinity : a, b < 0 ? Infinity : b);
+      var match = false;
+
+      for (var j = 0; j < regexList.length; j++) {
+        match = content.substring(pointer).match(regexList[j]);
+        if (match) {
+          match.push(pointer);
+          result += content.substring(start, pointer);
+          result += onread.apply(this, match);
+
+          start = pointer + match[0].length;
+          break;
+        }
+      }
+      if (!match) {
+        result += content.substring(start, start + 1);
+        start++;
+      }
+    }
+    result += content.substring(start);
 
     if (isReplace) {
-      content = String(content).replace( // 处理注释模板
+      result = String(result).replace( // 处理注释模板
         /\/\*#\*\/\s*function\s*\(\s*\)\s*\{\s*\/\*\!?([^]*?)\*\/[\s;]*\}/g,
         function(all, text) {
           return JSON.stringify(text);
@@ -227,7 +233,7 @@
       );
     }
 
-    return content;
+    return result;
   };
 
   /**
@@ -346,7 +352,6 @@
               return '';
             }
 
-
             if (!block.completed) {
               if (chain.indexOf(key) >= 0) { // 出现循环引用
                 throw new Error('Circular reference block.');
@@ -397,7 +402,8 @@
           }
 
           dirname = path.dirname(filename); // 恢复目录 《《《
-          return content;
+
+          return buildBlock(content, readBlock, true);
         case 'remove': // 必然移除的
           return '';
       }
@@ -446,6 +452,16 @@
     processors[encoding] = processor;
   };
 
+  function attrs2text(attrs) {
+    var result = [];
+    for (var key in attrs) {
+      if (!(/^@/.test(key))) {
+        result.push(key + '="' + decodeHTML(attrs[key]) + '"');
+      }
+    }
+    return result.join(' ');
+  }
+
   exports.build = buildFile;
   exports.setEncoding = setEncoding;
   exports.forceDirSync = forceDirSync;
@@ -454,5 +470,8 @@
   exports.loadFile = loadFile;
   exports.buildBlock = buildBlock;
   exports.md5 = md5;
+  exports.encodeHTML = encodeHTML;
+  exports.decodeHTML = decodeHTML;
+  exports.attrs2text = attrs2text;
 
 })();

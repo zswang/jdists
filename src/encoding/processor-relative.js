@@ -9,16 +9,7 @@
   var jdists = require('../jdists');
 
   var getAttrs = jdists.getAttrs;
-
-  function attrs2text(attrs) {
-    var result = [];
-    for (var key in attrs) {
-      if (!(/^@/.test(key))) {
-        result.push(key + '=' + JSON.stringify(attrs[key]));
-      }
-    }
-    return result.join(' ');
-  }
+  var attrs2text = jdists.attrs2text;
 
   /**
    * 资源合并处理器

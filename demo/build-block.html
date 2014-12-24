@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style type="text/css">
+  </style>
+</head>
+<body>
+<script type="text/jdists"><!--remove--><!--/remove-->
+<!--replace>
+<img src='data:image/png;base64,/*<include file="zswang.png" encoding="base64">*/'>
+</replace-->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+<!--remove-->
+<img src="zswang.png">
+<!--/remove-->
+<!--replace>
+<img src='data:image/png;base64,/*<include file="zswang.png" encoding="base64">*/'>
+</replace-->
+</body>
+</html>
+
+ /*<debug>*/
+  var h1 = document.querySelector('h1');
+  h1.innerHTML += ' 2014';
+  /*</debug>*/
+
+  /*<include base.js>*/
+  /*<include base.js/>*/
+  /*<include base.js />*/
+  /*<include file="base.js">*/
+  /*<include file="base.js"/>*/
+  /*<replace>console.log('JS 可以写在一行');</replace>*/</script>
+<script>
+(function() {
+  var buildBlock = function(content, onread, isReplace) {
+    // @group
+    // fl, tag, attrs, fr, content, end
+    var regexList = [
+      /^(<!--)(include)((?:\s+\w[\w\/\\\-\.]*?)*)()()(\s*\/?-->)/,
+      /^(<!--)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)()()(\s*\/?-->)/,
+      /^(<!--)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*-->)([^]*?)(<!--\/\2-->)/,
+      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*-->)([^]*?)(<!--\/\2-->)/,
+      /^(<!--)([\w-_]+)((?:\s+\w(?:[\w\/\\\-\.]*?\w)?)*)(\s*>)([^]*?)(<\/\2-->)/,
+      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>)([^]*?)(<\/\2-->)/,
+      /^(\/\*<)(include)((?:\s+\w[\w\/\\\-\.]*?)*)()()(\s*\/?>\*\/)/,
+      /^(\/\*<)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)()()(\s*\/?>\*\/)/,
+      /^(\/\*<)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/,
+      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/,
+      /^(\/\*<)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*>\s*)([^]*?)(\s*<\/\2>\*\/)/,
+      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>)([^]*?)(<\/\2>\*\/)/
+    ];
+    var result = '';
+    var start = 0;
+    var count = 0;
+    while (start < content.length) {
+      var a = content.substring(start).indexOf('<!--');
+      var b = content.substring(start).indexOf('/*');
+      if (a < 0 && b < 0) { // 没有找到语法
+        break;
+      }
+
+      var pointer = start + Math.min(a < 0 ? Infinity : a, b < 0 ? Infinity : b);
+      var match = false;
+
+      for (var j = 0; j < regexList.length; j++) {
+        match = content.substring(pointer).match(regexList[j]);
+        if (match) {
+          // match.push(pointer);
+          result += content.substring(start, pointer);
+          result += onread.apply(this, match);
+          start = pointer + match[0].length;
+          break;
+        }
+      }
+      if (!match) {
+        result += content.substring(start, start + 1);
+        start++;
+      }
+      if (count++ > 13) break;
+    }
+    result += content.substring(start);
+    return result;
+  };
+
+  var output = buildBlock(document.querySelector('script[type="text/jdists"]').innerHTML,
+    function(all, fl, tag, attrText, fr, content, end, pos) {
+      console.log('【' + content + '】');
+      return '!!!!';
+    }
+  );
+
+  console.log('output: ', output);
+})();
+</script>
+</body>
+</html>
