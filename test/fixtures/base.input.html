@@ -12,10 +12,7 @@ h1 {
   <!--debug-->
   <h1>debug</h1>
   <!--/debug-->
-  <!--include letter.txt -->
   <!--include file="letter.txt" slice="1,-1"-->
-  <!--include letter.txt/-->
-  <!--include letter.txt /-->
   <!--include file="letter.txt" /-->
   <!--include file="not.exist"/-->
 </body>
@@ -27,11 +24,10 @@ void function() {
   h1.innerHTML += ' 2014';
   /*</debug>*/
 
-  /*<include base.js>*/
-  /*<include base.js/>*/
-  /*<include base.js />*/
   /*<include file="base.js">*/
+  /*<include file="base.js" >*/
   /*<include file="base.js"/>*/
+  /*<include file="base.js" />*/
   /*<replace>console.log('可以写在一行');</replace>*/
 
   base.get(/*,*/function(a, b, c) {

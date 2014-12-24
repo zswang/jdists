@@ -8,7 +8,10 @@
   /**
    * 内联资源处理器
    */
-  module.exports = function(content, attrs, dirname, options, tag) {
+  module.exports = function(e) {
+    var content = e.content;
+    var dirname = e.dirname;
+
     return content.replace(
       /url\(\s*([^():?]+\.(png|jpg|jpeg|svg|gif|webp))\s*\)/g,
       function(all, file, type) {

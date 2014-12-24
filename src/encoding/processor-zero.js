@@ -15,7 +15,8 @@
    * 零宽字符编码处理器
    * @see http://ucren.com/blog/archives/549
    */
-  module.exports = function(content, attrs, dirname, options, tag, readBlock, buildFile) {
+  module.exports = function(e) {
+    var content = e.content;
     var t = parseInt('10000000', 2);
     content = encodeUnicode(content).replace(/[^]/g, function(all) {
       return (t + all.charCodeAt()).toString(2).substring(1).replace(/[^]/g, function(n) {

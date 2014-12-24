@@ -185,24 +185,16 @@ console.log('测试版本');
 ### 模块定义完整示例
 
 ```html
-<!--include base.html b1-->
-<!--include base.html b1 /-->
 <!--include file="base.html" block="b1"-->
 <!--include file="base.html" block="b1" /-->
-<!--debug base.html b1--><em>debug</em><!--/debug-->
 <!--debug file="base.html" block="b1" --><em>debug</em><!--/debug-->
-<!--debug base.html b1><em>debug</em></debug-->
 <!--debug file="base.html" block="b1"><em>debug</em></debug-->
 ```
 
 ```js
-/*<include base.html b1>*/
-/*<include base.html b1/>*/
 /*<include file="base.html" block="b1" >*/
 /*<include file="base.html" block="b1" />*/
-/*<debug base.html b1>*/<em>debug</em>/*</debug>*/
 /*<debug file="base.html" block="b1">*/<em>debug</em>/*</debug>*/
-/*<debug base.html b1><em>debug</em></debug>*/
 /*<debug file="base.html" block="b1"><em>debug</em></debug>*/
 ```
 
@@ -223,6 +215,7 @@ tag|功能|示例
 include|引入文件或代码块|```<!--include file="all.js" /-->```
 replace|将当前代码块替换成文件或代码块|
 remove|将当前代码移除|
+define|定义变量|自动会移除，不受触发器影响
 
 ### 代码属性（attribute）
 
@@ -262,7 +255,7 @@ css|css 文件|css="all_{{md5,7}}.css"|输出的 css 文件名
 
 * 安装 `$ npm install jdists -g`
 
-* 命令格式 `$ jdists input1 [input2] [-output output] [-remove debug,test]`
+* 命令格式 `$ jdists input1 [input2] [-output output] [-remove debug,test] [-tigger release]`
 
 * 命令参数
 

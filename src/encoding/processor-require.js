@@ -8,7 +8,13 @@
   /**
    * require 处理器
    */
-  module.exports = function(content, attrs, dirname, options, tag, readBlock, buildFile) {
+  module.exports = function(e) {
+    var content = e.content;
+    var dirname = e.dirname;
+    var attrs = e.attrs;
+    var options = e.options;
+    var build = e.jdists.build;
+
     var modules = {
       '@': {
         name: '@',
@@ -51,7 +57,7 @@
             }
 
             var filename = path.join(dirname, attrs.base, moduleName + '.js');
-            module.content = process(buildFile(filename, options), module);
+            module.content = process(build(filename, options), module);
           }
           updateRank(module);
           return 'require(' + quote + moduleName + quote + ')';

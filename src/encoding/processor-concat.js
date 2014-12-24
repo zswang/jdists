@@ -5,15 +5,10 @@
   var fs = require('fs');
   var path = require('path');
   var util = require('util');
-
-  var jdists = require('../jdists');
-
-  var forceDirSync = jdists.forceDirSync;
-  var getAttrs = jdists.getAttrs;
-  var replaceFile = jdists.replaceFile;
-  var loadFile = jdists.loadFile;
-  var buildBlock = jdists.buildBlock;
-  var md5 = jdists.md5;
+  var common = require('../../src/common');
+  var forceDirSync = common.forceDirSync;
+  var getAttrs = common.getAttrs;
+  var md5 = common.md5;
 
   var copyCache = {}; // 已经复制过的内容
 
@@ -48,12 +43,23 @@
   /**
    * 资源合并处理器
    */
-  module.exports = function(content, attrs, dirname, options, tag, readBlock, buildFile, sourceFile) {
+  module.exports = function(e) {
+    var replaceFile = e.jdists.replaceFile;
+    var loadFile = e.jdists.loadFile;
+    var buildBlock = e.buildBlock;
+    var readBlock = e.readBlock;
+    var options = e.options;
+
+    var content = e.content;
+    var attrs = e.attrs;
+    var dirname = e.dirname;
+    var sourceFile = e.filename;
+
     var js = []; // 所有 js 文件内容
     var css = []; // 所有 css 文件内容
 
     // 解析静态资源
-    content = String(content).replace(
+    var content = String(e.content).replace(
       /<script((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/script>/gi,
       function(all, attrText, content) {
         var copyResource = function(t) {
