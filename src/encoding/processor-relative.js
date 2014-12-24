@@ -53,6 +53,17 @@
         }
         return all;
       }
+    ).replace(
+      /<img((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?\/?>/ig,
+      function(all, attrText, content) {
+        var a = getAttrs('src', attrText, dirname);
+        if (a.src) {
+          a.src = path.relative(path.dirname(input), path.join(dirname, a.src));
+
+          return '<img ' + attrs2text(a) + '>';
+        }
+        return all;
+      }
     );
 
     return content;
