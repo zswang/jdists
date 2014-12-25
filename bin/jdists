@@ -2,6 +2,9 @@
 'use strict';
 
 var jdists = require('../.');
+var common = require('../src/common');
+var forceDirSync = common.forceDirSync;
+
 var util = require('util');
 var optimist = require('optimist');
 var fs = require('fs');
@@ -54,7 +57,7 @@ argv._.forEach(function(filename) {
 });
 var content = contents.join('\n');
 if (argv.output) {
-  jdists.forceDirSync(path.dirname(argv.output));
+  forceDirSync(path.dirname(argv.output));
   fs.writeFileSync(argv.output, content);
   util.puts(util.format('%j jdists output complete.', filenames));
 } else {

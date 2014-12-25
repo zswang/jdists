@@ -12,157 +12,53 @@
   var fs = require('fs');
   var path = require('path');
 
+  var common = require('./common');
+  var clean = common.clean;
+  var forceDirSync = common.forceDirSync;
+  var md5 = common.md5;
+  var decodeHTML = common.decodeHTML;
+  var encodeHTML = common.encodeHTML;
+  var getAttrs = common.getAttrs;
+
   var chain; // 引用链
 
   var blocks = {}; // key: filename, value: blocks
-
-  var crypto = require('crypto');
-
-  function clean(text) {
-    return String(text).replace(/^\s*$/gm, '') // 清除空行
-      .replace(/\n{2,}/gm, '\n'); // 清除连接的空行
-  }
-
-  /*
-   * 保证目录存在
-   * @param{String} dir 目录
-   */
-  function forceDirSync(dir) {
-    if (!fs.existsSync(dir)) {
-      forceDirSync(path.dirname(dir));
-      fs.mkdirSync(dir);
-    }
-  }
-
-  /**
-   * 计算 md5
-   * @param{String} content 内容
-   * @return 返回内容的 md5 值，以十六进制小写输出
-   */
-  function md5(content) {
-    var hash = crypto.createHash('md5');
-    hash.update(content);
-    return hash.digest('hex');
-  }
-
-  var htmlDecodeDict = {
-    'quot': '"',
-    'lt': '<',
-    'gt': '>',
-    'amp': '&',
-    'nbsp': ' '
-  };
-
-  /**
-   * HTML解码
-   * @param {String} html
-   */
-  function decodeHTML(html) {
-    return String(html).replace(
-      /&((quot|lt|gt|amp|nbsp)|#x([a-f\d]+)|#(\d+));/ig,
-      function(all, group, key, hex, dec) {
-        return key ? htmlDecodeDict[key.toLowerCase()] :
-          hex ? String.fromCharCode(parseInt(hex, 16)) :
-          String.fromCharCode(+dec);
-      }
-    );
-  }
-
-  var htmlEncodeDict = {
-    '"': 'quot',
-    '<': 'lt',
-    '>': 'gt',
-    '&': 'amp',
-    ' ': 'nbsp'
-  };
-
-  /**
-   * HTML编码
-   * @param {String} text 文本
-   */
-  function encodeHTML(text) {
-    return String(text).replace(/["<>& ]/g, function(all) {
-      return '&' + htmlEncodeDict[all] + ';';
-    });
-  }
-
-  /**
-   * 获取属性对象
-   * @param{String} tag 标签
-   * @param{String} attrText 属性文本
-   * @param{String} dirname 文件目录名
-   * @return 返回属性对象，如果出现文件则计算绝对路径
-   */
-  var getAttrs = function(tag, attrText, dirname) {
-    var result = {};
-    if (/^(\s+[\w\/\\\-\.]+)*$/.test(attrText)) { // a b c
-      var index = 0;
-      attrText.replace(/[\w\/\\\-\.]+/g, function(value) {
-        value = decodeHTML(value);
-        result[index] = value;
-        var key;
-        if (/^(replace|include)$/.test(tag)) {
-          key = ['file', 'block', 'encoding', 'trigger'][index];
-        } else if (tag === 'remove') {
-          key = ['trigger'][index];
-        } else {
-          key = ['type', 'trigger'][index];
-        }
-        if (key) {
-          result[key] = value;
-        }
-        index++;
-        return '';
-      });
-    } else { // a="v1" b="v2" c="v3"
-      attrText.replace(/\s*([\w-_.]+)\s*=\s*"([^"]+)"/g, function(all, key, value) {
-        result[key] = decodeHTML(value);
-        return '';
-      });
-    }
-    if (result.trigger) {
-      result.trigger = result.trigger.split(',');
-    }
-
-    if (/^(\*|&)$/.test(result.file)) { // file="&" 当前文件
-      result.file = '';
-    }
-    if (result.file) {
-      result['@filename'] = path.resolve(dirname, result.file); // 计算绝对路径
-    }
-    if (tag === 'script' && result.src &&
-      /^[^:]+$/.test(result.src)) {
-      result['@filename'] = path.resolve(dirname, result.src); // 计算绝对路径
-    }
-    if (tag === 'link' && result.href &&
-      /^[^:]+$/.test(result.href)) {
-      result['@filename'] = path.resolve(dirname, result.href); // 计算绝对路径
-    }
-    return result;
-  };
+  var variants = {}; // key: name, value: content
 
   /**
    * 编码处理器集合
-   * function(content, attrs, dirname, options, tag, readBlock)
+   * function(e)
+    content // 内容
+    attrs // 属性
+    dirname // 当前内容所在目录
+    blockfile // 块文件名
+    blockname // 块名
+    options // 选项
+    tag // 标签
+    buildBlock // 编译一个块
+    readBlock // 读取模块的函数
+    getValue // 获取变量的函数
+    filename // 输入文件
+    jdists // jdists 本身
    */
   var processors = {
-    base64: function(content) {
-      return (new Buffer(content)).toString('base64');
+    base64: function(e) {
+      return (new Buffer(e.content)).toString('base64');
     },
-    md5: function(content) {
-      return md5(content);
+    md5: function(e) {
+      return md5(e.content);
     },
-    url: function(content) {
-      return encodeURIComponent(content);
+    url: function(e) {
+      return encodeURIComponent(e.content);
     },
-    html: function(content) {
-      return encodeHTML(content);
+    html: function(e) {
+      return encodeHTML(e.content);
     },
-    string: function(content) {
-      return JSON.stringify(content);
+    string: function(e) {
+      return JSON.stringify(e.content);
     },
-    escape: function(content) {
-      return escape(content);
+    escape: function(e) {
+      return escape(e.content);
     }
   };
 
@@ -177,24 +73,18 @@
     // @group
     // fl, tag, attrs, fr, content, end
     var regexList = [
-      /^(<!--)(include)((?:\s+\w[\w\/\\\-\.]*?)*)()()(\s*\/?-->)/,
-      /^(<!--)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)()()(\s*\/?-->)/,
-      /^(<!--)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*-->)([^]*?)(<!--\/\2-->)/,
-      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*-->)([^]*?)(<!--\/\2-->)/,
-      /^(<!--)([\w-_]+)((?:\s+\w(?:[\w\/\\\-\.]*?\w)?)*)(\s*>)([^]*?)(<\/\2-->)/,
-      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>)([^]*?)(<\/\2-->)/,
-      /^(\/\*<)(include)((?:\s+\w[\w\/\\\-\.]*?)*)()()(\s*\/?>\*\/)/,
-      /^(\/\*<)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)()()(\s*\/?>\*\/)/,
-      /^(\/\*<)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/,
-      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/,
-      /^(\/\*<)([\w-_]+)((?:\s+\w[\w\/\\\-\.]*?)*)(\s*>\s*)([^]*?)(\s*<\/\2>\*\/)/,
-      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)(\s*>)([^]*?)(<\/\2>\*\/)/
+      /^(<!--)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?()()(\s*\/?-->)/,
+      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*-->)([^]*?)(<!--\/\2-->)/,
+      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>)([^]*?)(<\/\2-->)/,
+      /^(\/\*<)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?()()(\s*\/?>\*\/)/,
+      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/,
+      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>)([^]*?)(<\/\2>\*\/)/
     ];
     var result = '';
     var start = 0;
     while (start < content.length) {
       var a = content.substring(start).indexOf('<!--');
-      var b = content.substring(start).indexOf('/*');
+      var b = content.substring(start).indexOf('/*<');
       if (a < 0 && b < 0) { // 没有找到语法
         break;
       }
@@ -205,6 +95,9 @@
       for (var j = 0; j < regexList.length; j++) {
         match = content.substring(pointer).match(regexList[j]);
         if (match) {
+          match = match.map(function(item) { // 避免 undefined
+            return item || '';
+          });
           match.push(pointer);
           result += content.substring(start, pointer);
           result += onread.apply(this, match);
@@ -324,27 +217,32 @@
     var dirname = path.dirname(filename);
 
     var readBlock = function(all, fl, tag, attrText, fr, content, end) {
-      if (options.removeList.indexOf(tag) >= 0) {
-        return '';
-      }
 
       var attrs = getAttrs(tag, attrText, dirname);
 
-      if (attrs.trigger &&
-        attrs.trigger.indexOf(options.trigger) < 0) {
+      if (attrs.trigger && attrs.trigger.indexOf(options.trigger) < 0) {
+        if (/^(replace|include)$/ && attrs.export) { // 如果是导出类型
+          return '';
+        }
         return all;
+      }
+
+      if (options.removeList.indexOf(tag) >= 0) {
+        return '';
       }
 
       switch (tag) {
         case 'replace':
         case 'include':
           var isBinary = false;
-          if (attrs.block || attrs.file) {
-            var blockfile = attrs['@filename'] || filename; // 默认当前文件名
+          var blockfile = '';
+          var blockname = '';
 
-            dirname = path.dirname(blockfile); // 目录按块文件计算 《《《
-
-            var blockname = attrs.block || ''; // 默认全部文件
+          if (variants[attrs.file]) { // 文件在变量中出现
+            content = variants[attrs.file];
+          } else if (attrs.block || attrs.file) {
+            blockfile = attrs['@filename'] || filename; // 默认当前文件名
+            blockname = attrs.block || ''; // 默认全部文件
 
             var key = [blockfile, blockname].join();
             var block = blocks[key];
@@ -396,8 +294,22 @@
             if (!isBinary) { // 非二进制文件再次编译
               content = buildBlock(content, readBlock, true);
             }
-            content = processor(content, attrs, dirname, options, tag, readBlock, buildFile, filename);
+            content = processor({
+              content: content, // 内容
+              attrs: attrs, // 属性
+              dirname: blockfile ? path.dirname(blockfile) : dirname, // 当前内容所在目录
+              blockfile: blockfile, // 块文件名
+              blockname: blockname, // 块名
+              options: options, // 选项
+              tag: tag, // 标签
+              buildBlock: buildBlock, // 编译一个块
+              readBlock: readBlock, // 读取模块的函数
+              getValue: getValue, // 获取变量的函数
+              filename: filename, // 输入文件
+              jdists: exports // jdists 本身
+            });
           }
+
           if (attrs.slice) {
             var params = attrs.slice.split(',');
             content = content.slice(params[0], params[1]);
@@ -405,10 +317,19 @@
           if (options.clean) { // 清理空白字符
             content = clean(content);
           }
+          content = buildBlock(content, readBlock, true);
 
-          dirname = path.dirname(filename); // 恢复目录 《《《
-
-          return buildBlock(content, readBlock, true);
+          if (attrs.export) {
+            if (/^#/.test(attrs.export)) { // 保存到虚拟文件中
+              variants[attrs.export] = content;
+            } else {
+              if (attrs['@export']) {
+                fs.writeFileSync(attrs['@export'], content);
+              }
+            }
+            return '';
+          }
+          return content;
         case 'remove': // 必然移除的
           return '';
       }
@@ -455,26 +376,20 @@
     processors[encoding] = processor;
   };
 
-  function attrs2text(attrs) {
-    var result = [];
-    for (var key in attrs) {
-      if (!(/^@/.test(key))) {
-        result.push(key + '="' + decodeHTML(attrs[key]) + '"');
-      }
-    }
-    return result.join(' ');
+  function getValue(id) {
+    return variants[id];
+  }
+
+  function setValue(id, content) {
+    return variants[id] = content;
   }
 
   exports.build = buildFile;
   exports.setEncoding = setEncoding;
-  exports.forceDirSync = forceDirSync;
-  exports.getAttrs = getAttrs;
   exports.replaceFile = replaceFile;
   exports.loadFile = loadFile;
-  exports.buildBlock = buildBlock;
-  exports.md5 = md5;
-  exports.encodeHTML = encodeHTML;
-  exports.decodeHTML = decodeHTML;
-  exports.attrs2text = attrs2text;
+
+  exports.getValue = getValue;
+  exports.setValue = setValue;
 
 })();

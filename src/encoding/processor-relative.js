@@ -6,18 +6,21 @@
   var path = require('path');
   var util = require('util');
 
-  var jdists = require('../jdists');
+  var common = require('../common');
 
-  var getAttrs = jdists.getAttrs;
-  var attrs2text = jdists.attrs2text;
+  var getAttrs = common.getAttrs;
+  var attrs2text = common.attrs2text;
 
   /**
    * 资源合并处理器
    */
-  module.exports = function(content, attrs, dirname, options, tag, readBlock, buildFile, input) {
+  module.exports = function(e) {
+    var content = e.content;
+    var dirname = e.dirname;
+    var input = e.filename;
+
     var js = []; // 所有 js 文件内容
     var css = []; // 所有 css 文件内容
-
     // 解析静态资源
     content = String(content).replace(
       /<script((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/script>/gi,

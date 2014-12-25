@@ -1,1 +1,1 @@
-/*<include cycle1.js>*/
+/*<include file="cycle1.js">*/
