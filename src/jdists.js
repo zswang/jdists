@@ -14,7 +14,7 @@
 
   var chain; // 引用链
 
-  var blocks; // key: filename, value: blocks
+  var blocks = {}; // key: filename, value: blocks
 
   var crypto = require('crypto');
 
@@ -426,7 +426,6 @@
     options.trigger = options.trigger || 'release';
     options.removeList = String(options.remove).split(',');
 
-    blocks = {};
     chain = []; // 引用链
     filename = path.resolve('', filename); // 使用绝对文件路径
 
@@ -437,7 +436,6 @@
       result = clean(result);
     }
 
-    blocks = null;
     chain = null; // 引用链
 
     /*<debug>*/
