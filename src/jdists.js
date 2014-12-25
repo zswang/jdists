@@ -338,6 +338,7 @@
       switch (tag) {
         case 'replace':
         case 'include':
+          var isBinary = false;
           if (attrs.block || attrs.file) {
             var blockfile = attrs['@filename'] || filename; // 默认当前文件名
 
@@ -387,10 +388,14 @@
               chain.pop(); // 移除引用链
             }
             content = block.content;
+            isBinary = block.isBinary;
           }
 
           var processor = processors[attrs.encoding];
           if (processor) { // 编码处理器
+            if (!isBinary) { // 非二进制文件再次编译
+              content = buildBlock(content, readBlock, true);
+            }
             content = processor(content, attrs, dirname, options, tag, readBlock, buildFile, filename);
           }
           if (attrs.slice) {
