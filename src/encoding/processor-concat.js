@@ -24,7 +24,7 @@
 
     function copy(err) {
       if (!err) {
-        return cb(util.format('File %j exists.', dst));
+        console.warn('File "%s" overwrite.', dst);
       }
 
       fs.stat(src, function(err) {
@@ -49,6 +49,7 @@
     var buildBlock = e.buildBlock;
     var readBlock = e.readBlock;
     var options = e.options;
+    var build = e.jdists.build;
 
     var content = e.content;
     var attrs = e.attrs;
@@ -66,34 +67,35 @@
           if (!attrs.img || !attrs.js) { // 不需要复制
             return t;
           }
-          return String(t).replace(/\/\*@\*\/\s*(?:'|")([^'"]+\.(png|jpg|gif|jpeg|svg))('|")/g,
-            function(all, filename) {
-              var img = path.join(attrs.img, filename); // img 文件
-              if (options.output) { // 计算相对路径 dist
-                var input = path.join(path.dirname(sourceFile), filename);
-                var output = path.resolve(path.dirname(options.output), img); // 相对于输出路径
-                /*<debug>*/
-                // console.log('input: %j, output: %j', input, output);
-                // return;
-                /*</debug>*/
+          return String(t)
+            .replace(/\/\*#\s*sourceMappingURL=[^\s*]+\s*\*\/\s*$/g, '')
+            .replace(/\/\*@\*\/\s*(?:'|")([^'"]+\.(png|jpg|gif|jpeg|svg))('|")/g,
+              function(all, filename) {
+                var img = path.join(attrs.img, filename); // img 文件
+                if (options.output) { // 计算相对路径 dist
+                  var input = path.join(path.dirname(sourceFile), filename);
+                  var output = path.resolve(path.dirname(options.output), img); // 相对于输出路径
+                  /*<debug>*/
+                  // console.log('input: %j, output: %j', input, output);
+                  // return;
+                  /*</debug>*/
 
-                forceDirSync(path.dirname(output)); // 确保路径存在
-                copy(input, output, function(err) {
-                  if (err) {
-                    util.puts(err);
-                  }
-                });
+                  forceDirSync(path.dirname(output)); // 确保路径存在
+                  copy(input, output, function(err) {
+                    if (err) {
+                      util.puts(err);
+                    }
+                  });
+                }
+
+                return JSON.stringify(img);
               }
-
-              return JSON.stringify(img);
-            }
-          );
+            );
         };
         var a = getAttrs('script', attrText, dirname);
         if (a.src) {
           if (/^(|undefined|text\/javascript|text\/ecmascript)$/i.test(a.type)) {
-            loadFile(a['@filename'], options);
-            js.push(copyResource(replaceFile(a['@filename'], options)));
+            js.push(copyResource(build(a['@filename'], options)));
             return '';
           }
         } else {
@@ -112,27 +114,29 @@
           if (!attrs.img || !attrs.css) { // 不需要复制
             return t;
           }
-          return String(t).replace(/\burl\s*\(\s*([^():]+\.(png|jpg|gif|jpeg|svg))\s*\)/g,
-            function(all, filename) {
+          return String(t)
+            .replace(/\/\*#\s*sourceMappingURL=[^\s*]+\s*\*\/\s*$/g, '')
+            .replace(/\burl\s*\(\s*([^():]+\.(png|jpg|gif|jpeg|svg))\s*\)/g,
+              function(all, filename) {
 
-              var cssDir = path.dirname(attrs.css.replace(/\?.*$/, '')); // 相对于输出路径
-              var img = path.join(attrs.img, path.basename(filename)); // img 文件
-              var cssImg = path.relative(cssDir, img);
-              if (options.output) { // 计算相对路径 dist
-                var input = path.join(currdir, filename);
-                var output = path.resolve(path.dirname(options.output), cssDir, cssImg); // 相对于输出路径
+                var cssDir = path.dirname(attrs.css.replace(/\?.*$/, '')); // 相对于输出路径
+                var img = path.join(attrs.img, path.basename(filename)); // img 文件
+                var cssImg = path.relative(cssDir, img);
+                if (options.output) { // 计算相对路径 dist
+                  var input = path.join(currdir, filename);
+                  var output = path.resolve(path.dirname(options.output), cssDir, cssImg); // 相对于输出路径
 
-                forceDirSync(path.dirname(output)); // 确保路径存在
-                copy(input, output, function(err) {
-                  if (err) {
-                    util.puts(err);
-                  }
-                });
+                  forceDirSync(path.dirname(output)); // 确保路径存在
+                  copy(input, output, function(err) {
+                    if (err) {
+                      util.puts(err);
+                    }
+                  });
+                }
+
+                return 'url(' + cssImg + ')';
               }
-
-              return 'url(' + cssImg + ')';
-            }
-          );
+            );
         };
         var b;
         if (attrText) {
@@ -140,8 +144,7 @@
           if (b.href) {
             if (/^(|undefined|text\/css)$/i.test(b.type)) {
               currdir = path.dirname(b['@filename']);
-              loadFile(b['@filename'], options);
-              css.push(copyResource(replaceFile(b['@filename'], options)));
+              css.push(copyResource(build(b['@filename'], options)));
               return '';
             }
           }

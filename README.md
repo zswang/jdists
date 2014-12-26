@@ -234,11 +234,16 @@ css|css 文件|css="all_{{md5,7}}.css"|输出的 css 文件名
 
 ### 编码（encoding）
 
-* original：原文
+* original：原文【默认】
 * string：作为字符串
 * base64：base64 输出
 * md5：内容 MD5 戳（小写）
 * concat：合并本地 js 或 css 并可以知道输出
+* inline：内链文件
+* relative：静态资源相对路径
+* require：AMD 自动依赖处理
+* template：模板
+* zero：零宽字符加密
 
 可以通过 `jdists.setEncoding(encoding, processor)` 扩展
 

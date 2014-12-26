@@ -64,9 +64,9 @@
 
   /**
    * 编译块
-   * @param{String} content 内容
-   * @param{Function} onread 读取函数
-   * @param{Boolean} isReplace 是否替换过程
+   * @param {string} content 内容
+   * @param {Function} onread 读取函数
+   * @param {boolean} isReplace 是否替换过程
    * @return 返回编译后的内容
    */
   var buildBlock = function(content, onread, isReplace) {
@@ -131,8 +131,8 @@
 
   /**
    * 加载文件
-   * @param{String} filename 文件名，绝对路径
-   * @param{Object} options 配置项
+   * @param {string} filename 文件名，绝对路径
+   * @param {Object} options 配置项
    */
   var loadFile = function(filename, options) {
     if (blocks[[filename, '']]) { // 文件已经处理过
@@ -186,7 +186,8 @@
         content: content
       });
 
-      if (attrs.file && /^(replace|include)$/.test(tag)) { // 需要引入文件
+      if (attrs.file && /^[^#:]+/.test(attrs.file) &&
+        /^(replace|include)$/.test(tag)) { // 需要引入文件
         loadFile(attrs['@filename'], options);
       }
 
@@ -205,8 +206,8 @@
 
   /**
    * 替换文件内容
-   * @param{String} filename 文件名，绝对路径
-   * @param{Object} options 配置项
+   * @param {string} filename 文件名，绝对路径
+   * @param {Object} options 配置项
    * @return 返回替换后的内容
    */
   var replaceFile = function(filename, options) {
@@ -221,9 +222,6 @@
       var attrs = getAttrs(tag, attrText, dirname);
 
       if (attrs.trigger && attrs.trigger.indexOf(options.trigger) < 0) {
-        if (/^(replace|include)$/ && attrs.export) { // 如果是导出类型
-          return '';
-        }
         return all;
       }
 
@@ -324,6 +322,7 @@
               variants[attrs.export] = content;
             } else {
               if (attrs['@export']) {
+                forceDirSync(path.dirname(attrs['@export']));
                 fs.writeFileSync(attrs['@export'], content);
               }
             }
@@ -367,7 +366,8 @@
 
   /**
    * 添加一个编码器
-   * @param{Function} processor 处理器 function(content, attrs, dirname, options, tag, readBlock, buildFile, input)
+   * @param {string} encoding 编码名称
+   * @param {Function} processor 处理器 function(e)
    */
   var setEncoding = function(encoding, processor) {
     if (!encoding || !processor) {
