@@ -51,7 +51,6 @@
     var options = e.options;
     var build = e.jdists.build;
 
-    var content = e.content;
     var attrs = e.attrs;
     var dirname = e.dirname;
     var sourceFile = e.filename;
