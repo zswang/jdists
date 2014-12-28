@@ -70,6 +70,7 @@
    * @return 返回编译后的内容
    */
   var buildBlock = function(content, onread, isReplace) {
+    var content = String(content);
     // @group
     // fl, tag, attrs, fr, content, end
     var regexList = [
@@ -287,7 +288,22 @@
             isBinary = block.isBinary;
           }
 
-          var processor = processors[attrs.encoding];
+          if (/^(true|before)$/.test(attrs.trim)) { // 编码前，清理空白字符
+            content = content.trim();
+          }
+
+          var processor;
+          if (/^[#:]+/.test(attrs.encoding)) { // 编码器来至变量
+            if (variants[attrs.encoding]) { // 已经定义
+              var module = { exports: {} };
+              new Function('require', 'module', 'exports', variants[attrs.encoding])(
+                require, module, module.exports
+              );
+              processor = module.exports;
+            }
+          } else {
+            processor = processors[attrs.encoding];
+          }
           if (processor) { // 编码处理器
             if (!isBinary) { // 非二进制文件再次编译
               content = buildBlock(content, readBlock, true);
@@ -308,17 +324,18 @@
             });
           }
 
+          if (attrs.trim === 'after') { // 编码前，清理空白字符
+            content = content.trim();
+          }
+
           if (attrs.slice) {
             var params = attrs.slice.split(',');
             content = content.slice(params[0], params[1]);
           }
-          if (options.clean) { // 清理空白字符
-            content = clean(content);
-          }
           content = buildBlock(content, readBlock, true);
 
           if (attrs.export) {
-            if (/^#/.test(attrs.export)) { // 保存到虚拟文件中
+            if (/^[#:]+/.test(attrs.export)) { // 保存到虚拟文件中
               variants[attrs.export] = content;
             } else {
               if (attrs['@export']) {
@@ -341,22 +358,21 @@
 
   var buildFile = function(filename, options) {
     options = options || {};
-    options.clean = typeof options.clean === 'undefined' ? true : options.clean;
     options.remove = options.remove || 'debug,test';
     options.trigger = options.trigger || 'release';
     options.removeList = String(options.remove).split(',');
+    options.clean = typeof options.clean === 'undefined' ? true : options.clean;
 
     chain = []; // 引用链
     filename = path.resolve('', filename); // 使用绝对文件路径
 
     loadFile(filename, options); // 预处理，文件
     var result = replaceFile(filename, options);
+    chain = null; // 引用链
 
     if (options.clean) { // 清理空白字符
       result = clean(result);
     }
-
-    chain = null; // 引用链
 
     /*<debug>*/
     // console.log(result);
