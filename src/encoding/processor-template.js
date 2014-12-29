@@ -45,7 +45,7 @@
       } else if (/^[#:]+/.test(attrs.data)) { // 变量
         data = JSON.parse(getValue(attrs.data.trim()));
       } else {
-        var text = build(path.join(dirname, attrs.data));
+        var text = build(path.join(dirname, attrs.data), e.options);
         data = JSON.parse(text);
       }
     } else {

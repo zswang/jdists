@@ -368,7 +368,7 @@
 
     loadFile(filename, options); // 预处理，文件
     var result = replaceFile(filename, options);
-    chain = null; // 引用链
+    chain = []; // 引用链
 
     if (options.clean) { // 清理空白字符
       result = clean(result);
