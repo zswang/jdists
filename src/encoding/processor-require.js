@@ -14,11 +14,14 @@
     var attrs = e.attrs;
     var options = e.options;
     var build = e.jdists.build;
+    var getAttrOrValue = e.getAttrOrValue;
+    var attrBase = getAttrOrValue(attrs.base, '');
+    var attrInsert = getAttrOrValue(attrs.insert, '');
 
     var modules = {
       '@': {
         name: '@',
-        dirname: path.relative(path.join(dirname, attrs.base), dirname),
+        dirname: path.relative(path.join(dirname, attrBase), dirname),
         dependencies: [],
         rank: 0 // 被依赖多少次
       }
@@ -38,10 +41,10 @@
       return String(content).replace(/require\s*\(\s*(['"])([^'"]+)\1\s*\)/g,
         function(all, quote, moduleName) {
           if (/^\./.test(moduleName)) { // 有 ‘.’ 相对于当前文件
-            var t = path.resolve(dirname, attrs.base, // 绝对路径
+            var t = path.resolve(dirname, attrBase, // 绝对路径
               current.dirname, moduleName
             );
-            t = path.relative(path.join(dirname, attrs.base), t); // 相对路径
+            t = path.relative(path.join(dirname, attrBase), t); // 相对路径
             moduleName = '/' + t;
           }
           var module;
@@ -56,7 +59,7 @@
               current.dependencies.push(moduleName);
             }
 
-            var filename = path.join(dirname, attrs.base, moduleName + '.js');
+            var filename = path.join(dirname, attrBase, moduleName + '.js');
             module.content = process(build(filename, options), module);
           }
           updateRank(module);
@@ -83,8 +86,8 @@
 
     var lines = [];
     moduleList.forEach(function(module) {
-      if (attrs.insert) {
-        lines.push(attrs.insert.replace(/\{\{name\}\}/g, function() {
+      if (attrInsert) {
+        lines.push(attrInsert.replace(/\{\{name\}\}/g, function() {
           return module.name;
         }));
       }

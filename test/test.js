@@ -11,6 +11,7 @@ jdists.setEncoding('concat', require('../src/encoding/processor-concat'));
 jdists.setEncoding('relative', require('../src/encoding/processor-relative'));
 jdists.setEncoding('template', require('../src/encoding/processor-template'));
 jdists.setEncoding('jjencode', require('../src/encoding/processor-jjencode'));
+jdists.setEncoding('regex', require('../src/encoding/processor-regex'));
 
 describe('fixtures', function() {
   var dirname = 'test/fixtures';

@@ -237,11 +237,11 @@
           var blockfile = '';
           var blockname = '';
 
-          if (variants[attrs.file]) { // 文件在变量中出现
-            content = variants[attrs.file];
+          if (variants[attrs.import]) { // 文件在变量中出现
+            content = variants[attrs.import];
           } else if (attrs.block || attrs.file) {
-            blockfile = attrs['@filename'] || filename; // 默认当前文件名
-            blockname = attrs.block || ''; // 默认全部文件
+            blockfile = attrs['@filename'] || getAttrOrValue(attrs.file, filename); // 默认当前文件名
+            blockname = getAttrOrValue(attrs.block, ''); // 默认全部文件
 
             var key = [blockfile, blockname].join();
             var block = blocks[key];
@@ -288,23 +288,23 @@
             isBinary = block.isBinary;
           }
 
-          if (/^(true|before)$/.test(attrs.trim)) { // 编码前，清理空白字符
+          var trim = getAttrOrValue(attrs.trim, '');
+          if (/^(true|before)$/.test(trim)) { // 编码前，清理空白字符
             content = content.trim();
           }
 
           var processor;
-          if (/^[#:]+/.test(attrs.encoding)) { // 编码器来至变量
-            if (variants[attrs.encoding]) { // 已经定义
-              var module = { exports: {} };
-              new Function('require', 'module', 'exports', variants[attrs.encoding])(
-                require, module, module.exports
-              );
-              processor = module.exports;
-            }
-          } else {
-            processor = processors[attrs.encoding];
+          var encoding = getAttrOrValue(attrs.encoding, '');
+          if (/^[\w-_]+$/.test(encoding)) { // 正常编码前
+            processor = processors[encoding];
+          } else if (encoding) { // 编码器来至变量
+            var module = { exports: {} };
+            new Function('require', 'module', 'exports', encoding)(
+              require, module, module.exports
+            );
+            processor = module.exports;
           }
-          if (processor) { // 编码处理器
+          if (typeof processor === 'function') { // 编码处理器
             if (!isBinary) { // 非二进制文件再次编译
               content = buildBlock(content, readBlock, true);
             }
@@ -319,6 +319,7 @@
               buildBlock: buildBlock, // 编译一个块
               readBlock: readBlock, // 读取模块的函数
               getValue: getValue, // 获取变量的函数
+              getAttrOrValue: getAttrOrValue, // 获取属性或者是变量
               filename: filename, // 输入文件
               jdists: exports // jdists 本身
             });
@@ -335,7 +336,7 @@
           content = buildBlock(content, readBlock, true);
 
           if (attrs.export) {
-            if (/^[#:]+/.test(attrs.export)) { // 保存到虚拟文件中
+            if (/^#[\w-_]+$/.test(attrs.export)) { // 保存到虚拟文件中
               variants[attrs.export] = content;
             } else {
               if (attrs['@export']) {
@@ -398,6 +399,15 @@
 
   function setValue(id, content) {
     return variants[id] = content;
+  }
+
+  function getAttrOrValue(text, defValue) {
+    if (/^#[\w+_-]+$/.test(text)) {
+      if (variants[text]) {
+        return variants[text];
+      }
+    }
+    return text || defValue;
   }
 
   exports.build = buildFile;

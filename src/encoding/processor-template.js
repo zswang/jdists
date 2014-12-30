@@ -13,9 +13,12 @@
   var ejs = require('ejs');
 
   module.exports = function(e) {
-    var attrs = e.attrs;
+    var getAttrOrValue = e.getAttrOrValue;
 
-    if (!attrs.engine) {
+    var attrs = e.attrs;
+    var attrEngine = getAttrOrValue(attrs.engine);
+
+    if (!attrEngine) {
       return content;
     }
 
@@ -26,9 +29,10 @@
     var readBlock = e.readBlock;
     var buildBlock = e.buildBlock;
     var build = e.jdists.build;
+    var attrData = getAttrOrValue(attrs.data);
 
     var render;
-    switch (attrs.engine) {
+    switch (attrEngine) {
       case 'jhtmls':
         render = jhtmls.render(content);
         break;
@@ -39,13 +43,11 @@
         return content;
     }
     var data;
-    if (attrs.data) {
-      if (/^\s*[\[{"]/.test(attrs.data)) { // 直接 JSON 数据
-        data = JSON.parse(attrs.data);
-      } else if (/^[#:]+/.test(attrs.data)) { // 变量
-        data = JSON.parse(getValue(attrs.data.trim()));
+    if (attrData) {
+      if (/^\s*[\[{"]/.test(attrData)) { // 直接 JSON 数据
+        data = JSON.parse(attrData);
       } else {
-        var text = build(path.join(dirname, attrs.data), e.options);
+        var text = build(path.join(dirname, attrData), e.options);
         data = JSON.parse(text);
       }
     } else {

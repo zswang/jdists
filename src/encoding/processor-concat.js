@@ -54,6 +54,10 @@
     var attrs = e.attrs;
     var dirname = e.dirname;
     var sourceFile = e.filename;
+    var getAttrOrValue = e.getAttrOrValue;
+    var attrJs = getAttrOrValue(attrs.js, '');
+    var attrCss = getAttrOrValue(attrs.css, '');
+    var attrImg = getAttrOrValue(attrs.img, '');
 
     var js = []; // 所有 js 文件内容
     var css = []; // 所有 css 文件内容
@@ -63,7 +67,7 @@
       /<script((?:\s*[\w-_.]+\s*=\s*"[^"]+")*)\s*\/?>([^]*?)<\/script>/gi,
       function(all, attrText, content) {
         var copyResource = function(t) {
-          if (!attrs.img || !attrs.js) { // 不需要复制
+          if (!attrImg || !attrJs) { // 不需要复制
             return t;
           }
           return String(t)
@@ -110,7 +114,7 @@
       function(all, attrText, attrText2, content2) {
         var currdir;
         var copyResource = function(t) {
-          if (!attrs.img || !attrs.css) { // 不需要复制
+          if (!attrImg || !attrCss) { // 不需要复制
             return t;
           }
           return String(t)
@@ -200,8 +204,8 @@
       }
     };
 
-    runConcat('js', js, attrs.js);
-    runConcat('css', css, attrs.css);
+    runConcat('js', js, attrJs);
+    runConcat('css', css, attrCss);
 
     return content;
   };

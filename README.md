@@ -223,7 +223,8 @@ remove|将当前代码移除|
 encoding|编码|encoding="base64"|默认"original"，可扩展
 slice|裁剪|slice="1,-1"|参考 String.slice() 函数
 file|文件名|file="all.js"|默认当前文件
-export|导出文件|export="output.js"|如何为 '#' 或 ':' 开头则输出到内存中
+export|导出文件|export="output.js"|以 '#' 开头则输出到内存中
+import|导入内容|import="#str"|只能从内存中导入
 block|代码名|block="hello"|引入的块名
 type|类型|type="comment"|默认"original"，"comment"：去掉包裹代码块的注释
 trigger|触发器|trigger="release,LAN"|默认"release"，存在这些触发器时才生效
