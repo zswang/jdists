@@ -54,10 +54,14 @@
     var attrs = e.attrs;
     var dirname = e.dirname;
     var sourceFile = e.filename;
+    var setValue = e.setValue;
     var getAttrOrValue = e.getAttrOrValue;
     var attrJs = getAttrOrValue(attrs.js, '');
     var attrCss = getAttrOrValue(attrs.css, '');
     var attrImg = getAttrOrValue(attrs.img, '');
+    var imgFilesExport = attrs['img-files-export'];
+    var imgFiles = [];
+    var imgDicts = {};
 
     var js = []; // 所有 js 文件内容
     var css = []; // 所有 css 文件内容
@@ -75,6 +79,11 @@
             .replace(/\/\*@\*\/\s*(?:'|")([^'"]+\.(png|jpg|gif|jpeg|svg))('|")/g,
               function(all, filename) {
                 var img = path.join(attrs.img, filename); // img 文件
+                if (imgFilesExport && !imgDicts[img]) {
+                  imgFiles.push(img);
+                  imgDicts[img] = true;
+                }
+
                 if (options.output) { // 计算相对路径 dist
                   var input = path.join(path.dirname(sourceFile), filename);
                   var output = path.resolve(path.dirname(options.output), img); // 相对于输出路径
@@ -125,6 +134,18 @@
                 var cssDir = path.dirname(attrs.css.replace(/\?.*$/, '')); // 相对于输出路径
                 var img = path.join(attrs.img, path.basename(filename)); // img 文件
                 var cssImg = path.relative(cssDir, img);
+
+                if (imgFilesExport) {
+                  var imgFile = path.relative(
+                    path.dirname(options.output),
+                    path.resolve(path.dirname(options.output), cssDir, cssImg)
+                  );
+                  if (!imgDicts[imgFile]) {
+                    imgFiles.push(imgFile);
+                    imgDicts[imgFile] = true;
+                  }
+                }
+
                 if (options.output) { // 计算相对路径 dist
                   var input = path.join(currdir, filename);
                   var output = path.resolve(path.dirname(options.output), cssDir, cssImg); // 相对于输出路径
@@ -206,6 +227,10 @@
 
     runConcat('js', js, attrJs);
     runConcat('css', css, attrCss);
+
+    if (/^#[\w-_]+$/.test(imgFilesExport)) {
+      setValue(imgFilesExport, imgFiles.join('\n'));
+    }
 
     return content;
   };

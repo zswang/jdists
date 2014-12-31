@@ -346,6 +346,7 @@
               buildBlock: buildBlock, // 编译一个块
               readBlock: readBlock, // 读取模块的函数
               getValue: getValue, // 获取变量的函数
+              setValue: setValue, // 设置变量
               getAttrOrValue: getAttrOrValue, // 获取属性或者是变量
               filename: filename, // 输入文件
               jdists: exports // jdists 本身
