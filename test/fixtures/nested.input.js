@@ -1,3 +1,3 @@
 void function() {
-/*<include nested.js>*/
+/*<include file="nested.js" />*/
 }();

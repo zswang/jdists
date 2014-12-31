@@ -1,3 +1,3 @@
 console.log('start');
-/*<include base.js>*/
+/*<include file="base.js" />*/
 console.log('end');

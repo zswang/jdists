@@ -20,5 +20,5 @@ console.log('Informal version.');
   /*<number>
   a += 12;
   </number>*/
-  /*<include block="number"/>*/
+  /*<include block="number" />*/
 }();

@@ -74,27 +74,53 @@
     // @group
     // fl, tag, attrs, fr, content, end
     var regexList = [
-      /^(<!--)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?()()(\s*\/?-->)/,
+      // xml
+      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?()()(\s*\/-->)/,
       /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*-->)([^]*?)(<!--\/\2-->)/,
       /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>)([^]*?)(<\/\2-->)/,
-      /^(\/\*<)(include)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?()()(\s*\/?>\*\/)/,
+
+      // c \ c++ \ c# \ java \ js \ css
+      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?()()(\s*\/>\*\/)/,
       /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/,
-      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>)([^]*?)(<\/\2>\*\/)/
+      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>)([^]*?)(<\/\2>\*\/)/,
+
+      // pascal \ delphi
+      /^(\(\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?()()(\s*\/>\*\))/,
+      /^(\(\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>\*\))([^]*?)(\(\*<\/\2>\*\))/,
+      /^(\(\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>)([^]*?)(<\/\2>\*\))/,
+
+      // python
+      /^('''<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?()()(\s*\/>''')/,
+      /^('''<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>''')([^]*?)('''<\/\2>''')/,
+      /^('''<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>)([^]*?)(<\/\2>''')/
     ];
+
+    var flags = ['<!--', '/*<', '(*<', "'''"];
+
     var result = '';
     var start = 0;
     while (start < content.length) {
-      var a = content.substring(start).indexOf('<!--');
-      var b = content.substring(start).indexOf('/*<');
-      if (a < 0 && b < 0) { // 没有找到语法
+      var min = Infinity;
+      var regexIndex;
+
+      flags.forEach(function(flag, index) {
+        var t = content.substring(start).indexOf(flag);
+        if (t >= 0 && t < min) {
+          min = t;
+          regexIndex = index * 3;
+        }
+      });
+
+      if (min >= Infinity) { // 没有找到语法
         break;
       }
 
-      var pointer = start + Math.min(a < 0 ? Infinity : a, b < 0 ? Infinity : b);
+      var pointer = start + min;
       var match = false;
 
-      for (var j = 0; j < regexList.length; j++) {
+      for (var j = regexIndex; j <= regexIndex + 3; j++) {
         match = content.substring(pointer).match(regexList[j]);
+
         if (match) {
           match = match.map(function(item) { // 避免 undefined
             return item || '';
@@ -107,6 +133,7 @@
           break;
         }
       }
+
       if (!match) {
         result += content.substring(start, start + 1);
         start++;
