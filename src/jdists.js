@@ -274,7 +274,11 @@
             var block = blocks[key];
 
             if (!block) { // 没有发现预加载的块
-              return '';
+              loadFile(blockfile, options); // 预处理，文件
+              block = blocks[key];
+              if (!block) {
+                return;
+              }
             }
 
             if (!block.completed) {
