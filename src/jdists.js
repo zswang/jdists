@@ -11,6 +11,7 @@
 
   var fs = require('fs');
   var path = require('path');
+  var colors = require('colors/safe');
 
   var common = require('./common');
   var clean = common.clean;
@@ -174,7 +175,7 @@
       isFile: true
     };
     if (!fs.existsSync(filename)) {
-      console.warn('File "%s" not exists.', filename);
+      console.warn(colors.red('File "%s" not exists.'), filename);
       blocks[[filename, '']].content = '';
       return;
     }

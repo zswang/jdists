@@ -27,6 +27,7 @@
     "jshint": "2.5.8"
   },
   "dependencies": {
+    "colors": "1.0.3",
     "optimist": "0.6.1",
     "jhtmls": "0.0.8",
     "ejs": "1.0.0"
