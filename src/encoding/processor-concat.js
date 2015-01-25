@@ -5,7 +5,7 @@
   var fs = require('fs');
   var path = require('path');
   var util = require('util');
-  var common = require('../../src/common');
+  var common = require('../common');
   var forceDirSync = common.forceDirSync;
   var getAttrs = common.getAttrs;
   var md5 = common.md5;
