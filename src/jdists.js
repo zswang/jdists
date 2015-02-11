@@ -11,6 +11,8 @@
 
   var fs = require('fs');
   var path = require('path');
+  var cbml = require('cbml');
+
   var colors = require('colors/safe');
 
   var common = require('./common');
@@ -62,6 +64,13 @@
       return escape(e.content);
     }
   };
+
+  function build() {
+
+  }
+  exports.build = build;
+
+  return;
 
   /**
    * 编译块

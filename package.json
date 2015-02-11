@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "0.7.4",
+  "version": "0.8.0",
   "description": "JS 区块进行预处理工具",
   "main": "src/jdists.js",
   "bin": {
@@ -30,7 +30,8 @@
     "colors": "1.0.3",
     "optimist": "0.6.1",
     "jhtmls": "0.0.8",
-    "ejs": "1.0.0"
+    "ejs": "1.0.0",
+    "cbml": "0.0.2"
   },
   "scripts": {
     "test": "mocha -R spec && npm run coverage",
