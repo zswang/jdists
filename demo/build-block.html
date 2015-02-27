@@ -6,11 +6,38 @@
   </style>
 </head>
 <body>
-<script type="text/jdists"> /*<debug>*/
-  var h1 = document.querySelector('h1');
-  h1.innerHTML += ' 2014';
-  /*</debug>*/
-  /*<replace>console.log('可以写在一行');</replace>*/</script>
+<script type="text/jdists">
+/*<jdists import="6.js" />*/
+/*<jdists clean id='ttc' import="5.js">*/
+console.log(1);
+/*</jdists>*/
+/*<remove>
+console.log(2);
+</remove>*/
+(*<delphi>
+console.log(2);
+</delphi>*)
+(*<delphi>*)
+console.log(2);
+(*</delphi>*)
+'''<release>'''
+test
+'''</release>'''
+'''<release>
+test
+/*<jdists import="7.js">*/
+</release>'''
+/*<jdists import="6.js">*/
+console.log(3);
+/*</jdists>*/
+/*<jdists import="1.js">*/
+  /*<jdists import="2.js">*/
+    /*<jdists import="3.js">*/console.log(4);/*</jdists>*/
+    /*<jdists import="4.js">*/console.log(5);/*</jdists>*/
+    console.log(1);
+  /*</jdists>*/
+/*</jdists>*/
+</script>
 <script>
 (function() {
   /**
@@ -22,89 +49,143 @@
    */
   var buildBlock = function(content, onread, isReplace) {
     var content = String(content);
+
     // @group
     // fl, tag, attrs, fr, content, end
-    var regexList = [
-      // xml
-      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?()()(\s*\/-->)/,
-      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*-->)([^]*?)(<!--\/\2-->)/,
-      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>)([^]*?)(<\/\2-->)/,
-
-      // c \ c++ \ c# \ java \ js \ css
-      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?()()(\s*\/>\*\/)/,
-      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/,
-      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>)([^]*?)(<\/\2>\*\/)/,
-
-      // pascal \ delphi
-      /^(\(\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?()()(\s*\/>\*\))/,
-      /^(\(\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>\*\))([^]*?)(\(\*<\/\2>\*\))/,
-      /^(\(\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>)([^]*?)(<\/\2>\*\))/,
-
-      // python
-      /^('''<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?()()(\s*\/>''')/,
-      /^('''<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>''')([^]*?)('''<\/\2>''')/,
-      /^('''<)([\w-_.]+)((?:\s*[\w-_.]+\s*=\s*"[^"]+")+)?(\s*>)([^]*?)(<\/\2>''')/
-    ];
-
-    var flags = ['<!--', '/*<', '(*<', "'''"];
 
     var result = '';
     var start = 0;
+    var count = 0;
+    var level = 0;
     while (start < content.length) {
-      var min = Infinity;
-      var regexIndex;
-
-      flags.forEach(function(flag, index) {
-        var t = content.substring(start).indexOf(flag);
-        if (t >= 0 && t < min) {
-          min = t;
-          regexIndex = index * 3;
-        }
-      });
-
-      if (min >= Infinity) { // 没有找到语法
-        break;
-      }
-
-      var pointer = start + min;
-      var match = false;
-
-      for (var j = regexIndex; j <= regexIndex + 3; j++) {
-        match = content.substring(pointer).match(regexList[j]);
-        console.log(pointer, match);
-        if (match) {
-          match = match.map(function(item) { // 避免 undefined
-            return item || '';
-          });
-          match.push(pointer);
-          result += content.substring(start, pointer);
-          result += onread.apply(this, match);
-
-          start = pointer + match[0].length;
-          break;
-        }
-      }
-
+      // find tagName
+      var match = content.substring(start).match(
+        /(<!--|\/\*<|\(\*<|'''<)\s*(\/?)([\w_-]+)\s*/
+      );
       if (!match) {
-        result += content.substring(start, start + 1);
-        start++;
+        return;
+      }
+      var fl = match[1];
+      var closed = match[2];
+      var tag = match[3];
+      var attrs = [];
+      var fr = '';
+      start += match.index + match[0].length;
+
+      var find; // find end
+      if (closed === '/') { // 闭合便签
+        switch (fl) {
+          case '<!--':
+            find = /^\s*(\/?-->)/;
+            break;
+          case '/*<':
+            find = /^\s*(\/?>\*\/)/;
+            break;
+          case '(*<':
+            find = /^\s*(\/?>\*\))/;
+            break;
+          case "'''<":
+            find = /^\s*(\/?>''')/;
+            break;
+        }
+      } else { // 属性
+        // find attrs
+        while (true) {
+          // find attrName
+          match = content.substring(start).match(
+            /^\s*([\w_-]+)\s*/
+          );
+          if (match) {
+            var attrName = match[1];
+            var attrValue = '""';
+            start += match.index + match[0].length;
+
+            // find attrValue
+            match = content.substring(start).match(
+              /^\s*=\s*('([^']*)'|"([^"]*)"|([^'"\s\/>]+))\s*/
+            );
+
+            if (match) {
+              attrValue = match[1];
+              start += match.index + match[0].length;
+            }
+            attrs.push(attrName + '=' + attrValue);
+            // console.log(attrName, attrValue);
+          }
+          else {
+            break;
+          }
+        }
+        switch (fl) {
+          case '<!--':
+            find = /^\s*(\/?-->|>)/;
+            break;
+          case '/*<':
+            find = /^\s*(\/?>\*\/|>)/;
+            break;
+          case '(*<':
+            find = /^\s*(\/?>\*\)|>)/;
+            break;
+          case "'''<":
+            find = /^\s*(\/?>'''|>)/;
+            break;
+        }
+      }
+
+      match = content.substring(start).match(
+        find
+      );
+      if (match) {
+        fr = match[1];
+        start += match.index + match[0].length;
+
+        var left = '';
+        if (fr === '>') { // 需要闭合
+          left += '</' + tag;
+          switch (fl) {
+            case '<!--':
+              left += '-->';
+              break;
+            case '/*<':
+              left += '>*/';
+              break;
+            case '(*<':
+              left += '>*)';
+              break;
+            case "'''<":
+              left += ">'''";
+              break;
+          }
+          var pos = content.substring(start).indexOf(left);
+          if (pos >= 0) {
+            start += pos + left.length;
+            // console.log(pos, left);
+          }
+        }
+      }
+      var isRight = closed === '/' || fr[0] === '/' || fr == '>';
+      var isLeft = closed !== '/';
+      if (isRight ^ isLeft && isRight) {
+        level--;
+      }
+      console.log(fl + closed + tag + fr + ': ' + level, isLeft, isRight);
+      if (isRight ^ isLeft && isLeft) {
+        level++;
+      }
+      // console.log(JSON.stringify({
+      //   tag: tag,
+      //   fl: fl,
+      //   fr: fr,
+      //   closed: closed,
+      //   level: level,
+      //   attr: attrs.join(' ')
+      // }));
+
+      if (count++ > 20) {
+        break;
       }
     }
     result += content.substring(start);
-
-    if (isReplace) {
-      result = String(result).replace( // 处理注释模板
-        /\/\*#\*\/\s*function\s*\(\s*\)\s*\{\s*\/\*\!?([^]*?)\*\/[\s;]*\}/g,
-        function(all, text) {
-          return JSON.stringify(text);
-        }
-      ).replace(/\/\*,\*\/\s*(function(?:\s+[\w$_]+)?\s*\(\s*([^()]+)\s*\))/g, // 处理参数自识别
-        function(all, func, params) {
-          return '[' + params.replace(/([^\s,]+)/g, "'$&'") + '], ' + func;
-        }
-      );
-    }
-
     return result;
   };
 
