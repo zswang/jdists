@@ -30,7 +30,7 @@ describe('fixtures', function() {
       }
       assert.equal(
         jdists.build(path.join(dirname, input), {
-          output: output
+          output: path.join(dirname, output)
         }),
         String(fs.readFileSync(path.join(dirname, output)))
       );

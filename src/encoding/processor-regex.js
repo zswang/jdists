@@ -11,7 +11,7 @@
     var attrPattern = getAttrOrValue(attrs.pattern, '');
     var attrReplacement = getAttrOrValue(attrs.replacement, '');
     var content = e.content;
-    if (!attrReplacement || !content || !attrPattern) {
+    if (!content || !attrPattern) {
       return content;
     }
 

@@ -44,8 +44,7 @@
             var t = path.resolve(dirname, attrBase, // 绝对路径
               current.dirname, moduleName
             );
-            t = path.relative(path.join(dirname, attrBase), t); // 相对路径
-            moduleName = '/' + t;
+            moduleName = path.relative(path.join(dirname, attrBase), t); // 相对路径
           }
           var module;
           if (!modules[moduleName]) {
