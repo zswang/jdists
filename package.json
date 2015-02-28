@@ -33,7 +33,7 @@
     "ejs": "1.0.0"
   },
   "scripts": {
-    "test": "mocha -R spec && npm run coverage",
+    "test": "mocha -R spec",
     "lint": "jshint src/**/*.js"
   }
 }
