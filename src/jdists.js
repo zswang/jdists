@@ -194,7 +194,7 @@
       var attrs = getAttrs(tag, attrText, dirname);
 
       if (attrs.trigger &&
-        attrs.trigger.indexOf(options.trigger) < 0) {
+        !common.intersection(options.triggerList, attrs.trigger)) {
         return all;
       }
 
@@ -250,7 +250,8 @@
 
       var attrs = getAttrs(tag, attrText, dirname);
 
-      if (attrs.trigger && attrs.trigger.indexOf(options.trigger) < 0) {
+      if (attrs.trigger &&
+        !common.intersection(options.triggerList, attrs.trigger)) {
         return all;
       }
 
@@ -267,7 +268,8 @@
 
           if (variants[attrs.import]) { // 文件在变量中出现
             content = variants[attrs.import];
-          } else if (attrs.block || attrs.file) {
+          }
+          else if (attrs.block || attrs.file) {
             blockfile = attrs['@filename'] || getAttrOrValue(attrs.file, filename); // 默认当前文件名
             blockname = getAttrOrValue(attrs.block, ''); // 默认全部文件
 
@@ -291,10 +293,12 @@
               if (block.isFile) {
                 if (block.isBinary) { // 二进制文件
                   block.content = fs.readFileSync(block.filename);
-                } else {
+                }
+                else {
                   block.content = replaceFile(block.filename, options);
                 }
-              } else {
+              }
+              else {
                 block.nodes.sort(function(a, b) { // 保证代码顺序
                   return a.pos - b.pos;
                 });
@@ -304,7 +308,8 @@
                     if (node.attrs.type === 'comment') {
                       if (/^\s*</.test(node.content)) {
                         node.content = node.content.replace(/^\s*<!--([^]*)-->\s*$/, '$1');
-                      } else {
+                      }
+                      else {
                         node.content = node.content.replace(/^\s*\/\*([^]*)\*\/\s*$/, '$1');
                       }
                     }
@@ -329,8 +334,11 @@
           var encoding = getAttrOrValue(attrs.encoding, '');
           if (/^[\w-_]+$/.test(encoding)) { // 正常编码前
             processor = processors[encoding];
-          } else if (encoding) { // 编码器来至变量
-            var module = { exports: {} };
+          }
+          else if (encoding) { // 编码器来至变量
+            var module = {
+              exports: {}
+            };
             new Function('require', 'module', 'exports', encoding)(
               require, module, module.exports
             );
@@ -371,7 +379,8 @@
           if (attrs.export) {
             if (/^#[\w-_]+$/.test(attrs.export)) { // 保存到虚拟文件中
               variants[attrs.export] = content;
-            } else {
+            }
+            else {
               if (attrs['@export']) {
                 forceDirSync(path.dirname(attrs['@export']));
                 fs.writeFileSync(attrs['@export'], content);
@@ -394,6 +403,7 @@
     options = options || {};
     options.remove = options.remove || 'debug,test';
     options.trigger = options.trigger || 'release';
+    options.triggerList = String(options.trigger).split(',');
     options.removeList = String(options.remove).split(',');
     options.clean = typeof options.clean === 'undefined' ? true : options.clean;
 
