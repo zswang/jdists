@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "description": "JS 区块进行预处理工具",
   "main": "src/jdists.js",
   "bin": {

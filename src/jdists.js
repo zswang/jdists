@@ -407,6 +407,10 @@
     options.removeList = String(options.remove).split(',');
     options.clean = typeof options.clean === 'undefined' ? true : options.clean;
 
+    if (options.nocache) {
+      blocks = {};
+    }
+
     chain = []; // 引用链
     filename = path.resolve('', filename); // 使用绝对文件路径
 
