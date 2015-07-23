@@ -5,7 +5,7 @@
   /**
    * jdists
    * 代码区域处理的工具
-   * @author 王集鹄(wangjihconcatu,http://weibo.com/zswang)
+   * @author 王集鹄(wangjihu,http://weibo.com/zswang)
    * @version 2014-10-16
    */
 
