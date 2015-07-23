@@ -10,10 +10,8 @@
 var fs = require('fs');
 var path = require('path');
 var cbml = require('cbml');
-
+var jdistsScope = require('../src/scope');
 var colors = require('colors/safe');
-var blocks = {}; // key: filename, value: blocks
-var variants = {}; // key: name, value: content
 
 function buildNode(node, options) {
   var result = '';
@@ -47,16 +45,21 @@ function buildNode(node, options) {
   return result;
 }
 
-function build(filename, options) {
-  var key = [filename, ''];
-  if (blocks[key]) {
-    return blocks[key].value;
-  }
+function build(filename, argv) {
 
-  var tokens = cbml.parse(fs.readFileSync(filename));
-  buildNode(tokens);
-  blocks[key] = tokens;
-  return blocks[key].value;
+  var scopes = {};
+  var variants = {};
+  var processors = {};
+
+  var root = jdistsScope.create({
+    filename: filename,
+    argv: argv,
+    scopes: scopes,
+    variants: variants,
+    processors: processors
+  });
+
+  return root.build();
 }
 
-console.log(build('src/temp.js'));
+exports.build = build;

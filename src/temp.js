@@ -1,6 +1,6 @@
 /*<jdists encoding="base64">*/
 hello world!
-  /*<jdists encoding="string">*/
+  /*<jdists encoding="quoted">*/
   123
   /*</jdists>*/
 /*</jdists>*/
