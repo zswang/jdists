@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * 编码成 base64
  *

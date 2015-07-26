@@ -1,5 +1,3 @@
-'use strict';
-
 var cleanCSS = require('clean-css');
 
 /**

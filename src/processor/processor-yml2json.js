@@ -1,5 +1,3 @@
-'use strict';
-
 var yaml = require('js-yaml');
 
 /**

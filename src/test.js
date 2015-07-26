@@ -1,13 +1,17 @@
 (function() {
 
+  /*<header>*/
   'use strict';
+  /*</header>*/
 
+  /*<header info="file">*/
   /**
    * jdists
    * 代码区域处理的工具
    * @author 王集鹄(wangjihu,http://weibo.com/zswang)
-   * @version 2014-10-16
+   * @version (*<replace encoding="base64">2014-10-16</replace>*)
    */
+  /*</header>*/
 
   var fs = require('fs');
   var path = require('path');

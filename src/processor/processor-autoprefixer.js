@@ -1,5 +1,3 @@
-'use strict';
-
 var autopreFixer = require('autoprefixer-core');
 
 /**

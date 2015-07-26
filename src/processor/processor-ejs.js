@@ -1,5 +1,3 @@
-'use strict';
-
 var ejs = require('ejs');
 
 /**
@@ -9,7 +7,7 @@ var ejs = require('ejs');
  * @param {Object} attrs 属性
  * @param {string} attrs.data 数据项
  * @param {Object} scope 作用域
- * @param {Function} scope.parseAttr 解析属性
+ * @param {Function} scope.execImport 导入数据
  */
 module.exports = function processor(content, attrs, scope) {
   if (!content) {
@@ -18,7 +16,7 @@ module.exports = function processor(content, attrs, scope) {
   render = ejs.compile(content);
   var data;
   if (attrs.data) {
-    data = JSON.parse(scope.parseAttr(attrs.data));
+    data = JSON.parse(scope.execImport(attrs.data));
   } else {
     data = null;
   }

@@ -1,10 +1,10 @@
 {
   "name": "jdists",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "JS 区块进行预处理工具",
-  "main": "src/jdists.js",
+  "main": "src/index.js",
   "bin": {
-    "jdists": "bin/jdists"
+    "jdists": "cli.js"
   },
   "repository": {
     "type": "git",
@@ -15,7 +15,10 @@
     "region",
     "block"
   ],
-  "author": "zswang<wjhu111@21cn.com>",
+  "author": {
+    "name": "zswang",
+    "url": "http://weibo.com/zswang"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/zswang/jdists/issues"
@@ -27,7 +30,9 @@
     "jshint": "2.5.8"
   },
   "dependencies": {
+    "cbml": "^0.0.6",
     "mkdirp": "^0.5.0",
+    "less": "^2.4.0",
     "autoprefixer-core": "^5.1.8",
     "clean-css": "^3.1.8",
     "uglify-js": "^2.4.17",
@@ -36,14 +41,13 @@
     "js-yaml": "^3.3.1",
     "colors": "^1.0.3",
     "optimist": "^0.6.1",
-    "jhtmls": "^0.0.8",
+    "jhtmls": "^0.1.7",
     "jsets": "^0.0.1",
     "jade": "^1.11.0",
-    "ejs": "^1.0.0",
-    "cbml": "^0.0.3"
+    "ejs": "^1.0.0"
   },
   "scripts": {
-    "test": "mocha -R spec && npm run coverage",
+    "test": "mocha -R spec",
     "lint": "jshint src/**/*.js"
   }
 }

@@ -1,5 +1,3 @@
-'use strict';
-
 var uglify = require('uglify-js');
 
 /**

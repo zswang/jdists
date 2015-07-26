@@ -9,57 +9,72 @@
 
 var fs = require('fs');
 var path = require('path');
-var cbml = require('cbml');
-var jdistsScope = require('../src/scope');
+var Scope = require('../src/scope');
 var colors = require('colors/safe');
 
-function buildNode(node, options) {
-  var result = '';
-  if (!node) {
-    return result;
-  }
-  if (node.completed) {
-    return node.value;
-  }
-  if (node.type === 'text') {
-    return node.value;
-  }
+/*<remove>*/
+var defaultProcessors = {
+  "autoprefixer": require('./processor/processor-autoprefixer'),
+  "base64": require('./processor/processor-base64'),
+  "clean-css": require('./processor/processor-clean-css'),
+  "ejs": require('./processor/processor-ejs'),
+  "glob": require('./processor/processor-glob'),
+  "jade": require('./processor/processor-jade'),
+  "jhtmls": require('./processor/processor-jhtmls'),
+  "less": require('./processor/processor-less'),
+  "md5": require('./processor/processor-md5'),
+  "original": require('./processor/processor-original'),
+  "quoted": require('./processor/processor-quoted'),
+  "svgo": require('./processor/processor-svgo'),
+  "uglify": require('./processor/processor-uglify'),
+  "yml2json": require('./processor/processor-yml2json'),
+};
+/*</remove>*/
 
-  if (node.type === 'cbml') {
-    node.nodes.forEach(function(node) {
-      result += buildNode(node);
-    });
-  } else if (node.tag === 'jdists') {
-    var tokens = cbml.parse(node.content);
-    result = buildNode(tokens);
-    // TODO encoding
-    if (node.attrs.encoding === 'base64') {
-      result = (new Buffer(result)).toString('base64')
-    } else if (node.attrs.encoding === 'string') {
-      result = JSON.stringify(result);
-    }
-  }
+/*<jdists encoding="glob" pattern="processor/*.js" export="#processors" />*/
+/*<jdists encoding="jhtmls" data="#processors">
+var path = require('path');
+!#{'var defaultProcessors = {'}
+forEach(function (process) {
+  "!#{path.basename(process, '.js').replace(/^processor-/, '')}": require('#{process.replace(/\.js$/, '')}'),
+});
+!#{'};'}
+</jdists>*/
 
-  node.completed = true;
-  node.value = result;
-  return result;
-}
+var defaultTags = {
+  jdists: {
+    encoding: 'original'
+  },
+  include: {
+    encoding: 'original'
+  },
+  replace: {
+    encoding: 'original'
+  },
+  ejs: {
+    encoding: 'ejs'
+  }
+};
 
 function build(filename, argv) {
 
   var scopes = {};
   var variants = {};
-  var processors = {};
+  var processors = JSON.parse(JSON.stringify(defaultProcessors));
+  var tags = JSON.parse(JSON.stringify(defaultTags));
 
-  var root = jdistsScope.create({
+  var rootScope = Scope.create({
+    clean: argv.clean,
+    remove: argv.remove,
     filename: filename,
+    tags: tags,
     argv: argv,
     scopes: scopes,
     variants: variants,
     processors: processors
   });
 
-  return root.build();
+  return rootScope.build();
 }
 
 exports.build = build;
