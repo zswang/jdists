@@ -2,7 +2,7 @@
   "name": "jdists",
   "version": "1.0.0",
   "description": "Code block processing tools",
-  "main": "src/index.js",
+  "main": "lib/index.js",
   "bin": {
     "jdists": "cli.js"
   },

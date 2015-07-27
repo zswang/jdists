@@ -1,4 +1,4 @@
-var jdists = require('../src/index.js');
+var jdists = require('../.');
 var assert = require('should');
 var fs = require('fs');
 var util = require('util');
