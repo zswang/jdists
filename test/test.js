@@ -1,17 +1,8 @@
-var jdists = require('../.');
+var jdists = require('../src/index.js');
 var assert = require('should');
 var fs = require('fs');
 var util = require('util');
 var path = require('path');
-
-jdists.setEncoding('inline', require('../src/encoding/processor-inline'));
-jdists.setEncoding('require', require('../src/encoding/processor-require'));
-jdists.setEncoding('zero', require('../src/encoding/processor-zero'));
-jdists.setEncoding('concat', require('../src/encoding/processor-concat'));
-jdists.setEncoding('relative', require('../src/encoding/processor-relative'));
-jdists.setEncoding('template', require('../src/encoding/processor-template'));
-jdists.setEncoding('jjencode', require('../src/encoding/processor-jjencode'));
-jdists.setEncoding('regex', require('../src/encoding/processor-regex'));
 
 describe('fixtures', function() {
   var dirname = 'test/fixtures';
@@ -29,9 +20,7 @@ describe('fixtures', function() {
         return;
       }
       assert.equal(
-        jdists.build(path.join(dirname, input), {
-          output: output
-        }),
+        jdists.build(path.join(dirname, input)),
         String(fs.readFileSync(path.join(dirname, output)))
       );
     });

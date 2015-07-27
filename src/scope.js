@@ -26,27 +26,6 @@ var fs = require('fs');
 var minimatch = require('minimatch');
 
 /**
- * 清除空行
- *
- * @param {string} text 输入文本
- * @return {string} 返回处理后的结果
- */
-function cleanContent(content) {
-  return String(content).replace(/^\s*$/gm, '') // 清除空行
-    .replace(/\n{2,}/gm, '\n'); // 清除连接的空行
-}
-
-/**
- * 清除定义
- *
- * @param {string} text 输入文本
- * @return {string} 返回处理后的结果
- */
-function cleanDefine(content) {
-  return String(content).replace(/^[^\S\n]*\n|\n[^\S\n]*$/g, '');
-}
-
-/**
  * 是否无效的文件名
  *
  * @param {string} name 文件名
@@ -94,6 +73,30 @@ function create(options) {
   var cacheKeys = options.cacheKeys || {};
   var tokens = options.tokens;
   var excludeList = options.excludeList || [];
+
+  /**
+   * 清除空行
+   *
+   * @param {string} text 输入文本
+   * @return {string} 返回处理后的结果
+   */
+  function cleanContent(content) {
+    if (!clean) {
+      return content;
+    }
+    return String(content).replace(/^\s*$/gm, '') // 清除空行
+      .replace(/\n{2,}/gm, '\n'); // 清除连接的空行
+  }
+
+  /**
+   * 清除定义
+   *
+   * @param {string} text 输入文本
+   * @return {string} 返回处理后的结果
+   */
+  function cleanDefine(content) {
+    return String(content).replace(/^[^\S\n]*\n|\n[^\S\n]*$/g, '');
+  }
 
   /**
    * 编译 jdists 文件，初始化语法树
@@ -218,7 +221,20 @@ function create(options) {
    * @return {Function} 返回编码后的结果
    */
   function process(content, encoding, attrs) {
-    if (encoding === 'original') {
+    if (typeof content === 'undefined') {
+      console.error(
+        colors.red('process() : Undefined "content" parameters.')
+      );
+      return;
+    }
+    if (!encoding || encoding === 'original') {
+      return content;
+    }
+    var items = encoding.split(/\s*,\s*/);
+    if (items.length > 1) {
+      items.forEach(function (item) {
+        content = process(content, item, attrs);
+      });
       return content;
     }
     var processor = getProcessor(encoding);
@@ -480,10 +496,6 @@ function create(options) {
         // 'Selector is no matching nodes.'
         return;
       }
-      if (node.pending) { // 发生嵌套引用
-        // 'A circular reference.'
-        return;
-      }
       return scope.buildNode(node, true);
     }
     else {
@@ -532,9 +544,14 @@ function create(options) {
     if (!node) {
       return '';
     }
+    if (node.pending) {
+      throw util.format('A circular reference. (%s:%d:%d)',
+        filename, node.line || 0, node.col || 0
+      );
+    }
     var tagInfo = tags[node.tag];
     if (node.fixed) { // 已经编译过
-      if (isImport && !node.isTrigger) { // 未触发的 tag
+      if (isImport) { // 未触发的 tag
         return node.content;
       }
       return node.value;
@@ -543,6 +560,7 @@ function create(options) {
       return node.value;
     }
 
+    node.pending = true;
     var value = '';
     var fixed = true;
     if (!node.nodes) {
@@ -556,6 +574,7 @@ function create(options) {
         }
       });
     }
+    value = cleanContent(value);
 
     var isTrigger = tagInfo;
     if (isTrigger && node.attrs.trigger) {
@@ -568,19 +587,19 @@ function create(options) {
           fixed = false;
         }
       }
-      if (clean) {
+      else {
         value = cleanDefine(value);
       }
-      node.pending = true;
+
       value = process(value, node.attrs.encoding || tagInfo.encoding,
         node.attrs);
-      node.pending = false;
+      node.content = value;
       if (node.attrs.export && node.attrs.export !== '&') {
         execExport(node.attrs.export, value);
         value = '';
         fixed = false;
       }
-      if (removeList.indexOf(node.tag) >= 0) { // 这是被移除的节点
+      else if (removeList.indexOf(node.tag) >= 0) { // 这是被移除的节点
         value = '';
       }
     }
@@ -593,14 +612,11 @@ function create(options) {
         value = node.prefix + value + node.suffix;
       }
     }
-    if (clean) {
-      value = cleanContent(value);
-    }
-
+    node.pending = false;
     node.value = value;
     node.fixed = fixed;
     node.isTrigger = isTrigger;
-    if (isImport && !isTrigger) {
+    if (isImport) {
       return node.content;
     }
     return value;

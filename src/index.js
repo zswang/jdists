@@ -24,19 +24,24 @@ var colors = require('colors/safe');
 
 /*<remove>*/
 var defaultProcessors = {
+  "aaencode": require('../processor/processor-aaencode'),
   "autoprefixer": require('../processor/processor-autoprefixer'),
   "base64": require('../processor/processor-base64'),
   "clean-css": require('../processor/processor-clean-css'),
   "ejs": require('../processor/processor-ejs'),
   "glob": require('../processor/processor-glob'),
+  "html": require('../processor/processor-html'),
   "jade": require('../processor/processor-jade'),
   "jhtmls": require('../processor/processor-jhtmls'),
+  "jjencode": require('../processor/processor-jjencode'),
   "less": require('../processor/processor-less'),
   "md5": require('../processor/processor-md5'),
   "quoted": require('../processor/processor-quoted'),
   "svgo": require('../processor/processor-svgo'),
   "uglify": require('../processor/processor-uglify'),
+  "url": require('../processor/processor-url'),
   "yml2json": require('../processor/processor-yml2json'),
+  "zero": require('../processor/processor-zero'),
 };
 /*</remove>*/
 
@@ -71,6 +76,11 @@ var defaultExclude = [
 ];
 
 function build(filename, argv) {
+  argv = argv || {
+    remove: 'remove,test',
+    tirgger: 'release',
+    clean: true
+  };
   var scopes = {};
   var variants = {};
   var tags = JSON.parse(JSON.stringify(defaultTags));
