@@ -16,8 +16,14 @@ module.exports = function processor(content, attrs, scope) {
   render = ejs.compile(content);
   var data;
   if (attrs.data) {
-    data = JSON.parse(scope.execImport(attrs.data));
-  } else {
+    /*jslint evil: true */
+    data = new Function(
+      'return (' +
+      scope.execImport(attrs.data) +
+      ');'
+    )();
+  }
+  else {
     data = null;
   }
   return scope.compile(render(data));

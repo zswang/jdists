@@ -1,8 +1,8 @@
 {
   "name": "jdists",
   "version": "1.0.0",
-  "description": "JS 区块进行预处理工具",
-  "main": "src/index.js",
+  "description": "Code block processing tools",
+  "main": "lib/index.js",
   "bin": {
     "jdists": "cli.js"
   },
@@ -27,11 +27,12 @@
   "devDependencies": {
     "mocha": "2.0.1",
     "should": "4.1.0",
-    "jshint": "2.5.8"
+    "jshint": "2.8.0"
   },
   "dependencies": {
-    "cbml": "^0.0.6",
+    "cbml": "^0.0.7",
     "mkdirp": "^0.5.0",
+    "minimatch": "^2.0.10",
     "less": "^2.4.0",
     "autoprefixer-core": "^5.1.8",
     "clean-css": "^3.1.8",
@@ -48,6 +49,11 @@
   },
   "scripts": {
     "test": "mocha -R spec",
-    "lint": "jshint src/**/*.js"
-  }
+    "lint": "jshint src/*.js src/**/*.js processor/*.js",
+    "dist": "node cli.js src/index.js -o lib/index.js && node cli.js src/scope.js -o lib/scope.js "
+  },
+  "files": [
+    "lib",
+    "processor"
+  ]
 }

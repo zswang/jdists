@@ -1,14 +1,29 @@
+/*<jdists encoding="ejs" data="../package.json">*/
 /**
- * @file jdists 作用域
+ * @file <%- name %> scope
  *
- * @author 王集鹄(wangjihu,http://weibo.com/zswang)
- * @version 2015-07-24
+ * <%- description %>
+ * @author
+     <% (author instanceof Array ? author : [author]).forEach(function (item) { %>
+ *   <%- item.name %> (<%- item.url %>)
+     <% }); %>
+ * @version <%- version %>
+     <% var now = new Date() %>
+ * @date <%- [
+      now.getFullYear(),
+      now.getMonth() + 101,
+      now.getDate() + 100
+    ].join('-').replace(/-1/g, '-') %>
  */
+/*</jdists>*/
 
+var colors = require('colors');
+var util = require('util');
 var path = require('path');
 var jsets = require('jsets');
 var cbml = require('cbml');
 var fs = require('fs');
+var minimatch = require('minimatch');
 
 /**
  * 清除空行
@@ -60,6 +75,7 @@ var guid = 0;
  * @param {Object} options.processors 处理器集合
  * @param {Object} options.argv 控制台参数集合
  * @param {Object} options.scopes 作用域集合
+ * @param {Array} options.excludeList 排除的文件名
  * @param {jdistsScope} options.rootScope 顶级作用域
  * @return {jdistsScope} 返回 jdists 作用域对象
  */
@@ -68,6 +84,7 @@ function create(options) {
   var filename = path.resolve('', options.filename || '');
   var tags = options.tags || {};
   var clean = options.clean;
+  var removeList = options.removeList || [];
 
   var argv = options.argv || {};
   var rootScope = options.rootScope || instance;
@@ -76,6 +93,8 @@ function create(options) {
   var variants = options.variants || {};
   var cacheKeys = options.cacheKeys || {};
   var tokens = options.tokens;
+  var excludeList = options.excludeList || [];
+
   /**
    * 编译 jdists 文件，初始化语法树
    */
@@ -93,7 +112,6 @@ function create(options) {
   scopes[filename] = instance;
 
   function compile(content) {
-    console.log('content: %j', content);
     return buildNode(cbml.parse(content));
   }
   instance.compile = compile;
@@ -166,6 +184,7 @@ function create(options) {
   /**
    * 获取一个文件的作用域
    *
+   * @inner
    * @param {string} filename 对应文件名
    * @return {jdistsScope} 返回文件对应的作用域
    */
@@ -174,6 +193,9 @@ function create(options) {
     var result = scopes[filename];
     if (!result) {
       result = create({
+        clean: clean,
+        removeList: removeList,
+        excludeList: excludeList,
         rootScope: rootScope,
         filename: filename,
         argv: argv,
@@ -187,9 +209,23 @@ function create(options) {
     return result;
   }
 
+  /**
+   * 将内容进行编码
+   *
+   * @param {string} content 内容
+   * @param {string} encoding 编码名称
+   * @param {Object} attrs 属性集合
+   * @return {Function} 返回编码后的结果
+   */
   function process(content, encoding, attrs) {
+    if (encoding === 'original') {
+      return content;
+    }
     var processor = getProcessor(encoding);
     if (!processor) {
+      console.error(
+        colors.red(util.format('The "%s" processor does not exist.', encoding))
+      );
       return;
     }
     return processor(content, attrs, instance);
@@ -199,6 +235,7 @@ function create(options) {
   /**
    * 获取处理器
    *
+   * @inner
    * @param {string} encoding 编码名称
    * @return {Function} 返回名称对应的处理器，如果没有找到则返回 undefined
    */
@@ -215,9 +252,15 @@ function create(options) {
 
       var file = path.join(__dirname, 'processor', 'processor-' + encoding + '.js');
       if (fs.existsSync(file)) {
-        return processors[encoding] = require(file);
+        processors[encoding] = require(file);
+        return processors[encoding];
       }
-      return;
+      console.warn(
+        colors.blue(
+          util.format('Processor "%s" is not registered.', encoding)
+        )
+      );
+      return '';
     }
 
     var item = processors[encoding];
@@ -235,12 +278,14 @@ function create(options) {
       var module = {
         exports: {}
       };
+      /*jslint evil: true */
       new Function('require', 'module', 'exports', body)(
         require, module, module.exports
       );
       result = module.exports;
     }
     else {
+      /*jslint evil: true */
       result = new Function('require', 'return (' + body + ');')(require);
     }
     if (/^[#@]/.test(encoding)) { // 缓存编码
@@ -277,6 +322,7 @@ function create(options) {
     match[2].replace(/\s*\[([\w_-]+)\s*=\s*("([^\\"]*(\\.)*)*"|'([^\\']*(\\.)*)*'|[^\[\]]*)\]/g,
       function (all, name, value) {
         if (/^['"]/.test(value)) {
+          /*jslint evil: true */
           value = new Function('return (' + value + ');')();
         }
         attributes.push({
@@ -290,8 +336,9 @@ function create(options) {
       if (!node || !node.attrs) {
         return;
       }
+      var flag;
       if (!tag || node.tag === tag) {
-        var flag = true;
+        flag = true;
         attributes.every(function (item) {
           if (item.value !== node.attrs[item.name]) {
             flag = false;
@@ -307,12 +354,12 @@ function create(options) {
         return node;
       }
       var result;
-      node.nodes.every(function (item) {
-        if (check(item)) {
-          result = item;
-        }
-        return !result;
-      });
+      if (node.nodes) {
+        node.nodes.every(function (item) {
+          result = scan(item);
+          return !result;
+        });
+      }
       return result;
     }
     return scan(tokens);
@@ -326,10 +373,55 @@ function create(options) {
    * @return {boolean} 返回触发器是否生效
    */
   function execTrigger(trigger) {
-    // "@trigger == 'debug'"
+    if (!trigger) {
+      return true;
+    }
+    // "trigger1[,trigger2]*"
+    if (/^([\w-_]+)(,[\w-_]+)*$/.test(trigger)) {
+      var a1 = String(getArgument('trigger')).split(',');
+      var a2 = trigger.split(',');
+      var flag = false;
+      a1.every(function (item) {
+        if (a2.indexOf(item) >= 0) {
+          flag = true;
+        }
+        return !flag;
+      });
+      return flag;
+    }
 
+    // "@trigger === 'debug'"
+    // "#variant === 'debug'"
+    /*jslint evil: true */
+    return new Function('return (' +
+      trigger.replace(/(@|#)([\w-_]+)/g, function (all, flag, name) {
+        if (flag === '@') {
+          return JSON.stringify(getArgument(name));
+        }
+        else {
+          return JSON.stringify(getVariant(name));
+        }
+      }) +
+      ')')();
   }
   instance.execTrigger = execTrigger;
+
+  /**
+   * 执行文件排除
+   *
+   * @param {string} file 文件名
+   * @return {boolean} 返回文件是否被排除
+   */
+  function execExclude(file) {
+    var result = false;
+    excludeList.every(function (item) {
+      if (minimatch(file, item)) {
+        result = true;
+      }
+      return !result;
+    });
+    return result;
+  }
 
   /**
    * 执行数据导入
@@ -348,6 +440,7 @@ function create(options) {
       return getArgument(importation.slice(1));
     }
     if (/^'([^\\']*(\\.)*)*'$/.test(importation)) { // 字符串输出
+      /*jslint evil: true */
       return new Function('return (' + importation + ');')();
     }
     if (/^[\[\{"]/.test(importation)) { // 可能是 JSON
@@ -366,7 +459,17 @@ function create(options) {
       scope = instance;
     }
     else {
-      scope = getScope(path.resolve(getDirname(), name));
+      var file = path.resolve(getDirname(), name);
+      if (execExclude(file)) {
+        if (!selecotr) {
+          return fs.readFileSync(file);
+        }
+        else {
+          // 'The file has been ruled exclude, unable to code block import.'
+          return;
+        }
+      }
+      scope = getScope(file);
     }
     if (!scope) {
       return importation;
@@ -374,15 +477,18 @@ function create(options) {
     if (selecotr) {
       var node = scope.querySelector(selecotr);
       if (!node) {
+        // 'Selector is no matching nodes.'
         return;
       }
       if (node.pending) { // 发生嵌套引用
+        // 'A circular reference.'
         return;
       }
       return scope.buildNode(node, true);
     }
     else {
       if (instance === scope) { // 不能引用自己
+        // 'Cannot reference himself.'
         return;
       }
       return scope.build(instance);
@@ -405,6 +511,7 @@ function create(options) {
       return true;
     }
     else if (!invalidFilename(name)) {
+      cacheKeys[exportation] = guid++;
       var name = path.resolve(getDirname(), exportation);
       fs.writeFileSync(name, content);
       scopes[name] = null;
@@ -427,7 +534,7 @@ function create(options) {
     }
     var tagInfo = tags[node.tag];
     if (node.fixed) { // 已经编译过
-      if (isImport && !tagInfo) { // 引入未注册 tag
+      if (isImport && !node.isTrigger) { // 未触发的 tag
         return node.content;
       }
       return node.value;
@@ -450,15 +557,19 @@ function create(options) {
       });
     }
 
-    if (tagInfo) { // 已注册 tag
+    var isTrigger = tagInfo;
+    if (isTrigger && node.attrs.trigger) {
+      isTrigger = execTrigger(node.attrs.trigger);
+    }
+    if (isTrigger) { // 已注册 tag
       if (node.attrs.import && node.attrs.import !== '&') {
         value = execImport(node.attrs.import);
-        if (clean) {
-          value = cleanDefine(value);
-        }
         if (node.attrs.import.indexOf('@') !== 0) {
           fixed = false;
         }
+      }
+      if (clean) {
+        value = cleanDefine(value);
       }
       node.pending = true;
       value = process(value, node.attrs.encoding || tagInfo.encoding,
@@ -469,19 +580,27 @@ function create(options) {
         value = '';
         fixed = false;
       }
+      if (removeList.indexOf(node.tag) >= 0) { // 这是被移除的节点
+        value = '';
+      }
     }
     else if (node.tag) { // 并不是根目录
       node.content = cleanDefine(value);
-      value = node.prefix + value + node.suffix;
+      if (removeList.indexOf(node.tag) >= 0) { // 这是被移除的节点
+        value = '';
+      }
+      else {
+        value = node.prefix + value + node.suffix;
+      }
     }
     if (clean) {
       value = cleanContent(value);
-      // console.log('value: %j', value);
     }
 
     node.value = value;
     node.fixed = fixed;
-    if (isImport && !tagInfo) {
+    node.isTrigger = isTrigger;
+    if (isImport && !isTrigger) {
       return node.content;
     }
     return value;

@@ -16,7 +16,12 @@ module.exports = function processor(content, attrs, scope) {
   render = jade.compile(content);
   var data;
   if (attrs.data) {
-    data = JSON.parse(scope.execImport(attrs.data));
+    /*jslint evil: true */
+    data = new Function(
+      'return (' +
+      scope.execImport(attrs.data) +
+      ');'
+    )();
   } else {
     data = null;
   }
