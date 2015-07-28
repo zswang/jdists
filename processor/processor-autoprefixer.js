@@ -1,4 +1,5 @@
-var autopreFixer = require('autoprefixer-core');
+var postcss = require('postcss');
+var autoprefixer = require('autoprefixer-core');
 
 /**
  * 自动添加 CSS前缀
@@ -11,10 +12,12 @@ var autopreFixer = require('autoprefixer-core');
  */
 module.exports = function processor(content, attrs, scope) {
   var browsers;
-  if (attr.browsers) {
-    browsers = scope.execImport(attr.browsers).split(/\s*,\s*/);
+  if (attrs.browsers) {
+    browsers = scope.execImport(
+      attrs.browsers
+    ).split(/\s*,\s*/);
   }
-  return autopreFixer.process(content, {
+  return postcss(autoprefixer).process(content, {
     browsers: browsers
-  }).css;
+  }).toString();
 };

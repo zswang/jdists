@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ejs</title>
+</head>
+<body>
+  <!--include encoding="glob" pattern="cycle*.js" export="#data" /-->
+  <ul>
+  <!--jdists encoding="jhtmls" data="#data"-->
+  sort().forEach(function (item) {
+    <li>#{item}</li>
+  });
+  <!--/jdists-->
+  </ul>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>candy</title>
+</head>
+<body>
+  <h1></h1>
+  <div></div>
+</body>
+<script>
+/*<jdists encoding="candy,uglify">*/
+(function() {
+  /*<remove>*/
+  'use strict';
+  /*</remove>*/
+
+  function format(template, json) {
+    /*<remove>*/
+    if (typeof template === 'function') { // 函数多行注释处理
+      template = String(template).replace(
+        /[^]*\/\*!?\s*|\s*\*\/[^]*/g, // 替换掉函数前后部分
+        ''
+      );
+    }
+    /*</remove>*/
+    return template.replace(/#\{(.*?)\}/g, function(all, key) {
+        return json && (key in json) ? json[key] : "";
+    });
+  }
+
+  function createGetter(target, getter) {
+    var method = function (name, fn) {
+      var result;
+
+      /*<remove>*/
+      if (typeof name === 'function') {
+        var keys = name['-jsets-params'];
+        if (!keys) { // 优先从缓存中获取
+          keys = [];
+          String(name).replace(/\(\s*([^()]+?)\s*\)/,
+            function (all, names) {
+              keys = names.split(/\s*,\s*/);
+            }
+          );
+          name['-jsets-params'] = keys;
+        }
+        return method(keys, name);
+      }
+      /*</remove>*/
+
+      if (typeof name === 'string' || typeof name === 'number') {
+        if (typeof fn === 'function') {
+          fn.call(target, getter(name));
+          return target;
+        }
+        return getter(name);
+      }
+
+      if (typeof name === 'object') {
+        if (name instanceof Array) {
+          if (typeof fn === 'function') {
+            result = [];
+            name.forEach(function (n) {
+              result.push(getter(n));
+            });
+            fn.apply(target, result);
+            return target;
+          }
+          result = {};
+          name.forEach(function (n) {
+            result[n] = getter(n);
+          });
+          return result;
+        }
+
+        var key;
+        if (typeof fn === 'function') {
+          result = [];
+          for (key in name) {
+            result.push(getter(key) || name[key]);
+          }
+          return target;
+        }
+        result = {};
+        for (key in name) {
+          result[key] = getter(key) || name[key];
+        }
+        return result;
+      }
+    };
+    return method;
+  }
+
+  var now = new Date();
+  var data = {
+    title: 'uglify',
+    date: [
+      now.getFullYear(),
+      now.getMonth() + 101,
+      now.getDate() + 100
+    ].join('-').replace(/-1/g, '-'),
+    color: 'red'
+  };
+  var instance = {};
+  instance.get = createGetter(instance, function (name) {
+    return data[name];
+  });
+
+  instance.get( /*,*/ function (title, color, date) {
+    document.querySelector('h1').innerHTML =
+      [title, color, date].join('<br>');
+  });
+
+  document.querySelector('div').innerHTML = format(
+    /*#*/ function () {
+    /*
+      <div>
+        <h1>#{title}</h1>
+        <label><em>#{date}</em></label>
+      </div>
+    */
+    }, data
+  );
+})();
+/*</jdists>*/
+</script>
+</html>

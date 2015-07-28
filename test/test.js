@@ -4,15 +4,15 @@ var fs = require('fs');
 var util = require('util');
 var path = require('path');
 
-describe('fixtures', function() {
+describe('fixtures', function () {
   var dirname = 'test/fixtures';
-  var items = fs.readdirSync(dirname).filter(function(item) {
+  var items = fs.readdirSync(dirname).filter(function (item) {
     return /\.input\.(js|html|css)$/.test(item);
-  }).forEach(function(input) {
-    var output = input.replace(/\.input\.(js|html|css)$/, '.output.$1');
-    it(input, function() {
+  }).forEach(function (input) {
+    var output = input.replace(/\.input\.(js|html|css|less)$/, '.output.$1');
+    it(input, function () {
       if (/\.throw\./.test(input)) { // 出现异常
-        (function() {
+        (function () {
           jdists.build(path.join(dirname, input), {
             output: output
           });
@@ -20,7 +20,9 @@ describe('fixtures', function() {
         return;
       }
       assert.equal(
-        jdists.build(path.join(dirname, input)),
+        jdists.build(path.join(dirname, input), {
+          output: output
+        }),
         String(fs.readFileSync(path.join(dirname, output)))
       );
     });

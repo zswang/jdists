@@ -75,17 +75,28 @@ var defaultExclude = [
   '**/*.min.+(js|css)'
 ];
 
+/**
+ * 编译 jdists 文件
+ * @param {string} filename 文件名
+ * @param {Object} argv 配置项
+ * @param {boolean} argv.clean 是否清除连续空行，默认 true
+ * @param {string} argv.remove 需要移除的标签列表，默认 "remove,test"
+ * @return {string} 返回编译后的结果
+ */
 function build(filename, argv) {
-  argv = argv || {
-    remove: 'remove,test',
-    tirgger: 'release',
-    clean: true
-  };
+  // 处理默认值
+  argv = argv || {};
+  argv.trigger = argv.trigger || 'release';
+  argv.remove = argv.remove || 'remove,test';
+  if (typeof argv.clean === 'undefined') {
+    argv.clean = true;
+  }
+
   var scopes = {};
   var variants = {};
   var tags = JSON.parse(JSON.stringify(defaultTags));
   var excludeList = defaultExclude.slice();
-  var removeList = (argv.remove || '').split(/\s*,\s*/);
+  var removeList = argv.remove.split(/\s*,\s*/);
   var processors = {};
   for (var key in defaultProcessors) {
     processors[key] = defaultProcessors[key];
@@ -98,6 +109,7 @@ function build(filename, argv) {
     filename: filename,
     tags: tags,
     argv: argv,
+    env: process.env,
     scopes: scopes,
     variants: variants,
     processors: processors

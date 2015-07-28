@@ -25,5 +25,5 @@ module.exports = function processor(content, attrs, scope) {
   } else {
     data = null;
   }
-  return render(data);
+  return scope.compile(render(data));
 };

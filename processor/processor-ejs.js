@@ -13,7 +13,7 @@ module.exports = function processor(content, attrs, scope) {
   if (!content) {
     return content;
   }
-  render = ejs.compile(content);
+  var render = ejs.compile(content);
   var data;
   if (attrs.data) {
     /*jslint evil: true */

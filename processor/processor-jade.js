@@ -13,7 +13,18 @@ module.exports = function processor(content, attrs, scope) {
   if (!content) {
     return content;
   }
-  render = jade.compile(content);
+  var match = content.match(/^[^\n\S]+/);
+  var space;
+  if (match) {
+    space = match[0].length;
+    /*jslint evil: true */
+    var regex = new Function('return (/^[^\\n\\S]{' + space + '}/gm)')();
+    content = content.replace(regex, '');
+    space = match[0];
+  }
+  render = jade.compile(content, {
+    pretty: true
+  });
   var data;
   if (attrs.data) {
     /*jslint evil: true */
@@ -22,8 +33,13 @@ module.exports = function processor(content, attrs, scope) {
       scope.execImport(attrs.data) +
       ');'
     )();
-  } else {
+  }
+  else {
     data = null;
   }
-  return render(data);
+  content = render(data);
+  if (space) { // 需要补空白
+    content = content.replace(/^/gm, space);
+  }
+  return content;
 };
