@@ -2,7 +2,7 @@
   "name": "jdists",
   "version": "1.0.0",
   "description": "Code block processing tools",
-  "main": "lib/index.js",
+  "main": "index.js",
   "bin": {
     "jdists": "cli.js"
   },
@@ -33,6 +33,7 @@
     "cbml": "^0.0.7",
     "jsets": "^0.0.3",
     "mkdirp": "^0.5.0",
+    "JSDev": "^0.0.83",
     "minimatch": "^2.0.10",
     "less": "^2.4.0",
     "postcss": "^4.1.16",
@@ -51,7 +52,7 @@
   "scripts": {
     "test": "mocha -R spec",
     "lint": "jshint src/*.js src/**/*.js processor/*.js",
-    "dist": "node cli.js src/index.js -o lib/index.js && node cli.js src/scope.js -o lib/scope.js "
+    "dist": "node cli.js src/jdists.js -o lib/jdists.js && node cli.js src/scope.js -o lib/scope.js "
   },
   "files": [
     "lib",
