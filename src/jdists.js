@@ -1,184 +1,123 @@
-(function() {
+/*<jdists encoding="ejs" data="../package.json">*/
+/**
+ * @file <%- name %>
+ *
+ * <%- description %>
+ * @author
+     <% (author instanceof Array ? author : [author]).forEach(function (item) { %>
+ *   <%- item.name %> (<%- item.url %>)
+     <% }); %>
+ * @version <%- version %>
+     <% var now = new Date() %>
+ * @date <%- [
+      now.getFullYear(),
+      now.getMonth() + 101,
+      now.getDate() + 100
+    ].join('-').replace(/-1/g, '-') %>
+ */
+/*</jdists>*/
 
-  'use strict';
+var fs = require('fs');
+var path = require('path');
+var scope = require('./scope');
+var colors = require('colors/safe');
 
-  /**
-   * jdists
-   * 代码区域处理的工具
-   * @author 王集鹄(wangjihconcatu,http://weibo.com/zswang)
-   * @version 2014-10-16
-   */
+/*<remove>*/
+var defaultProcessors = {
+  "ejs": require('../processor/processor-ejs'),
+  "glob": require('../processor/processor-glob'),
+  "html": require('../processor/processor-html'),
+  "jhtmls": require('../processor/processor-jhtmls'),
+  "quoted": require('../processor/processor-quoted'),
+};
+/*</remove>*/
 
-  var fs = require('fs');
-  var path = require('path');
-  var colors = require('colors/safe');
+/*<jdists encoding="glob" pattern="../processor/*.js" export="#processors" />*/
+/*<jdists encoding="jhtmls" data="#processors">
+var path = require('path');
+!#{'var defaultProcessors = {'}
+forEach(function (process) {
+  "!#{path.basename(process, '.js').replace(/^processor-/, '')}": require('#{process.replace(/\.js$/, '')}'),
+});
+!#{'};'}
+</jdists>*/
 
-  var common = require('./common');
-  var clean = common.clean;
-  var forceDirSync = common.forceDirSync;
-  var md5 = common.md5;
-  var decodeHTML = common.decodeHTML;
-  var encodeHTML = common.encodeHTML;
-  var getAttrs = common.getAttrs;
+var defaultTags = {
+  jdists: {
+    encoding: 'original'
+  }
+};
 
-  var chain; // 引用链
+var defaultExclude = [
+  '**/*.+(png|jpeg|jpg|mp3|ogg|gif|eot|ttf|woff)',
+  '**/*.min.+(js|css)'
+];
 
-  var blocks = {}; // key: filename, value: blocks
-  var variants = {}; // key: name, value: content
+var defaultRemove = 'remove,test,debug';
 
-  /**
-   * 编码处理器集合
-   * function(e)
-    content // 内容
-    attrs // 属性
-    dirname // 当前内容所在目录
-    blockfile // 块文件名
-    blockname // 块名
-    options // 选项
-    tag // 标签
-    buildBlock // 编译一个块
-    readBlock // 读取模块的函数
-    getValue // 获取变量的函数
-    filename // 输入文件
-    jdists // jdists 本身
-   */
-  var processors = {
-    base64: function(e) {
-      return (new Buffer(e.content)).toString('base64');
-    },
-    md5: function(e) {
-      return md5(e.content);
-    },
-    url: function(e) {
-      return encodeURIComponent(e.content);
-    },
-    html: function(e) {
-      return encodeHTML(e.content);
-    },
-    string: function(e) {
-      return JSON.stringify(e.content);
-    },
-    escape: function(e) {
-      return escape(e.content);
-    }
-  };
+var defaultTrigger = 'release';
 
-  /**
-   * 编译块
-   * @param {string} content 内容
-   * @param {Function} onread 读取函数
-   * @param {boolean} isReplace 是否替换过程
-   * @return 返回编译后的内容
-   */
-  var buildBlock = function(content, onread, isReplace) {
-    var content = String(content);
-    // @group
-    // fl, tag, attrs, fr, content, end
-    var regexList = [
-      // xml
-      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*(?:=\s*"[^"]*"))*)?()()(\s*\/-->)/,
-      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*(?:=\s*"[^"]*"))*)?(\s*-->)([^]*?)(<!--\/\2-->)/,
-      /^(<!--)([\w-_.]+)((?:\s*[\w-_.]+\s*(?:=\s*"[^"]*"))*)?(\s*>)([^]*?)(<\/\2-->)/,
+/**
+ * 编译 jdists 文件
+ * @param {string} filename 文件名
+ * @param {Object} argv 配置项
+ * @param {boolean} argv.clean 是否清除连续空行，默认 true
+ * @param {string} argv.remove 需要移除的标签列表，默认 "remove,test"
+ * @return {string} 返回编译后的结果
+ */
+function build(filename, argv) {
+  // 处理默认值
+  argv = argv || {};
+  argv.trigger = argv.trigger || defaultTrigger;
+  argv.remove = argv.remove || defaultRemove;
 
-      // c \ c++ \ c# \ java \ js \ css
-      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*(?:=\s*"[^"]*"))*)?()()(\s*\/>\*\/)/,
-      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*(?:=\s*"[^"]*"))*)?(\s*>\*\/)([^]*?)(\/\*<\/\2>\*\/)/,
-      /^(\/\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*(?:=\s*"[^"]*"))*)?(\s*>)([^]*?)(<\/\2>\*\/)/,
+  var scopes = {};
+  var variants = {};
+  var tags = JSON.parse(JSON.stringify(defaultTags));
+  var excludeList = defaultExclude.slice();
+  var removeList = argv.remove.split(/\s*,\s*/);
+  var processors = {};
+  var clean = true;
+  for (var key in defaultProcessors) {
+    processors[key] = defaultProcessors[key];
+  }
 
-      // pascal \ delphi
-      /^(\(\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*(?:=\s*"[^"]*"))*)?()()(\s*\/>\*\))/,
-      /^(\(\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*(?:=\s*"[^"]*"))*)?(\s*>\*\))([^]*?)(\(\*<\/\2>\*\))/,
-      /^(\(\*<)([\w-_.]+)((?:\s*[\w-_.]+\s*(?:=\s*"[^"]*"))*)?(\s*>)([^]*?)(<\/\2>\*\))/,
+  // 处理配置文件
+  var configFilename = argv.config || '.jdistsrc';
+  if (fs.existsSync(configFilename)) {
+    var config =
+      /*<jdists>
+      JSON.parse(fs.readFileSync(configFilename))
+      </jdists>*/
 
-      // python
-      /^('''<)([\w-_.]+)((?:\s*[\w-_.]+\s*(?:=\s*"[^"]*"))*)?()()(\s*\/>''')/,
-      /^('''<)([\w-_.]+)((?:\s*[\w-_.]+\s*(?:=\s*"[^"]*"))*)?(\s*>''')([^]*?)('''<\/\2>''')/,
-      /^('''<)([\w-_.]+)((?:\s*[\w-_.]+\s*(?:=\s*"[^"]*"))*)?(\s*>)([^]*?)(<\/\2>''')/
-    ];
-
-    var flags = ['<!--', '/*<', '(*<', "'''"];
-
-    var result = '';
-    var start = 0;
-    while (start < content.length) {
-      var min = Infinity;
-      var regexIndex;
-
-      flags.forEach(function(flag, index) {
-        var t = content.substring(start).indexOf(flag);
-        if (t >= 0 && t < min) {
-          min = t;
-          regexIndex = index * 3;
-        }
-      });
-
-      if (min >= Infinity) { // 没有找到语法
-        break;
+      /*<jdists encoding="indent" export="../.jdistsrc">*/
+      {
+        "clean": true,
+        "tags": {
+          "ejs": {
+            "encoding": "ejs"
+          },
+          "xor": {
+            "encoding": "xor"
+          }
+        },
+        "processors": {
+          "xor": "processor-extend/processor-xor.js"
+        },
+        "exclude": [
+          "**/*.+(exe|obj|dll|bin|zip|rar)"
+        ]
       }
+      /*</jdists>*/
+    ;
 
-      var pointer = start + min;
-      var match = false;
-
-      for (var j = regexIndex; j <= regexIndex + 3; j++) {
-        match = content.substring(pointer).match(regexList[j]);
-
-        if (match) {
-          match = match.map(function(item) { // 避免 undefined
-            return item || '';
-          });
-          match.push(pointer);
-          result += content.substring(start, pointer);
-          result += onread.apply(this, match);
-
-          start = pointer + match[0].length;
-          break;
-        }
-      }
-
-      if (!match) {
-        result += content.substring(start, start + 1);
-        start++;
-      }
+    if (typeof config.clean !== 'undefined') {
+      clean = config.clean;
     }
-    result += content.substring(start);
-
-    if (isReplace) {
-      result = String(result).replace( // 处理注释模板
-        /\/\*#\*\/\s*function\s*\(\s*\)\s*\{\s*\/\*\!?([^]*?)\*\/[\s;]*\}/g,
-        function(all, text) {
-          return JSON.stringify(text);
-        }
-      ).replace(/\/\*,\*\/\s*(function(?:\s+[\w$_]+)?\s*\(\s*([^()]+)\s*\))/g, // 处理参数自识别
-        function(all, func, params) {
-          return '[' + params.replace(/([^\s,]+)/g, "'$&'") + '], ' + func;
-        }
-      );
+    if (config.exclude instanceof Array) {
+      excludeList = excludeList.concat(config.exclude);
     }
-
-    return result;
-  };
-
-  /**
-   * 加载文件
-   * @param {string} filename 文件名，绝对路径
-   * @param {Object} options 配置项
-   */
-  var loadFile = function(filename, options) {
-    if (blocks[[filename, '']]) { // 文件已经处理过
-      return;
-    }
-    /*<debug>*/
-    // console.log('loadFile(filename: %j)', filename);
-    /*</debug>*/
-    blocks[[filename, '']] = {
-      filename: filename,
-      isFile: true
-    };
-    if (!fs.existsSync(filename)) {
-      console.warn(colors.red('File "%s" not exists.'), filename);
-      blocks[[filename, '']].content = '';
-      return;
-    }
+<<<<<<< HEAD
 
     options = options || {};
 
@@ -196,38 +135,14 @@
       if (attrs.trigger &&
         !common.intersection(options.triggerList, attrs.trigger)) {
         return all;
+=======
+    if (config.processors) {
+      for (var encoding in config.processors) {
+        registerProcessor(encoding, config.processors[encoding]);
+>>>>>>> cbml
       }
-
-      var key = [filename, tag];
-      /*<debug>*/
-      // console.log('loadFile()::readBlock() key: %j', key);
-      /*</debug>*/
-
-      blocks[key] = blocks[[filename, tag]] || {
-        filename: filename,
-        tag: tag,
-        nodes: []
-      };
-
-      blocks[key].nodes.push({
-        pos: pos,
-        attrs: attrs,
-        content: content
-      });
-
-      if (attrs.file && /^[^#:]+/.test(attrs.file) &&
-        /^(replace|include)$/.test(tag)) { // 需要引入文件
-        loadFile(attrs['@filename'], options);
-      }
-
-      buildBlock(content, readBlock); // 处理嵌套
-      return new Array(all.length + 1).join(' ');
-    };
-
-    var content = fs.readFileSync(filename);
-    if (options.clean) { // 清理空白字符
-      content = clean(content);
     }
+<<<<<<< HEAD
     blocks[[filename, '']].content = content;
 
     return buildBlock(blocks[[filename, '']].content, readBlock);
@@ -420,49 +335,60 @@
 
     if (options.clean) { // 清理空白字符
       result = clean(result);
-    }
-
-    /*<debug>*/
-    // console.log(result);
-    /*</debug>*/
-    return result;
-  };
-
-  /**
-   * 添加一个编码器
-   * @param {string} encoding 编码名称
-   * @param {Function} processor 处理器 function(e)
-   */
-  var setEncoding = function(encoding, processor) {
-    if (!encoding || !processor) {
-      return;
-    }
-    processors[encoding] = processor;
-  };
-
-  function getValue(id) {
-    return variants[id];
-  }
-
-  function setValue(id, content) {
-    return variants[id] = content;
-  }
-
-  function getAttrOrValue(text, defValue) {
-    if (/^#[\w+_-]+$/.test(text)) {
-      if (variants[text]) {
-        return variants[text];
+=======
+    if (config.tags) {
+      for (var name in config.tags) {
+        var item = config.tags[name];
+        if (item) {
+          tags[name] = item;
+        }
       }
+>>>>>>> cbml
     }
-    return text || defValue;
   }
 
-  exports.build = buildFile;
-  exports.setEncoding = setEncoding;
-  exports.replaceFile = replaceFile;
-  exports.loadFile = loadFile;
+  var rootScope = scope.create({
+    clean: clean,
+    removeList: removeList,
+    excludeList: excludeList,
+    filename: filename,
+    tags: tags,
+    argv: argv,
+    env: process.env,
+    scopes: scopes,
+    variants: variants,
+    processors: processors
+  });
 
-  exports.getValue = getValue;
-  exports.setValue = setValue;
+  return rootScope.build();
+}
+exports.build = build;
 
-})();
+/**
+ * 注册默认处理器
+ *
+ * @param {string} encoding 编码名称
+ * @param {Function|string} processor 处理函数
+ */
+function registerProcessor(encoding, processor) {
+  if (!processor) {
+    return;
+  }
+  if (typeof processor === 'function') {
+    defaultProcessors[encoding] = processor;
+    return true;
+  } else if (typeof processor === 'string' && processor) {
+    if (fs.existsSync(processor)) {
+      return registerProcessor(
+        encoding,
+        scope.buildProcessor(fs.readFileSync(processor))
+      );
+    } else {
+      return registerProcessor(
+        encoding,
+        scope.buildProcessor(processor)
+      );
+    }
+  }
+}
+exports.registerProcessor = registerProcessor;

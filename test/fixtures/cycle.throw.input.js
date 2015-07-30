@@ -1,3 +1,3 @@
 void function() {
-/*<include file="cycle1.js" />*/
+/*<jdists import="cycle1.js" />*/
 }();

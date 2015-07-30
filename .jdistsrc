@@ -1,0 +1,17 @@
+{
+  "clean": true,
+  "tags": {
+    "ejs": {
+      "encoding": "ejs"
+    },
+    "xor": {
+      "encoding": "xor"
+    }
+  },
+  "processors": {
+    "xor": "processor-extend/processor-xor.js"
+  },
+  "exclude": [
+    "**/*.+(exe|obj|dll|bin|zip|rar)"
+  ]
+}

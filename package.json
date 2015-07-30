@@ -1,10 +1,16 @@
 {
   "name": "jdists",
+<<<<<<< HEAD
   "version": "0.7.7",
   "description": "JS 区块进行预处理工具",
   "main": "src/jdists.js",
+=======
+  "version": "0.9.0",
+  "description": "Code block processing tools",
+  "main": "index.js",
+>>>>>>> cbml
   "bin": {
-    "jdists": "bin/jdists"
+    "jdists": "cli.js"
   },
   "repository": {
     "type": "git",
@@ -15,7 +21,10 @@
     "region",
     "block"
   ],
-  "author": "zswang<wjhu111@21cn.com>",
+  "author": {
+    "name": "zswang",
+    "url": "http://weibo.com/zswang"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/zswang/jdists/issues"
@@ -24,16 +33,40 @@
   "devDependencies": {
     "mocha": "2.0.1",
     "should": "4.1.0",
-    "jshint": "2.5.8"
+    "jshint": "2.8.0"
   },
   "dependencies": {
-    "colors": "1.0.3",
-    "optimist": "0.6.1",
-    "jhtmls": "0.0.8",
-    "ejs": "1.0.0"
+    "cbml": "^0.0.7",
+    "jsets": "^0.0.3",
+    "mkdirp": "^0.5.0",
+    "JSDev": "^0.0.83",
+    "minimatch": "^2.0.10",
+    "less": "^2.4.0",
+    "postcss": "^4.1.16",
+    "autoprefixer-core": "^5.1.8",
+    "clean-css": "^3.1.8",
+    "uglify-js": "^2.4.17",
+    "svgo": "^0.5.1",
+    "glob": "^5.0.5",
+    "js-yaml": "^3.3.1",
+    "colors": "^1.0.3",
+    "optimist": "^0.6.1",
+    "jhtmls": "^0.1.7",
+    "jade": "^1.11.0",
+    "ejs": "^1.0.0"
   },
   "scripts": {
     "test": "mocha -R spec",
+<<<<<<< HEAD
     "lint": "jshint src/**/*.js"
   }
+=======
+    "lint": "jshint src/*.js src/**/*.js processor/*.js",
+    "dist": "node cli.js src/jdists.js -o lib/jdists.js && node cli.js src/scope.js -o lib/scope.js "
+  },
+  "files": [
+    "lib",
+    "processor"
+  ]
+>>>>>>> cbml
 }

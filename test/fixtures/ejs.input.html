@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ejs</title>
+</head>
+<body>
+<!--jdists export="#data">
+[
+  {
+    title: "捉妖记",
+    url: "http://movie.douban.com/subject/25723907/",
+    isnew: true
+  },
+  {
+    title: "煎饼侠",
+    url: "http://movie.douban.com/subject/25895276/",
+    isnew: true
+  },
+  {
+    title: "西游记之大圣归来",
+    url: "http://movie.douban.com/subject/26277313/"
+  },
+  {
+    title: "道士下山",
+    url: "http://movie.douban.com/subject/24879839/"
+  },
+  {
+    title: "侏罗纪世界",
+    url: "http://movie.douban.com/subject/10440138/"
+  }
+]
+</jdists-->
+  <ul>
+<!--jdists encoding="ejs" data="#data">
+<% forEach(function (item, index) { %>
+    <li>
+      <b>第<%= index + 1 %>名</b>
+      <a href="<%= item.url %>"><%= item.title %></a>
+      <% if (item.isnew) { %>
+        <span>new!</span>
+      <% } %>
+    </li>
+<% }); %>
+</jdists-->
+  </ul>
+</body>
+<script>
+/*<jdists encoding="ejs" data="{filename: 'hello.js'}">
+  <%- ['<!--', 'jdists import="', filename, '" /-->'].join('') %>
+</jdists>*/
+</script>
+</html>

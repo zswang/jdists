@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>uglify</title>
+</head>
+<body>
+  <div></div>
+</body>
+<script>
+!function(){function e(e,t){return e.replace(/#\{(.*?)\}/g,function(e,n){return t&&n in t?t[n]:""})}var t=new Date;document.querySelector("div").innerHTML=e("<div>\n        <h1>#{title}</h1>\n        <label><em>#{date}</em></label>\n      </div>",{title:"uglify",date:[t.getFullYear(),t.getMonth()+101,t.getDate()+100].join("-").replace(/-1/g,"-")})}();
+</script>
+</html>

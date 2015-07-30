@@ -30,8 +30,7 @@ node_modules
 
 # Bower
 coverage
-components
-lib
+bower_components
 
 # test
 assets

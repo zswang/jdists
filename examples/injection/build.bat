@@ -1,1 +1,0 @@
-jdists tool.jdists.js -o tool.js

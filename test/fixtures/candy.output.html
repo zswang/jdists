@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>candy</title>
+</head>
+<body>
+  <h1></h1>
+  <div></div>
+</body>
+<script>
+!function(){function n(n,e){return n.replace(/#\{(.*?)\}/g,function(n,t){return e&&t in e?e[t]:""})}function e(n,e){var t=function(t,r){var o;if("string"==typeof t||"number"==typeof t)return"function"==typeof r?(r.call(n,e(t)),n):e(t);if("object"==typeof t){if(t instanceof Array)return"function"==typeof r?(o=[],t.forEach(function(n){o.push(e(n))}),r.apply(n,o),n):(o={},t.forEach(function(n){o[n]=e(n)}),o);var i;if("function"==typeof r){o=[];for(i in t)o.push(e(i)||t[i]);return n}o={};for(i in t)o[i]=e(i)||t[i];return o}};return t}var t=new Date,r={title:"uglify",date:[t.getFullYear(),t.getMonth()+101,t.getDate()+100].join("-").replace(/-1/g,"-"),color:"red"},o={};o.get=e(o,function(n){return r[n]}),o.get(["title","color","date"],function(n,e,t){document.querySelector("h1").innerHTML=[n,e,t].join("<br>")}),document.querySelector("div").innerHTML=n("\n      <div>\n        <h1>#{title}</h1>\n        <label><em>#{date}</em></label>\n      </div>\n    ",r)}();
+</script>
+</html>

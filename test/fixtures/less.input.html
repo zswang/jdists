@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <style>
+/*<jdists encoding="less">
+@base: #f938ab;
+
+.box-shadow(@style, @c) when (iscolor(@c)) {
+  -webkit-box-shadow: @style @c;
+  box-shadow:         @style @c;
+}
+.box-shadow(@style, @alpha: 50%) when (isnumber(@alpha)) {
+  .box-shadow(@style, rgba(0, 0, 0, @alpha));
+}
+.box {
+  .item1 {
+    color: saturate(@base, 5%);
+    border-color: lighten(@base, 30%);
+    div { .box-shadow(0 0 5px, 30%) }
+  }
+  .item2 {
+    color: saturate(@base, 30%);
+    border-color: lighten(@base, 5%);
+    div { .box-shadow(0 0 5px, green) }
+  }
+}
+</jdists>*/
+  </style>
+</head>
+<body>
+  <div class="box">
+    <ol>
+      <li class="item1"><div>hello</div> item1</li>
+      <li class="item2"><div>world</div> item2</li>
+    </ol>
+  </div>
+</body>
+</html>
