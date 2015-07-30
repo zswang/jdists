@@ -1,1 +1,1 @@
-module.exports = require('./lib/jdists');
+module.exports = require('./src/jdists');
