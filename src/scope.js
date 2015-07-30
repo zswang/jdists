@@ -278,7 +278,10 @@ function create(options) {
         return result;
       }
 
-      var file = path.join(__dirname, 'processor', 'processor-' + encoding + '.js');
+      var file = path.join(__dirname, '../processor', 'processor-' + encoding + '.js');
+      if (!fs.existsSync(file)) {
+        file = path.join(__dirname, '../processor-extend', 'processor-' + encoding + '.js');
+      }
       if (fs.existsSync(file)) {
         processors[encoding] = require(file);
         return processors[encoding];
