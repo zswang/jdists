@@ -7,9 +7,9 @@ var path = require('path');
 describe('fixtures', function () {
   var dirname = 'test/fixtures';
   var items = fs.readdirSync(dirname).filter(function (item) {
-    return /\.input\.(js|html|css)$/.test(item);
+    return /\.input\.(\w+)$/.test(item);
   }).forEach(function (input) {
-    var output = input.replace(/\.input\.(js|html|css|less)$/, '.output.$1');
+    var output = input.replace(/\.input\.(\w+)$/, '.output.$1');
     it(input, function () {
       if (/\.throw\./.test(input)) { // 出现异常
         (function () {

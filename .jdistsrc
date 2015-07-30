@@ -12,6 +12,6 @@
     "xor": "processor-extend/processor-xor.js"
   },
   "exclude": [
-    "**/*.+(exe|obj|dll|bin|zip|rar)"
+    "**\/*.+(exe|obj|dll|bin|zip|rar)"
   ]
 }

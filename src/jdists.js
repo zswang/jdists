@@ -26,9 +26,7 @@ var colors = require('colors/safe');
 var defaultProcessors = {
   "ejs": require('../processor/processor-ejs'),
   "glob": require('../processor/processor-glob'),
-  "html": require('../processor/processor-html'),
   "jhtmls": require('../processor/processor-jhtmls'),
-  "quoted": require('../processor/processor-quoted'),
 };
 /*</remove>*/
 
@@ -85,31 +83,26 @@ function build(filename, argv) {
   // 处理配置文件
   var configFilename = argv.config || '.jdistsrc';
   if (fs.existsSync(configFilename)) {
-    var config =
-      /*<jdists>
-      JSON.parse(fs.readFileSync(configFilename))
-      </jdists>*/
-
-      /*<jdists encoding="indent" export="../.jdistsrc">*/
-      {
-        "clean": true,
-        "tags": {
-          "ejs": {
-            "encoding": "ejs"
-          },
-          "xor": {
-            "encoding": "xor"
-          }
+    /*<jdists encoding="indent" export="../.jdistsrc">
+    {
+      "clean": true,
+      "tags": {
+        "ejs": {
+          "encoding": "ejs"
         },
-        "processors": {
-          "xor": "processor-extend/processor-xor.js"
-        },
-        "exclude": [
-          "**/*.+(exe|obj|dll|bin|zip|rar)"
-        ]
-      }
-      /*</jdists>*/
-    ;
+        "xor": {
+          "encoding": "xor"
+        }
+      },
+      "processors": {
+        "xor": "processor-extend/processor-xor.js"
+      },
+      "exclude": [
+        "**\/*.+(exe|obj|dll|bin|zip|rar)"
+      ]
+    }
+    </jdists>*/
+    var config = JSON.parse(fs.readFileSync(configFilename));
 
     if (typeof config.clean !== 'undefined') {
       clean = config.clean;
