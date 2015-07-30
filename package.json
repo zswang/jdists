@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "1.0.0",
+  "version": "0.9.0",
   "description": "Code block processing tools",
   "main": "index.js",
   "bin": {

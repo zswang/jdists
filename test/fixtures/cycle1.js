@@ -1,1 +1,1 @@
-/*<include import="cycle2.js" />*/
+/*<jdists import="cycle2.js" />*/

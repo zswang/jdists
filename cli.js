@@ -12,6 +12,10 @@ var colors = require('colors');
 var argv = optimist
   .usage('$0 input1.js [input2.js] -o output')
 
+.alias('h', 'help')
+  .describe('h', 'show this help message and exit.')
+  .string('h')
+
 .alias('o', 'output')
   .describe('o', 'output file.')
   .string('o')
@@ -26,10 +30,10 @@ var argv = optimist
   .default('t', 'release')
   .string('t')
 
-.alias('clean', 'c')
-  .describe('c', 'Clean white space.')
-  .default('c', true)
-  .boolean('c')
+.alias('config', 'c')
+  .describe('c', 'path to config file.')
+  .default('c', '.jdistsrc')
+  .string('c')
 
 .alias('v', 'version')
   .describe('v', 'Print version number and exit.')
@@ -49,7 +53,7 @@ if (argv._.length < 1) {
       /*
 Usage:
 
-    #{jdists,magenta} <input list> [options]
+    #{j,yellow}#{dist,green}#{s,yellow} <input list> [options]
 
 Options:
 

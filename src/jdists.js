@@ -45,22 +45,17 @@ forEach(function (process) {
 var defaultTags = {
   jdists: {
     encoding: 'original'
-  },
-  include: {
-    encoding: 'original'
-  },
-  replace: {
-    encoding: 'original'
-  },
-  ejs: {
-    encoding: 'ejs'
   }
 };
 
 var defaultExclude = [
-  '**/*.(png|jpeg|jpg|mp3|ogg|gif|eot|ttf|woff)',
+  '**/*.+(png|jpeg|jpg|mp3|ogg|gif|eot|ttf|woff)',
   '**/*.min.+(js|css)'
 ];
+
+var defaultRemove = 'remove,test,debug';
+
+var defaultTrigger = 'release';
 
 /**
  * 编译 jdists 文件
@@ -73,11 +68,8 @@ var defaultExclude = [
 function build(filename, argv) {
   // 处理默认值
   argv = argv || {};
-  argv.trigger = argv.trigger || 'release';
-  argv.remove = argv.remove || 'remove,test';
-  if (typeof argv.clean === 'undefined') {
-    argv.clean = true;
-  }
+  argv.trigger = argv.trigger || defaultTrigger;
+  argv.remove = argv.remove || defaultRemove;
 
   var scopes = {};
   var variants = {};
@@ -85,12 +77,63 @@ function build(filename, argv) {
   var excludeList = defaultExclude.slice();
   var removeList = argv.remove.split(/\s*,\s*/);
   var processors = {};
+  var clean = true;
   for (var key in defaultProcessors) {
     processors[key] = defaultProcessors[key];
   }
 
+  // 处理配置文件
+  var configFilename = argv.config || '.jdistsrc';
+  if (fs.existsSync(configFilename)) {
+    var config =
+      /*<jdists>
+      JSON.parse(fs.readFileSync(configFilename))
+      </jdists>*/
+
+      /*<jdists encoding="indent" export="../.jdistsrc">*/
+      {
+        "clean": true,
+        "tags": {
+          "ejs": {
+            "encoding": "ejs"
+          },
+          "xor": {
+            "encoding": "xor"
+          }
+        },
+        "processors": {
+          "xor": "processor-extend/processor-xor.js"
+        },
+        "exclude": [
+          "**/*.+(exe|obj|dll|bin|zip|rar)"
+        ]
+      }
+      /*</jdists>*/
+    ;
+
+    if (typeof config.clean !== 'undefined') {
+      clean = config.clean;
+    }
+    if (config.exclude instanceof Array) {
+      excludeList = excludeList.concat(config.exclude);
+    }
+    if (config.processors) {
+      for (var encoding in config.processors) {
+        registerProcessor(encoding, config.processors[encoding]);
+      }
+    }
+    if (config.tags) {
+      for (var name in config.tags) {
+        var item = config.tags[name];
+        if (item) {
+          tags[name] = item;
+        }
+      }
+    }
+  }
+
   var rootScope = scope.create({
-    clean: argv.clean,
+    clean: clean,
     removeList: removeList,
     excludeList: excludeList,
     filename: filename,
@@ -110,9 +153,27 @@ exports.build = build;
  * 注册默认处理器
  *
  * @param {string} encoding 编码名称
- * @param {Function} processor 处理函数
+ * @param {Function|string} processor 处理函数
  */
 function registerProcessor(encoding, processor) {
-  defaultProcessors[encoding] = processor;
+  if (!processor) {
+    return;
+  }
+  if (typeof processor === 'function') {
+    defaultProcessors[encoding] = processor;
+    return true;
+  } else if (typeof processor === 'string' && processor) {
+    if (fs.existsSync(processor)) {
+      return registerProcessor(
+        encoding,
+        scope.buildProcessor(fs.readFileSync(processor))
+      );
+    } else {
+      return registerProcessor(
+        encoding,
+        scope.buildProcessor(processor)
+      );
+    }
+  }
 }
 exports.registerProcessor = registerProcessor;
