@@ -28,12 +28,18 @@ function Constructor(number) {
   {trace.exit("Constructor");}
 }
 var trace = {
+  stack: [],
   enter: function (name) {
-    this.tick = new Date;
+    this.stack.push(new Date);
     console.log('enter %s', name);
   },
   exit: function (name) {
-    console.log('exit %s (%dms)', name, new Date() - this.tick);
+    var t = this.stack.pop();
+    if (t) {
+      console.log('exit %s (%dms)', name, new Date() - t);
+    } else {
+      console.log('exit %s', name);
+    }
   }
 };
 new Constructor(1);

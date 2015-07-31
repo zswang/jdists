@@ -39,8 +39,9 @@ function invalidFilename(name) {
 }
 
 /**
- * 唯一标识
- * @type {Number}
+ * 唯一标识，用来区分缓存内容是否修改
+ *
+ * @type {number}
  */
 var guid = 0;
 
@@ -51,7 +52,7 @@ var guid = 0;
  * @return {Funciton} 返回处理器函数
  */
 function buildProcessor(body) {
-  if (/\bmodule\.exports\s*=/.test(body)) {
+  if (/\bmodule\.exports\s*=/.test(body)) { // module 模式
     var module = {
       exports: {}
     };
@@ -61,7 +62,7 @@ function buildProcessor(body) {
     );
     return module.exports;
   }
-  else {
+  else { // 纯函数
     /*jslint evil: true */
     return new Function('require', 'return (' + body + ');')(require);
   }
@@ -139,6 +140,12 @@ function create(options) {
   var instance = {};
   scopes[filename] = instance;
 
+  /**
+   * 编译完整内容，一般用于模板引擎二次处理 jdists
+   *
+   * @param {string} content 内容
+   * @return {string} 返回编译的结果
+   */
   function compile(content) {
     return buildBlock(cbml.parse(content));
   }
@@ -708,7 +715,7 @@ function create(options) {
    */
   function build() {
     init();
-    if (tokens.completed) {
+    if (tokens.completed) { // 已经被编译过
       return tokens.value;
     }
     return buildBlock(tokens);

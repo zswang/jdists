@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>jsdev</title>
+</head>
+<body>
+  <!--jdists encoding="ejs,regex"
+    data="{filename: 'jade.input.html?jdists'}"
+    pattern="/~/g" replacement="*">
+    /~<jdists import="<%- filename %>" />~/
+  </jdists-->
+
+  <!--jdists export="#define">
+  function (content, attrs, scope) {
+    scope.execExport('#replacer', function (all) {
+      return '[' + all + ']';
+    });
+    return content;
+  }
+  </jdists-->
+
+  <!--jdists encoding="#define,regex" pattern="/\w+/g" replacement="#replacer">
+  hello world!
+  </jdists-->
+</body>
+</html>

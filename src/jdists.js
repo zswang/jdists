@@ -18,7 +18,6 @@
 /*</jdists>*/
 
 var fs = require('fs');
-var path = require('path');
 var scope = require('./scope');
 var colors = require('colors/safe');
 

@@ -70,6 +70,10 @@ function aaencode(text) {
 /**
  * 代码加密
  *
+ * @example
+ * <~jdists encoding="aaencode"~>
+ * ...
+ * <~/jdists~>
  * @param {string} content 文本内容
  */
 module.exports = function (content) {

@@ -3,10 +3,11 @@
  *
  * @param {string} content 文本内容
  * @param {Object} attrs 属性
- * @param {string} attrs.begin 起始点
- * @param {string} attrs.end 结束点
+ * @param {string} attrs.pattern 表达式
+ * @param {string} attrs.replacement 替换内容
  * @param {Object} scope 作用域
  * @param {Function} scope.execImport 导入数据
+ * @param {Function} scope.compile 变量 jdists 文本
  */
 module.exports = function processor(content, attrs, scope) {
   var pattern = scope.execImport(attrs.pattern);
@@ -25,5 +26,5 @@ module.exports = function processor(content, attrs, scope) {
   if (!regex) {
     return content;
   }
-  return content.replace(regex, replacement || '');
+  return scope.compile(content.replace(regex, replacement || ''));
 };

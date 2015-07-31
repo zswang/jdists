@@ -4,7 +4,7 @@ int main(void)
 {
 	/*<jdists export="#encode">
 	function (content) {
-		return content.replace(/char\s+(\w+)\[\s*(\d+)\s*\]\s*=\s*"(.*?)"/,
+		return content.replace(/char\s+(\w+)\[\s*(\d+)\s*\]\s*=\s*"(.*?)"/g,
 			function (all, name, len, value) {
 				var items = value.split('').concat([0]);
 				items = items.map(function (item, index) {
@@ -17,9 +17,10 @@ int main(void)
 	}
 	</jdists>*/
 	/*<jdists encoding="#encode">*/
-	char _link[100] = "http://legend.baidu.com/";
+	char _link1[100] = "http://legend.baidu.com/";
+	char _link2[100] = "http://shushuo.baidu.com/";
 	/*</jdists>*/
 
-	printf("link: %s\n", _link);
+	printf("link1: %s\n link2", _link2, _link2);
 	return 0;
 }
