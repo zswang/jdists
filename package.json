@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Code block processing tools",
   "main": "index.js",
   "bin": {
@@ -30,7 +30,7 @@
     "jshint": "2.8.0"
   },
   "dependencies": {
-    "cbml": "^0.0.7",
+    "cbml": "^0.0.8",
     "jsets": "^0.0.3",
     "mkdirp": "^0.5.0",
     "JSDev": "^0.0.83",

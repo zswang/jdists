@@ -209,15 +209,6 @@ function create(options) {
   };
 
   /**
-   * 获取当前文件名
-   *
-   * @return {string} 返回当前文件名
-   */
-  instance.getFilename = function () {
-    return filename;
-  };
-
-  /**
    * 获取当前文件所在目录
    *
    * @return {string} 返回当前文件所在目录
@@ -621,9 +612,11 @@ function create(options) {
       return '';
     }
     if (node.pending) {
-      throw util.format('A circular reference. (%s:%d:%d)',
+      var error = util.format('A circular reference. (%s:%d:%d)',
         filename, node.line || 0, node.col || 0
       );
+      console.error(error);
+      throw error;
     }
     if (node.fixed) { // 已经编译过
       if (isImport) { // 未触发的 tag

@@ -4,6 +4,13 @@ var fs = require('fs');
 var util = require('util');
 var path = require('path');
 
+/**
+ * 清除 \r，为兼容 Windows 下的文本换行符 CRLF
+ */
+function cleanCRLF(text) {
+  return String(text).replace(/\r\n?/g, '\n');
+}
+
 describe('fixtures', function () {
   var dirname = 'test/fixtures';
   var items = fs.readdirSync(dirname).filter(function (item) {
@@ -23,7 +30,7 @@ describe('fixtures', function () {
         jdists.build(path.join(dirname, input), {
           output: path.join(dirname, output)
         }),
-        String(fs.readFileSync(path.join(dirname, output)))
+        cleanCRLF(fs.readFileSync(path.join(dirname, output)))
       );
     });
   });
