@@ -404,9 +404,10 @@ function create(options) {
       return flag;
     }
 
+    var items;
     function scan(node) {
       if (check(node)) {
-        if (all) {
+        if (items) {
           items.push(result);
         }
         return node;
@@ -415,14 +416,13 @@ function create(options) {
       if (node.nodes) {
         node.nodes.every(function (item) {
           result = scan(item);
-          return !result || all;
+          return items || !result;
         });
       }
       return result;
     }
-    var items;
     if (all) {
-      var items = [];
+      items = [];
       scan(tokens);
       return items;
     }
