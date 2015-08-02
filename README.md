@@ -1,458 +1,494 @@
-# jdists(```<>```) 前端代码块预处理工具
+# jdists 强大的代码块预处理工具
+
+标签： jdists 教程
+
+---
 
 [![Build Status](https://img.shields.io/travis/zswang/jdists/master.svg)](https://travis-ci.org/zswang/jdists)
 [![NPM version](https://img.shields.io/npm/v/jdists.svg)](http://badge.fury.io/js/jdists)
 
+![jdists logo](https://cloud.githubusercontent.com/assets/536587/9022251/4d33427c-38a1-11e5-98e5-37b6a1c69a85.png)
+
+## 背景
+
+### 软件发布流程
+
+![code pretreatment](https://cloud.githubusercontent.com/assets/536587/9024268/5275fe58-38f8-11e5-9306-89e6c1840f97.png)
+
+通常软件发布时会将源文件做一次「预处理」再编译成可执行文件，才发布到市场。
+
+### 「预处理」的目的主要是出于以下几点
+
+* 配置线上运行环境，如调试服务地址需变更为实现线上地址；
+* 减少执行程序的大小，移除没有使用的代码或资源并压缩；
+* 增加逆向工程的成本，给代码做混淆（包括改变标识符和代码结构），降低可读性；
+* 移除或增加调试功能，关闭或开启一些特权后门。
+
+> 一些 IDE 已在「编译」时集成了「预处理」功能。
+
 ## 什么是 jdists
 
-项目地址：[https://github.com/zswang/jdists](https://github.com/zswang/jdists)
+jdists 是一款强大的代码块预处理工具。
 
-### 关于命名
+### 什么是「代码块」(code block)？
 
-j **dist** s 就是 `js` 里插入了一个 `dist` （分发），避免和其他组件命名冲突，同时特殊好记。
-本工具专注于前端代码块（js、css、html）预处理。
+通常就是注释或注释包裹的代码片段，用于表达各种各样的含义。
 
-### 起因
+> 举个栗子
 
-一个页面从开发到上线基本会经历三个阶段：
-
-* 本机开发调试
-
-	* 打印一些变量和执行状态、模拟数据接口
-
-* 内网测试
-
-	* 跳过某些步骤、使用内网环境
-
-* 公网上线
-
-	* 移除调试代码、使用线上环境。
-
-
-其实前端代码和其他语言代码都需要编译，目前已经有很多成熟的工具来完成编译的事情。
-比如：fis、grunt、gulp，基本都是依赖配置文件，将项目代码进行编译到相应版本。
-
-### 问题
-
-* 代码和配置文件是分离的，这样开发维护起来不够直观。
-* 配置文件通常是基于 JSON，还是不够直观。
-* 调试代码容易遗忘，有导致线上事故的风险。
-
-### 思考
-
-那有没有一种方法能将部分编译逻辑写在代码中，就像 C 语言预编译宏定义，代码本身就包含了编译逻辑不依赖配置文件就能执行：
-
-```c
-#include "headfile"
-#ifdef DEBUG
-fprintf("variant=%d", variant);
-#endif
-```
-
-这样不仅利于维护也方便在本机开发时调试，那么接下来需求来了！
-
-### 需求
-
-* 学习成本要很低。（使用 html 标记，这个大家再熟悉不过）
-* 支持 html、css、js 文件格式。
-* 本机开发调试时不依赖编译器。（编译逻辑写在注释中）
-* 不仅能 include 一个文件，还能 include 一个文件中的片段（代码块）。
-* 能引入当前文件的代码块。
-* 能够替换代码块的内容。
-* 能 include 二进制文件，变为 base64 字符串，方便转成 dataUri。
-* 自动合并 css 或 js 文件，能够输出合并文件并能打 md5 戳。
-* 能够处理一些 `黑魔法`，避免被压缩工具影响
-
-比如：`注释模板`
-
++ TODO 注释，表示代码中待完善的地方
 ```js
-var render = jhtmls.render( /*#*/ function () {
+/* TODO 功能待开发 */
+```
+----
++ [wiredep][1] 注释，表示引入 bower 组件依赖的 css 资源
+```html
+  <!-- bower:css -->
+  <link rel="stylesheet" href="bower_components/css/bootstrap.css" />
+  <!-- endbower -->
+```
+----
++ [jshint.js][2] 顶部注释，表示版权声明
+```js
 /*!
-<div title="#{title}">#{content}</div>
-*/});
+ * JSHint, by JSHint Community.
+ *
+ * This file (and this file only) is licensed under the same slightly modified
+ * MIT license that JSLint is. It stops evil-doers everywhere:
+ *
+ *   Copyright (c) 2002 Douglas Crockford  (www.JSLint.com)
+ * .........
+ */
+```
+----
++ jshint.js 另一部分注释，表示代码检查配置项
+```js
+/*jshint quotmark:double */
+/*global console:true */
+/*exported console */
+```
+总之，本文所指「代码块」就是有特殊意义的注释。
+
+### 什么是「代码块预处理」？
+
+指在代码编译之前，将代码文件按代码块粒度做一次编码或解析。
+
+> 举个栗子，原本无效的代码片段，经过编码后变成了有效代码。
+
+预处理前：
+```js
+/*<jdists>
+console.log('Hello World!');
+</jdists>*/
 ```
 
-jdists 处理后 --->
+预处理后：
+```js
+console.log('Hello World!');
+```
+
+### 市面上还有哪一些「代码块预处理工具」？
+
+市面上有不少，这里只列两个比较典型的。
+
++ 已被普遍使用的 [JSDoc][3]，功能是将代码中的注释抽离成 API 文档。
 
 ```js
-var render = jhtmls.render('<div title="#{title}">#{content}</div>');
-```
-
-
-比如：`参数自识别`
-
-```js
-instance.get( /*,*/ function(a, b, c) {
-	// TODO
-});
-```
-
-jdists 处理后 --->
-
-```js
-instance.get(['a', 'b', 'c'], function(a, b, c) {
-	// TODO
-});
-```
-
-* 能够扩展替换规则。
-
-## 设计思路
-
-解决好如何定义代码块，其他问题基本就迎刃而解了。
-
-### 用什么方式来定义代码块？
-
-利用注释 + html 标记，并且又能和普通注释区分。
-
-* 在 html 中：
-
-```html
-<!--debug-->
-<div>测试版本</div>
-<!--/debug-->
-```
-* 在 js 中：
-
-```js
-/*<debug>*/
-console.log('测试版本');
-/*</debug>*/
-```
-
-* 在 css 中：
-
-```css
-.version {
-	font-size: 12px;
-/*<debug>*/
-	color: red;
-/*</debug>*/
+/**
+ * Represents a book.
+ * @constructor
+ * @param {string} title - The title of the book.
+ * @param {string} author - The author of the book.
+ */
+function Book(title, author) {
 }
 ```
+----
++ [JSDev][4] 是由 JSON 之父 Douglas Crockford 编写。jdists 与 JSDev 的功能类似，但 jdists 功能要复杂很多。
 
-### 一些代码未必默认启用，所以支持如下方式
+C command line example:
 
-* 在 html 中：
+```shell
+   jsdev -comment "Devel Edition." <input >output test_expose enter:trace.enter exit:trace.exit unless:alert
+```
+
+JavaScript:
+```js
+    output = JSDEV(input, [
+        "test_expose",
+        "enter:trace.enter",
+        "exit:trace.exit",
+        "unless:alert"
+    ] , ["Devel Edition."]);
+```
+input:
+```js
+    // This is a sample file.
+
+    function Constructor(number) {
+        /*enter 'Constructor'*/
+        /*unless(typeof number !== 'number') 'number', "Type error"*/
+        function private_method() {
+            /*enter 'private_method'*/
+            /*exit 'private_method'*/
+        }
+        /*test_expose
+            this.private_method = private_method;
+        */
+        this.priv = function () {
+            /*enter 'priv'*/
+            private_method();
+            /*exit 'priv'*/
+        }
+        /*exit "Constructor"*/
+    }
+```
+
+output:
+
+```js
+    // Devel Edition.
+    // This is a sample file.
+
+    function Constructor(number) {
+        {trace.enter('Constructor');}
+        if (typeof number !== 'number') {alert('number', "Type error");}
+        function private_method() {
+            {trace.enter('private_method');}
+            {trace.exit('private_method');}
+        }
+        {
+            this.private_method = private_method;
+        }
+        this.priv = function () {
+            {trace.enter('priv');}
+            private_method();
+            {trace.exit('priv');}
+        }
+        {trace.exit("Constructor");}
+    }
+```
+
+lightly minified:
+
+```js
+    function Constructor(number) {
+        function private_method() {
+        }
+        this.priv = function () {
+            private_method();
+        }
+    }
+```
+
+### 预处理以「代码块」为粒度有什么优势？
+ 
+* 处理速度快，按需对代码块部分进行指定编码；
+* 控制力更强，可以控制每个字符的变化；
+* 不干扰编译器，编译器天然忽略注释。
+
+### 现有「代码块预处理工具」存在什么问题？
+
++ 不容易学习和记忆。`begin` 还是 `start`，前缀还是后缀？
+```
+<!-- 乐居广告脚本 begin-->
+/* jshint ignore:start */
+/* TODO 待开发功能 */
+```
+
++ 是否存在闭合不明显。什么时候生效，什么时候失效？
+```
+/*jshint unused:true, eqnull:true*/
+/*test_expose
+    this.private_method = private_method;
+  */
+```
+
++ 没有标准，不能跨语言。JSDev 和 JSDoc 不能用于其他主流语言，如 Python、Lua 等。
+
+## 代码预处理的思考
+
+问题也就是：怎么定义、怎么处理、什么情况下触发。
+
+### 怎么定义「代码块」？
+
+本人拟订了一个基于「XML 标签」+「多行注释」的代码块规范： [CBML][5]
+
+![CBML](https://cloud.githubusercontent.com/assets/536587/9024562/a4dbd27a-3908-11e5-9c2c-50156a04d398.png)
+
+优势：
+
+* 学习成本低，XML、多行注释都是大家熟知的东西；
+* 标签是否闭合很明显；
+* 支持多种主流编程语言。
+
+### 怎么处理「代码块」？
+
+处理的步骤无外乎就是：输入、编码、输出
+
+![processor](https://cloud.githubusercontent.com/assets/536587/9024576/3bdbae70-3909-11e5-9b3e-f4ba83b5e842.png)
+
+经过解析 CBML 的语法树，获取 `tag` 和 `attribute` 两个关键信息。
+
+如果 `tag` 值为 `<jdists>` 就开始按 jdists 的规则进行处理。
+
+> 整个处理过程由四个关键属性决定：
+> 1. `import=` 指定输入媒介
+> 2. `export=` 指定输出媒介
+> 3. `encoding=` 指定编码集合
+> 4. `trigger=` 指定触发条件
+
+举个例子
+```js
+/*<jdists export="template.js" trigger="@version < '1.0.0'">
+  var template = /*<jdists encoding="base64,quoted" import="main.html?template" />*/
+/*</jdists>
+```
+
+这里有两个代码块，还是一个嵌套结构
+
+* 外层代码块属性 `export="template.js"` 指定内容导出到文件 `template.js`（目录相对于当前代码块所在的文件）。
+* 外层代码块属性  `trigger="@version < '1.0.0'"` 指定命令行参数 `version` 小于 `'1.0.0'` 才触发。
+* 内层代码块属性 `encoding="base64,quoted"` 表示先给内容做一次 `base64` 编码再做一次 `quoted` 即，编码成字符串字面量。
+
+### 什么情况下触发？
+
+有两个触发条件：
+
+1. 当 `tag` 值为 `<jdists>` 或者是被配置为 `jdists` 标签
+2. 当属性 `trigger=` 表达式判断为 `true`
+
+## jdists 基本概念
+
+### 代码块 block
+
+由 tag 标识的代码区域
+
+代码块主要有如下三种形式：
+* 空内容代码块，没有包裹任何代码
+```js
+/*<jdists import="main.js" />/
+```
+
+* 有效内容代码块，包裹的内容是编译器会解析
+```js
+/*<jdists encoding="uglify">*/
+  function format(template, json) {
+    if (typeof template === 'function') { // 函数多行注释处理
+      template = String(template).replace(
+        /[^]*\/\*!?\s*|\s*\*\/[^]*/g, // 替换掉函数前后部分
+        ''
+      );
+    }
+    return template.replace(/#\{(.*?)\}/g, function(all, key) {
+        return json && (key in json) ? json[key] : "";
+    });
+  }
+/*</jdists>*/
+```
+
+* 无效内容代码块，包裹的内容也在注释中
+```js
+/*<jdists>
+console.log('version: %s', version);
+<jdists>*/
+```
+
+### 标签 tag
+
+* `<jdists>` | 自定义
+
+### 属性 attribute
+
+* `import=` 指定输入媒介
+* `export=` 指定输出媒介
+* `encoding=` 指定编码集合
+* `trigger=` 指定触发条件
+
+### 媒介 medium
+
+* `&content` 默认为 "&"
+* `file` 文件
+    > 如：
+    > `main.js`
+    > `index.html`
+
+* `#variant` 变量
+    > 如：
+    > `#name`
+    > `#data`
+
+* `[file]?block` *readonly* 代码块，默认 `file` 为当前文件
+    > 如：
+    > `filename?tagName`
+    > `filename?tagName[attrName=attrValue]`
+    > `filename?tagName[attrName=attrValue][attrName2=attrValue2]`
+
+* `@argument` *readonly* 控制台参数
+    > 如：
+    > `@output`
+    > `@version`
+
+* `:environment` *readonly* 环境变量
+    > 如：
+    > `:HOME`
+    > `:USER`
+
+* `[...]`、`{...}` *readonly* 字面量
+    > 如：
+    > `[1, 2, 3, 4]`
+    > `{title: 'jdists'}`
+
+* `'string'` *readonly* 字符串
+    > 如：
+    > `'zswang'`
+
+### 触发器 trigger
+
+触发器有两种表达式
+
+* 触发器名列表与控制台参数 `--trigger` 是否存在交集，存在则被触发
+
+> 当 `$ jdists ... --trigger release` 触发
 
 ```html
-<!--release>
-<div>线上版本</div>
-</release-->
+<!--remove trigger="release"-->
+<label>release</label>
+<!--/remove-->
 ```
 
-* 在 js 中：
+* 将变量、属性、环境变量表达式替换后的字面量结果是否为 true
 
-```js
-/*<release>
-console.log('测试版本');
-</release>*/
-```
-
-* 在 css 中：
-
-```css
-.version {
-	font-size: 12px;
-/*<release>
-	color: red;
-</release>*/
-}
-```
-
-### 废弃的方式
+> 当 `$ jdists ... --version 0.0.9` 触发
 
 ```html
-<!--debug begin-->
-<div>测试版本</div>
-<!--debug end-->
-
-<!--start debug-->
-<div>测试版本</div>
-<!--end debug-->
+<!--remove trigger="@version < '1.0.0'"-->
+<label>1.0.0+</label>
+<!--/remove-->
 ```
 
-* 使用 `begin` | `start` / `end` 的方式，容易遗忘：前缀还是后缀、`begin` 还是 `start`
+## 如何扩展 jdists
+
+可以参考项目中 processor 目录，中自带编码器的写法
+
+举个栗子
+```js
+var ejs = require('ejs');
+
+/**
+ * ejs 模板渲染
+ *
+ * @param {string} content 文本内容
+ * @param {Object} attrs 属性
+ * @param {string} attrs.data 数据项
+ * @param {Object} scope 作用域
+ * @param {Function} scope.execImport 导入数据
+ * @param {Function} scope.compile 二次编译 jdists 文本
+ */
+module.exports = function processor(content, attrs, scope) {
+  if (!content) {
+    return content;
+  }
+  var render = ejs.compile(content);
+  var data;
+  if (attrs.data) {
+    /*jslint evil: true */
+    data = new Function(
+      'return (' +
+      scope.execImport(attrs.data) +
+      ');'
+    )();
+  }
+  else {
+    data = null;
+  }
+  return scope.compile(render(data));
+};
+```
+
+### jdistsScope
+
+```js
+/**
+ * 获取控制台参数
+ *
+ * @param {string} name 参数名
+ * @return {string} 返回控制台参数
+ */
+function getArgument(name) {}
+
+/**
+ * 获取变量值
+ *
+ * @param {string} name 变量名
+ * @return {*} 返回变量值
+ */
+function getVariant(name) {}
+
+/**
+ * 设置变量值
+ *
+ * @param {string} name 变量名
+ * @param {*} value 变量值
+ * @return {jdistsScope} 返回当前作用域
+ */
+function setVariant(name, value) {}
+
+/**
+ * 获取顶级作用域
+ *
+ * @return {jdistsScope} 返回顶级作用域
+ */
+function getRootScope() {}
+
+/**
+ * 获取当前所在目录
+ *
+ * @return {string} 返回当前所在目录
+ */
+function getDirname() {}
+```
+
+
+## 用例
+
+### 代码编译成 dataurl
+
+通过块导入
 
 ```html
-/*<release
-	color: red;
-/release>*/
+<!--remove-->
+<script>
+/*<jdists encoding="base64" id="code">*/
+console.log('hello world!');
+/*</jdists>*/
+</script>
+<!--/remove-->
+
+<!--jdists>
+<script src="data:application/javascript;base64,/*<jdists import="?[id=code]" />*/"></script>
+</jdists-->
 ```
 
-* 不能处理单行
-
-### 模块定义完整示例
+通过变量导入
 
 ```html
-<!--include file="base.html" block="b1"-->
-<!--include file="base.html" block="b1" /-->
-<!--debug file="base.html" block="b1" --><em>debug</em><!--/debug-->
-<!--debug file="base.html" block="b1"><em>debug</em></debug-->
+<!--remove-->
+<script>
+/*<jdists encoding="base64" export="#code">*/
+console.log('hello world!');
+/*</jdists>*/
+</script>
+<!--/remove-->
+
+<!--jdists>
+<script src="data:application/javascript;base64,/*<jdists import="#code" />*/"></script>
+</jdists-->
 ```
 
-```js
-/*<include file="base.html" block="b1" >*/
-/*<include file="base.html" block="b1" />*/
-/*<debug file="base.html" block="b1">*/<em>debug</em>/*</debug>*/
-/*<debug file="base.html" block="b1"><em>debug</em></debug>*/
-```
 
-## 基本概念
-
-名称|含义|例子|备注
-----|----|----|----
-file|文件|1.js,1.png|包括二进制文件
-block|代码块||只能是文本文件
-block::tag |标签|```<a>```|
-block::attribute|代码块属性|```<a encoding="md5">```|
-encoding|编码器|将代码块进行编码处理
-
-### 标准代码块
-
-tag|功能|示例
----|----|----
-include|引入文件或代码块|```<!--include file="all.js" /-->```
-replace|将当前代码块替换成文件或代码块|
-remove|将当前代码移除|
-
-### 代码属性（attribute）
-
-属性名|含义|例子|备注
-------|----|----|----
-encoding|编码|encoding="base64"|默认"original"，可扩展
-slice|裁剪|slice="1,-1"|参考 String.slice() 函数
-file|文件名|file="all.js"|默认当前文件
-export|导出文件|export="output.js"|以 '#' 开头则输出到内存中
-import|导入内容|import="#str"|只能从内存中导入
-block|代码名|block="hello"|引入的块名
-type|类型|type="comment"|默认"original"，"comment"：去掉包裹代码块的注释
-trigger|触发器|trigger="release,LAN"|默认"release"，存在这些触发器时才生效
-js|js 文件|js="all_{{md5,7}}.js"|输出的 js 文件名
-css|css 文件|css="all_{{md5,7}}.css"|输出的 css 文件名
-
-> {{md5,len}} 计算内容的 md5 值，len 指定长度
-
-### 编码（encoding）
-
-* original：原文【默认】
-* string：作为字符串
-* base64：base64 输出
-* md5：内容 MD5 戳（小写）
-* concat：合并本地 js 或 css 并可以知道输出
-* inline：内链文件
-* relative：静态资源相对路径
-* require：AMD 自动依赖处理
-* template：模板
-* zero：零宽字符加密
-
-可以通过 `jdists.setEncoding(encoding, processor)` 扩展
-
-### 使用限制
-
-* 代码块不能交叉，可以嵌套
-* 代码块引用不能出现循环
-
-## 实战
-
-### 开始使用
-
-* 依赖 npm 环境
-
-* 安装 `$ npm install jdists -g`
-
-* 命令格式 `$ jdists input1 [input2] [-output output] [-remove debug,test] [-tigger release]`
-
-* 命令参数
-
-参数|简写|功能|备注
-----|----|----|----
--output|-o|指定输出文件|默认输出到控制台
--remove|-r|指定移除的代码块|默认 "debug,test"
--trigger|-t|指定触发器|默认 "release"
--clean|-c|清除空白行|默认 true
--version|-v|打印当前版本|
-
-### 处理 js 中的 `注释模板`
-
-假设文件 `js/base.js` 内容为：
-
-```js
-var render = jhtmls.render(function() {/*!
-<ul>
-forEach(function(item) {
-	<li>#{item.title}</li>
-});
-<ul>
-*/});
-```
-
-如上可以省去拼接字符串的工作，直观好维护。但经过带压缩后就变成：
-
-```js
-var render=jhtmls.render( /*#*/ function(){});
-```
-怎么避免 `注释模板` 被压缩代码的工具移除？
-
-`$jdists js/base.js -o dist/js/base.js`
-
-生成的文件是：
-
-```js
-var render = jhtmls.render('<ul>\nforEach(function(item) {\n  <li>#{item.title}</li>\n});\n<ul>');
-```
-jdists 默认会处理 `注释模板`
-
-### 处理 js 中的 `参数名自识别`
-
-假设文件 `js/base.js` 内容为：
-
-```js
-instance.get( /*,*/ function(name, x, y, width, height) { ... });
-```
-
-我们可以通过函数声明中的参数列表判断需要获取的值，但是参数经过压缩后名字就变了，如：
-
-
-```js
-instance.get(function(a,b,c,d){ ... });
-```
-
-jdists 同样可以帮我们处理
-
-`$jdists js/base.js -o dist/js/base.js`
-
-生成的文件是：
-
-```js
-instance.get(['name','x','y','width','height'],function(a,b,c,d){ ... });
-```
-
-### 发布代码
-
-假设文件 `js/net.js` 内容为：
-
-```js
-var ajax = ajax || {};
-void function(exports) {
-/*<replace>
-	exports.host = 'http://api.baidu.com/1.0/getuser';
-</replace>*/
-}(ajax);
-```
-
-`$jdists js/net.js -o dist/js/net.js`
-
-生成的文件是：
-
-```js
-var ajax = ajax || {};
-void function(exports) {
-	exports.host = 'http://api.baidu.com/1.0/getuser';
-}(ajax);
-```
-
-还有一种情况，是我们需要先编译一个局域网版本
-
-假设文件 `js/net.js` 内容为：
-
-```js
-var ajax = ajax || {};
-void function(exports) {
-/*<replace trigger="release">
-	exports.host = 'http://api.baidu.com/1.0/getuser';
-</replace>*/
-/*<replace trigger="LAN">
-	exports.host = 'http://http://192.168.1.67:8000/1.0/getuser';
-</replace>*/
-}(ajax);
-```
-`$jdists js/net.js -o dist/js/net.js -t LAN`
-
-生成的文件是：
-
-```js
-var ajax = ajax || {};
-void function(exports) {
-/*<replace trigger="release">
-	exports.host = 'http://api.baidu.com/1.0/getuser';
-</replace>*/
-	exports.host = 'http://192.168.1.67:8000/1.0/getuser';
-}(ajax);
-```
-
-指定 trigger 的代码块，会检查是否命中配置的触发器，如果没有命中则不启用功能。
-
-### 合并静态资源
-
-还是依`所见即所得`的设计思路，开发期的 html 指明了依赖的静态文件，如：
-
-`index.html`
-
-```html
-<html>
-<head>
-	<!--replace encoding="concat" js="dist/all.js" css="dist/all.css"-->
-	<link rel="stylesheet" type="text/css" href="base.css">
-	<link rel="stylesheet" type="text/css" href="button.css">
-	<script src="base.js"></script>
-	<script src="replace.js"></script>
-	<!--/replace-->
-</head>
-<body>...</body>
-</html>
-```
-
-`$jdists index.html -o dist/index.html`
-
-生成的文件是：
-
-```html
-<html>
-<head>
-	<script src="all.js"></script>
-	<link rel="stylesheet" type="text/css" href="all.css">
-</head>
-<body>...</body>
-</html>
-```
-
-同时将本地静态资源分别合并到 `dist/all.js` 和 `dist/all.css`
-
-### 打包组件
-
-通过 jdists 可以将零散的代码和静态资源，拼凑为一个完整的组件
-
-```js
-void function() {
-	var bar = document.getElementById('jfpss-bar');
-	if (bar) {
-		return;
-	}
-
-	/*<include components/jframes/src/jframes.js>*/
-	;
-	/*<include components/jhtmls/src/jhtmls.js>*/
-	;
-	/*<include src/jfpss.js>*/
-
-	createStyle(function() {/*!<!--include src/tools.html style-->*/});
-
-	var div = document.createElement('div');
-	div.innerHTML = function() {/*!<!--include src/tools.html html-->*/};
-	document.body.appendChild(div);
-
-	/*<include src/tools.html js>*/
-}();
-```
-
-这样就可以用静态页面开发 UI 组件了。
-
-参考实例：[https://github.com/zswang/jfpss/blob/master/src/tools.jdists](https://github.com/zswang/jfpss/blob/master/src/tools.jdists)
-
-## 后续
-
-* 加入自动内联代码。
-* 提供 fis、grunt、gulp 插件。
-
-项目地址：[https://github.com/zswang/jdists](https://github.com/zswang/jdists)
+  [1]: https://github.com/taptapship/wiredep
+  [2]: https://github.com/jshint/jshint
+  [3]: https://github.com/jsdoc3/jsdoc
+  [4]: https://github.com/douglascrockford/JSDev
+  [5]: https://github.com/cbml/cbml

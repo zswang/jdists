@@ -8,7 +8,7 @@ var ejs = require('ejs');
  * @param {string} attrs.data 数据项
  * @param {Object} scope 作用域
  * @param {Function} scope.execImport 导入数据
- * @param {Function} scope.compile 变量 jdists 文本
+ * @param {Function} scope.compile 二次编译 jdists 文本
  */
 module.exports = function processor(content, attrs, scope) {
   if (!content) {

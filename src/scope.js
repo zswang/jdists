@@ -143,8 +143,20 @@ function create(options) {
   /**
    * 编译完整内容，一般用于模板引擎二次处理 jdists
    *
-   * @param {string} content 内容
+   * @param {string} content 可能包含 jdists 代码块的内容
    * @return {string} 返回编译的结果
+   *
+   * @example
+   * ```js
+   * function processor(content) {
+   *   if (!content) {
+   *     return content;
+   *   }
+   *   return scope.compile(
+   *     content.replace(/<~/g, '(*<').replae(/~>/g, '>*)')
+   *   );
+   * }
+   * ```
    */
   function compile(content) {
     return buildBlock(cbml.parse(content));
@@ -245,6 +257,7 @@ function create(options) {
     }
     return result;
   }
+  instance.getScope = getScope;
 
   /**
    * 将内容进行编码
@@ -342,9 +355,10 @@ function create(options) {
    * 根据搜索表达式查询节点
    *
    * @param {string} selecotr 搜索表达式 "tagName[attrName=attrValue]*"
-   * @return {jdistsNode} 返回第一个匹配的节点
+   * @param {boolean} all 是否搜索全部
+   * @return {jdistsNode|Array} 返回第一个匹配的节点
    */
-  function querySelector(selecotr) {
+  function querySelector(selecotr, all) {
     init();
     if (!selecotr) {
       return tokens;
@@ -392,18 +406,29 @@ function create(options) {
 
     function scan(node) {
       if (check(node)) {
+        if (all) {
+          items.push(result);
+        }
         return node;
       }
       var result;
       if (node.nodes) {
         node.nodes.every(function (item) {
           result = scan(item);
-          return !result;
+          return !result || all;
         });
       }
       return result;
     }
-    return scan(tokens);
+    var items;
+    if (all) {
+      var items = [];
+      scan(tokens);
+      return items;
+    }
+    else {
+      return scan(tokens);
+    }
   }
   instance.querySelector = querySelector;
 
@@ -615,7 +640,7 @@ function create(options) {
       var error = util.format('A circular reference. (%s:%d:%d)',
         filename, node.line || 0, node.col || 0
       );
-      console.error(error);
+      console.error(colors.red(error));
       throw error;
     }
     if (node.fixed) { // 已经编译过
