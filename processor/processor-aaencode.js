@@ -70,11 +70,12 @@ function aaencode(text) {
 /**
  * 代码加密
  *
+ * @param {string} content 文本内容
+ * @return {string} 返回加密后的内容
  * @example
  * <~jdists encoding="aaencode"~>
- * ...
+ * console.log('Hello world!');
  * <~/jdists~>
- * @param {string} content 文本内容
  */
 module.exports = function (content) {
   return aaencode(content);

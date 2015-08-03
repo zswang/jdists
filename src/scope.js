@@ -354,28 +354,29 @@ function create(options) {
   /**
    * 根据搜索表达式查询节点
    *
-   * @param {string} selecotr 搜索表达式 "tagName[attrName=attrValue]*"
-   * @param {boolean} all 是否搜索全部
+   * @param {string} selector 搜索表达式 "tagName[attrName=attrValue]\*"，如果表达式最后一个字符是 '*' 则返回数组
    * @return {jdistsNode|Array} 返回第一个匹配的节点
    */
-  function querySelector(selecotr, all) {
+  function querySelector(selector) {
     init();
-    if (!selecotr) {
+    if (!selector) {
       return tokens;
     }
 
-    var match = selecotr.match(
-      /^\s*([\w_-]*)((\s*\[[\w_-]+\s*=\s*("([^\\"]*(\\.)*)*"|'([^\\']*(\\.)*)*'|[^\[\]]*)\])*)/
+    var match = selector.match(
+      /^\s*([\w_-]*)((\s*\[[\w_-]+\s*=\s*("([^\\"]*(\\.)*)*"|'([^\\']*(\\.)*)*'|[^\[\]]*)\])*)\s*(\*?)$/
     );
 
     if (!match) {
+      console.warn(colors.blue('Invalid selector expressions %j.'), selector);
       return;
     }
 
     var tag = match[1];
     var attributes = [];
+    var all = match[9] === '*';
     match[2].replace(/\s*\[([\w_-]+)\s*=\s*("([^\\"]*(\\.)*)*"|'([^\\']*(\\.)*)*'|[^\[\]]*)\]/g,
-      function (all, name, value) {
+      function (match, name, value) {
         if (/^['"]/.test(value)) {
           /*jslint evil: true */
           value = new Function('return (' + value + ');')();
@@ -408,7 +409,7 @@ function create(options) {
     function scan(node) {
       if (check(node)) {
         if (items) {
-          items.push(result);
+          items.push(node);
         }
         return node;
       }
@@ -497,7 +498,7 @@ function create(options) {
   /**
    * 执行数据导入
    *
-   * @param {string} importation 导入项表达式 : "#variant" 内存, "@argv" 属性, "filename[?selecotr]" 文件和代码块
+   * @param {string} importation 导入项表达式 : "#variant" 内存, "@argv" 属性, "filename[?selector]" 文件和代码块
    * @param {Array=} froms 来源结婚，默认全部
    * @return {string} 返回导入的内容
    */
@@ -539,7 +540,7 @@ function create(options) {
     if (invalidFilename(name)) { // 无效文件名
       return importation;
     }
-    var selecotr = items[1];
+    var selector = items[1];
     var scope;
     if (!name) {
       scope = instance;
@@ -550,7 +551,7 @@ function create(options) {
         return importation;
       }
       if (execExclude(file)) {
-        if (!selecotr) {
+        if (!selector) {
           return fs.readFileSync(file);
         }
         else {
@@ -565,13 +566,18 @@ function create(options) {
     if (!scope) {
       return importation;
     }
-    if (selecotr) {
-      var node = scope.querySelector(selecotr);
+    if (selector) {
+      var node = scope.querySelector(selector);
       if (!node) {
         console.error(
-          colors.red('Selector "%s" is no matching nodes.'), selecotr
+          colors.red('Selector "%s" is no matching nodes.'), selector
         );
         return '';
+      }
+      if (node instanceof Array) {
+        return node.map(function (item) {
+          return scope.buildBlock(item, true);
+        }).join('\n');
       }
       return scope.buildBlock(node, true);
     }
