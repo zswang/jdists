@@ -444,6 +444,12 @@ console.log('hello world!');
 </jdists-->
 ```
 
+## 实战
+
+* [给源文件添加版权信息](https://github.com/zswang/jdists/wiki/%5Bcase%5DBuild-copyright)
+* [代码混合加密](https://github.com/zswang/jdists/wiki/%5Bcase%5DCode-mixed-encryption)
+* [预制默认插件](https://github.com/zswang/jdists/wiki/%5Bcase%5DPrefabricated-default-plugin)
+* [防止静态资源被搜索](https://github.com/zswang/jdists/wiki/%5Bcase%5DTo-prevent-the-reverse-engineering)
 
   [1]: https://github.com/taptapship/wiredep
   [2]: https://github.com/jshint/jshint
