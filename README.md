@@ -450,6 +450,7 @@ console.log('hello world!');
 * [代码混合加密](https://github.com/zswang/jdists/wiki/%5Bcase%5DCode-mixed-encryption)
 * [预制默认插件](https://github.com/zswang/jdists/wiki/%5Bcase%5DPrefabricated-default-plugin)
 * [防止静态资源被搜索](https://github.com/zswang/jdists/wiki/%5Bcase%5DTo-prevent-the-reverse-engineering)
+* [引入其他代码处理工具](https://github.com/zswang/jdists/wiki/%5Bcase%5DThe-introduction-of-third-party-code-processing-tools)
 
   [1]: https://github.com/taptapship/wiredep
   [2]: https://github.com/jshint/jshint
