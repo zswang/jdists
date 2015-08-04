@@ -406,49 +406,7 @@ module.exports = function processor(content, attrs, scope) {
 };
 ```
 
-### jdistsScope
-
-```js
-/**
- * 获取控制台参数
- *
- * @param {string} name 参数名
- * @return {string} 返回控制台参数
- */
-function getArgument(name) {}
-
-/**
- * 获取变量值
- *
- * @param {string} name 变量名
- * @return {*} 返回变量值
- */
-function getVariant(name) {}
-
-/**
- * 设置变量值
- *
- * @param {string} name 变量名
- * @param {*} value 变量值
- * @return {jdistsScope} 返回当前作用域
- */
-function setVariant(name, value) {}
-
-/**
- * 获取顶级作用域
- *
- * @return {jdistsScope} 返回顶级作用域
- */
-function getRootScope() {}
-
-/**
- * 获取当前所在目录
- *
- * @return {string} 返回当前所在目录
- */
-function getDirname() {}
-```
-
+详情参考：[jdists Scope](https://github.com/zswang/jdists/wiki/Scope)
 
 ## 用例
 

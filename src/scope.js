@@ -233,7 +233,6 @@ function create(options) {
   /**
    * 获取一个文件的作用域
    *
-   * @inner
    * @param {string} filename 对应文件名
    * @return {jdistsScope} 返回文件对应的作用域
    */
