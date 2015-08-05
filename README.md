@@ -267,7 +267,7 @@ lightly minified:
 代码块主要有如下三种形式：
 * 空内容代码块，没有包裹任何代码
 ```js
-/*<jdists import="main.js" />/
+/*<jdists import="main.js" />*/
 ```
 
 * 有效内容代码块，包裹的内容是编译器会解析
