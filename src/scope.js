@@ -714,7 +714,7 @@ function create(options) {
         node.altered = false;
         value = '';
       }
-      else {
+      else if (node.type !== 'single') { // 非空内容标签
         value = node.prefix + value + node.suffix;
       }
     }

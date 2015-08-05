@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+<body>
+<script>
+(function() {
+    var handler = function(e) {
+        if (e.target == document) {
+            // ...
+        }
+    };
+    document.addEventListener('click', handler);
+    window.check = function(arg) {
+        if (arg == handler) {
+            alert('win');
+        }
+    };
+})();
+/*<jdists encoding="base64" export="#code">*/
+var event = new Event('click');
+var hackHandler;
+event.__defineGetter__('target', function () {
+  hackHandler = arguments.callee.caller;
+});
+document.dispatchEvent(event);
+check(hackHandler);
+/*</jdists>*/
+
+/*<jdists>
+new Function(atob("(*<jdists import="#code" />*)"))();
+// new Function(atob("(*<none import="#code" />*)"))();
+// new Function(atob("(*<jdists import="#code" trigger="none" />*)"))();
+</jdists>*/
+</script>
+</body>
+</html>

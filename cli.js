@@ -61,7 +61,7 @@ Options:
     #{-o, --output,cyan}                 Output file (default STDOUT)
     #{-v, --version,cyan}                Output jdists version
     #{-t, --trigger,cyan}                Trigger name list (default "release")
-    #{-c, --clean,cyan}                  Clean white space (default true)
+    #{-c, --config,cyan}                 Path to config file (default ".jdistsrc")
       */
     })
     .replace(/[^]*\/\*!?\s*|\s*\*\/[^]*/g, '')

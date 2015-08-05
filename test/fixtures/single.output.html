@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+<body>
+<script>
+(function() {
+    var handler = function(e) {
+        if (e.target == document) {
+            // ...
+        }
+    };
+    document.addEventListener('click', handler);
+    window.check = function(arg) {
+        if (arg == handler) {
+            alert('win');
+        }
+    };
+})();
+new Function(atob("dmFyIGV2ZW50ID0gbmV3IEV2ZW50KCdjbGljaycpOwp2YXIgaGFja0hhbmRsZXI7CmV2ZW50Ll9fZGVmaW5lR2V0dGVyX18oJ3RhcmdldCcsIGZ1bmN0aW9uICgpIHsKICBoYWNrSGFuZGxlciA9IGFyZ3VtZW50cy5jYWxsZWUuY2FsbGVyOwp9KTsKZG9jdW1lbnQuZGlzcGF0Y2hFdmVudChldmVudCk7CmNoZWNrKGhhY2tIYW5kbGVyKTs="))();
+// new Function(atob("(*<none import="#code" />*)"))();
+// new Function(atob("(*<jdists import="#code" trigger="none" />*)"))();
+</script>
+</body>
+</html>

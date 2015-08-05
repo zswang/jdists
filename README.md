@@ -452,6 +452,77 @@ console.log('hello world!');
 * [防止静态资源被搜索](https://github.com/zswang/jdists/wiki/%5Bcase%5DTo-prevent-the-reverse-engineering)
 * [引入其他代码处理工具](https://github.com/zswang/jdists/wiki/%5Bcase%5DThe-introduction-of-third-party-code-processing-tools)
 
+## 如何使用
+
+jdists 依赖 node v0.10.0 以上的环境
+
+### 安装 
+
+`$ npm install jdists [-g]`
+
+### 命令行
+
+```
+Usage:
+
+    jdists <input list> [options]
+
+Options:
+
+    -r, --remove                 Remove block tag name list (default "remove,test")
+    -o, --output                 Output file (default STDOUT)
+    -v, --version                Output jdists version
+    -t, --trigger                Trigger name list (default "release")
+    -c, --config                 Path to config file (default ".jdistsrc")
+```
+
+### JS
+
+```js
+var content = jdists.build(filename, {
+	remove: 'remove,debug',
+	trigger: 'release'
+});
+```
+
+### 问题反馈和建议
+
+https://github.com/zswang/jdists/issues
+
+## 开发
+
+### 复制项目代码
+
+`$ git clone https://github.com/zswang/jdists.git`
+
+### 初始化依赖
+
+`$ npm install`
+
+### 执行测试用例
+
+`$ npm test`
+
+### 预处理
+
+`$ npm run dist`
+
+## 关键文件目录结果
+
+```
+[lib]                 --- 发布后的代码目录
+	jdists.js         --- jdists 业务代码
+	scope.js          --- jdists 作用域
+[processor]           --- 预制编码器
+[processor-extend]    --- 未预制的编码器，可能会常用的
+[src]                 --- 开发期代码
+[test]                --- 测试目录
+	[fixtures]        --- 测试用例
+	test.js           --- 测试调度文件
+index.js              --- jdists 声明
+cli.js                --- jdists 控制台
+```
+
   [1]: https://github.com/taptapship/wiredep
   [2]: https://github.com/jshint/jshint
   [3]: https://github.com/jsdoc3/jsdoc
