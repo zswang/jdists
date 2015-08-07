@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "description": "Code block processing tools",
   "main": "index.js",
   "bin": {
@@ -26,11 +26,12 @@
   "homepage": "https://github.com/zswang/jdists",
   "devDependencies": {
     "mocha": "2.0.1",
+    "istanbul": "0.3.17",
     "should": "4.1.0",
     "jshint": "2.8.0"
   },
   "dependencies": {
-    "cbml": "^0.0.8",
+    "cbml": "^0.0.9",
     "jsets": "^0.0.3",
     "mkdirp": "^0.5.0",
     "JSDev": "^0.0.83",
@@ -50,7 +51,7 @@
     "ejs": "^1.0.0"
   },
   "scripts": {
-    "test": "mocha -R spec",
+    "test": "istanbul cover --hook-run-in-context node_modules/mocha/bin/_mocha -- -R spec",
     "lint": "jshint src/*.js src/**/*.js processor/*.js",
     "dist": "node cli.js src/jdists.js -o lib/jdists.js && node cli.js src/scope.js -o lib/scope.js "
   },

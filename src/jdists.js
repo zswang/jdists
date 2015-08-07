@@ -150,7 +150,7 @@ exports.build = build;
  * @param {Function|string} processor 处理函数
  */
 function registerProcessor(encoding, processor) {
-  if (!processor) {
+  if (!processor || !encoding) {
     return;
   }
   if (typeof processor === 'function') {

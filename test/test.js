@@ -11,6 +11,14 @@ function cleanCRLF(text) {
   return String(text).replace(/\r\n?/g, '\n');
 }
 
+/**
+ * coverage
+ */
+
+jdists.registerProcessor();
+jdists.registerProcessor('none', 'function() { return ""; }');
+jdists.build('test/fixtures/coverage.html');
+
 describe('fixtures', function () {
   var dirname = 'test/fixtures';
   var items = fs.readdirSync(dirname).filter(function (item) {

@@ -90,6 +90,8 @@ function create(options) {
   var clean = options.clean;
   var removeList = options.removeList || [];
 
+  var instance = {};
+
   var argv = options.argv || {};
   var env = options.env || {};
   var rootScope = options.rootScope || instance;
@@ -137,7 +139,6 @@ function create(options) {
     //</debug>*/
   }
 
-  var instance = {};
   scopes[filename] = instance;
 
   /**

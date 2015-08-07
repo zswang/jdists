@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+  <!--jdists trigger=""-->
+  <div></div>
+  <!--/jdists-->
+
+  <!--jdists export="#my-encoding">
+  function (content, attrs, scope) {
+    scope.execTrigger('');
+    scope.execImport('#none', ['argv']);
+    scope.execImport('@none', ['varint']);
+    scope.execImport(':none', ['varint']);
+    scope.querySelector('[trigger=""]')
+    scope.execImport('@input');
+    scope.execImport(':USER');
+    scope.process();
+    scope.process('hello', 'error', {});
+    return String(scope.getRootScope().querySelector().type);
+  }
+  </jdists-->
+  <div>
+  <!--jdists encoding="#my-encoding" /-->
+  </div>
+</body>
+</html>

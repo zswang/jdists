@@ -43,9 +43,9 @@ jdists 是一款强大的代码块预处理工具。
 ----
 + [wiredep][1] 注释，表示引入 bower 组件依赖的 css 资源
 ```html
-  <!-- bower:css -->
-  <link rel="stylesheet" href="bower_components/css/bootstrap.css" />
-  <!-- endbower -->
+	<!-- bower:css -->
+	<link rel="stylesheet" href="bower_components/css/bootstrap.css" />
+	<!-- endbower -->
 ```
 ----
 + [jshint.js][2] 顶部注释，表示版权声明
@@ -109,76 +109,76 @@ function Book(title, author) {
 C command line example:
 
 ```shell
-   jsdev -comment "Devel Edition." <input >output test_expose enter:trace.enter exit:trace.exit unless:alert
+	 jsdev -comment "Devel Edition." <input >output test_expose enter:trace.enter exit:trace.exit unless:alert
 ```
 
 JavaScript:
 ```js
-    output = JSDEV(input, [
-        "test_expose",
-        "enter:trace.enter",
-        "exit:trace.exit",
-        "unless:alert"
-    ] , ["Devel Edition."]);
+		output = JSDEV(input, [
+				"test_expose",
+				"enter:trace.enter",
+				"exit:trace.exit",
+				"unless:alert"
+		] , ["Devel Edition."]);
 ```
 input:
 ```js
-    // This is a sample file.
+		// This is a sample file.
 
-    function Constructor(number) {
-        /*enter 'Constructor'*/
-        /*unless(typeof number !== 'number') 'number', "Type error"*/
-        function private_method() {
-            /*enter 'private_method'*/
-            /*exit 'private_method'*/
-        }
-        /*test_expose
-            this.private_method = private_method;
-        */
-        this.priv = function () {
-            /*enter 'priv'*/
-            private_method();
-            /*exit 'priv'*/
-        }
-        /*exit "Constructor"*/
-    }
+		function Constructor(number) {
+				/*enter 'Constructor'*/
+				/*unless(typeof number !== 'number') 'number', "Type error"*/
+				function private_method() {
+						/*enter 'private_method'*/
+						/*exit 'private_method'*/
+				}
+				/*test_expose
+						this.private_method = private_method;
+				*/
+				this.priv = function () {
+						/*enter 'priv'*/
+						private_method();
+						/*exit 'priv'*/
+				}
+				/*exit "Constructor"*/
+		}
 ```
 
 output:
 
 ```js
-    // Devel Edition.
-    // This is a sample file.
+		// Devel Edition.
+		// This is a sample file.
 
-    function Constructor(number) {
-        {trace.enter('Constructor');}
-        if (typeof number !== 'number') {alert('number', "Type error");}
-        function private_method() {
-            {trace.enter('private_method');}
-            {trace.exit('private_method');}
-        }
-        {
-            this.private_method = private_method;
-        }
-        this.priv = function () {
-            {trace.enter('priv');}
-            private_method();
-            {trace.exit('priv');}
-        }
-        {trace.exit("Constructor");}
-    }
+		function Constructor(number) {
+				{trace.enter('Constructor');}
+				if (typeof number !== 'number') {alert('number', "Type error");}
+				function private_method() {
+						{trace.enter('private_method');}
+						{trace.exit('private_method');}
+				}
+				{
+						this.private_method = private_method;
+				}
+				this.priv = function () {
+						{trace.enter('priv');}
+						private_method();
+						{trace.exit('priv');}
+				}
+				{trace.exit("Constructor");}
+		}
 ```
 
 lightly minified:
 
 ```js
-    function Constructor(number) {
-        function private_method() {
-        }
-        this.priv = function () {
-            private_method();
-        }
-    }
+		function Constructor(number) {
+				function private_method() {
+				}
+				this.priv = function () {
+						private_method();
+				}
+		}
 ```
 
 ### 预处理以「代码块」为粒度有什么优势？
@@ -200,8 +200,8 @@ lightly minified:
 ```
 /*jshint unused:true, eqnull:true*/
 /*test_expose
-    this.private_method = private_method;
-  */
+		this.private_method = private_method;
+	*/
 ```
 
 + 没有标准，不能跨语言。JSDev 和 JSDoc 不能用于其他主流语言，如 Python、Lua 等。
@@ -241,7 +241,7 @@ lightly minified:
 举个例子
 ```js
 /*<jdists export="template.js" trigger="@version < '1.0.0'">
-  var template = /*<jdists encoding="base64,quoted" import="main.html?template" />*/
+	var template = /*<jdists encoding="base64,quoted" import="main.html?template" />*/
 /*</jdists>
 ```
 
@@ -273,17 +273,17 @@ lightly minified:
 * 有效内容代码块，包裹的内容是编译器会解析
 ```js
 /*<jdists encoding="uglify">*/
-  function format(template, json) {
-    if (typeof template === 'function') { // 函数多行注释处理
-      template = String(template).replace(
-        /[^]*\/\*!?\s*|\s*\*\/[^]*/g, // 替换掉函数前后部分
-        ''
-      );
-    }
-    return template.replace(/#\{(.*?)\}/g, function(all, key) {
-        return json && (key in json) ? json[key] : "";
-    });
-  }
+	function format(template, json) {
+		if (typeof template === 'function') { // 函数多行注释处理
+			template = String(template).replace(
+				/[^]*\/\*!?\s*|\s*\*\/[^]*/g, // 替换掉函数前后部分
+				''
+			);
+		}
+		return template.replace(/#\{(.*?)\}/g, function(all, key) {
+				return json && (key in json) ? json[key] : "";
+		});
+	}
 /*</jdists>*/
 ```
 
@@ -309,39 +309,39 @@ console.log('version: %s', version);
 
 * `&content` 默认为 "&"
 * `file` 文件
-    > 如：
-    > `main.js`
-    > `index.html`
+		> 如：
+		> `main.js`
+		> `index.html`
 
 * `#variant` 变量
-    > 如：
-    > `#name`
-    > `#data`
+		> 如：
+		> `#name`
+		> `#data`
 
 * `[file]?block` *readonly* 代码块，默认 `file` 为当前文件
-    > 如：
-    > `filename?tagName`
-    > `filename?tagName[attrName=attrValue]`
-    > `filename?tagName[attrName=attrValue][attrName2=attrValue2]`
+		> 如：
+		> `filename?tagName`
+		> `filename?tagName[attrName=attrValue]`
+		> `filename?tagName[attrName=attrValue][attrName2=attrValue2]`
 
 * `@argument` *readonly* 控制台参数
-    > 如：
-    > `@output`
-    > `@version`
+		> 如：
+		> `@output`
+		> `@version`
 
 * `:environment` *readonly* 环境变量
-    > 如：
-    > `:HOME`
-    > `:USER`
+		> 如：
+		> `:HOME`
+		> `:USER`
 
 * `[...]`、`{...}` *readonly* 字面量
-    > 如：
-    > `[1, 2, 3, 4]`
-    > `{title: 'jdists'}`
+		> 如：
+		> `[1, 2, 3, 4]`
+		> `{title: 'jdists'}`
 
 * `'string'` *readonly* 字符串
-    > 如：
-    > `'zswang'`
+		> 如：
+		> `'zswang'`
 
 ### 触发器 trigger
 
@@ -386,23 +386,23 @@ var ejs = require('ejs');
  * @param {Function} scope.compile 二次编译 jdists 文本
  */
 module.exports = function processor(content, attrs, scope) {
-  if (!content) {
-    return content;
-  }
-  var render = ejs.compile(content);
-  var data;
-  if (attrs.data) {
-    /*jslint evil: true */
-    data = new Function(
-      'return (' +
-      scope.execImport(attrs.data) +
-      ');'
-    )();
-  }
-  else {
-    data = null;
-  }
-  return scope.compile(render(data));
+	if (!content) {
+		return content;
+	}
+	var render = ejs.compile(content);
+	var data;
+	if (attrs.data) {
+		/*jslint evil: true */
+		data = new Function(
+			'return (' +
+			scope.execImport(attrs.data) +
+			');'
+		)();
+	}
+	else {
+		data = null;
+	}
+	return scope.compile(render(data));
 };
 ```
 
@@ -465,23 +465,23 @@ jdists 依赖 node v0.10.0 以上的环境
 ```
 Usage:
 
-    jdists <input list> [options]
+		jdists <input list> [options]
 
 Options:
 
-    -r, --remove                 Remove block tag name list (default "remove,test")
-    -o, --output                 Output file (default STDOUT)
-    -v, --version                Output jdists version
-    -t, --trigger                Trigger name list (default "release")
-    -c, --config                 Path to config file (default ".jdistsrc")
+		-r, --remove                 Remove block tag name list (default "remove,test")
+		-o, --output                 Output file (default STDOUT)
+		-v, --version                Output jdists version
+		-t, --trigger                Trigger name list (default "release")
+		-c, --config                 Path to config file (default ".jdistsrc")
 ```
 
 ### JS
 
 ```js
 var content = jdists.build(filename, {
-	remove: 'remove,debug',
-	trigger: 'release'
+		remove: 'remove,debug',
+		trigger: 'release'
 });
 ```
 
@@ -507,24 +507,28 @@ https://github.com/zswang/jdists/issues
 
 `$ npm run dist`
 
+### 代码覆盖率
+
+`$ npm run cover`
+
 ## 关键文件目录结果
 
 ```
 [lib]                 --- 发布后的代码目录
-	jdists.js         --- jdists 业务代码
-	scope.js          --- jdists 作用域
+		jdists.js         --- jdists 业务代码
+		scope.js          --- jdists 作用域
 [processor]           --- 预制编码器
 [processor-extend]    --- 未预制的编码器，可能会常用的
 [src]                 --- 开发期代码
 [test]                --- 测试目录
-	[fixtures]        --- 测试用例
-	test.js           --- 测试调度文件
+		[fixtures]        --- 测试用例
+		test.js           --- 测试调度文件
 index.js              --- jdists 声明
 cli.js                --- jdists 控制台
 ```
 
-  [1]: https://github.com/taptapship/wiredep
-  [2]: https://github.com/jshint/jshint
-  [3]: https://github.com/jsdoc3/jsdoc
-  [4]: https://github.com/douglascrockford/JSDev
-  [5]: https://github.com/cbml/cbml
+	[1]: https://github.com/taptapship/wiredep
+	[2]: https://github.com/jshint/jshint
+	[3]: https://github.com/jsdoc3/jsdoc
+	[4]: https://github.com/douglascrockford/JSDev
+	[5]: https://github.com/cbml/cbml
