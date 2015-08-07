@@ -171,3 +171,4 @@ function registerProcessor(encoding, processor) {
   }
 }
 exports.registerProcessor = registerProcessor;
+exports.createScope = scope.create;

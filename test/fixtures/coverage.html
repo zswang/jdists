@@ -4,9 +4,11 @@
   <title></title>
 </head>
 <body>
-  <!--jdists trigger=""-->
-  <div></div>
-  <!--/jdists-->
+  <code>
+    <!--jdists encoding="html" trigger=""-->
+    <div></div>
+    <!--/jdists-->
+  </code>
 
   <!--jdists export="#my-encoding">
   function (content, attrs, scope) {
@@ -14,6 +16,18 @@
     scope.execImport('#none', ['argv']);
     scope.execImport('@none', ['varint']);
     scope.execImport(':none', ['varint']);
+
+    scope.execExport();
+    scope.execExport('@none', 'ttt');
+    scope.execExport(':none', 'ttt');
+    scope.execExport('ttt.js', 'ttt');
+
+    scope.buildBlock();
+
+    var node = scope.querySelector('cctv');
+    scope.buildBlock(node);
+    scope.buildBlock(node);
+
     scope.querySelector('[trigger=""]')
     scope.execImport('@input');
     scope.execImport(':USER');
@@ -24,6 +38,29 @@
   </jdists-->
   <div>
   <!--jdists encoding="#my-encoding" /-->
+  <!--jdists encoding="#my-encoding" /-->
   </div>
+  <!--cctv>(*<jdists>cctv</jdists>*)</cctv-->
+  <!--quoted>(*<jdists>cctv</jdists>*)</quoted-->
+  <!--remove-->
+  remove
+  <!--/remove-->
+  <!--jdists import="?cctv" /-->
+  <!--jdists import="?cctv" /-->
 </body>
+<script>
+/*<jdists import="hello.min.js" />*/
+/*<jdists import="hello.min.js" />*/
+/*<jdists import="hello.js" />*/
+/*<jdists import="hello.js" />*/
+/*<jdists import="hello.min.js?debug" />*/
+/*<jdists import="none.js?debug" />*/
+/*<jdists import="coverage.html" />*/
+</script>
+<!--jdists export="#my-encoding">
+function (content, attrs, scope) {
+  return 'new';
+}
+</jdists-->
+<!--jdists encoding="#my-encoding" /-->
 </html>

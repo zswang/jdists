@@ -17,7 +17,11 @@ function cleanCRLF(text) {
 
 jdists.registerProcessor();
 jdists.registerProcessor('none', 'function() { return ""; }');
-jdists.build('test/fixtures/coverage.html');
+jdists.build('test/fixtures/coverage.html', {
+  config: 'test/test.jdistsrc',
+  remove: 'remove,test,quoted'
+});
+jdists.createScope().getScope();
 
 describe('fixtures', function () {
   var dirname = 'test/fixtures';

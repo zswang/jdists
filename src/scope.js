@@ -206,7 +206,6 @@ function create(options) {
    */
   var setVariant = jsets.createSetter(instance, function (name, value) {
     if (variants[name] !== value) {
-      cacheKeys[name] = guid++;
       variants[name] = value;
     }
   }, true);
@@ -303,9 +302,6 @@ function create(options) {
    * @return {Function} 返回名称对应的处理器，如果没有找到则返回 undefined
    */
   function getProcessor(encoding) {
-    if (!encoding) {
-      return;
-    }
     var result;
     if (/^[\w-_]+$/.test(encoding)) { // 标准编码器
       result = processors[encoding];
@@ -343,6 +339,7 @@ function create(options) {
 
     result = buildProcessor(body);
     if (/^[#@]/.test(encoding)) { // 缓存编码
+      cacheKeys[encoding] = guid++;
       processors[encoding] = {
         cacheKey: cacheKeys[encoding],
         processor: result
@@ -563,9 +560,6 @@ function create(options) {
       }
       scope = getScope(file);
     }
-    if (!scope) {
-      return importation;
-    }
     if (selector) {
       var node = scope.querySelector(selector);
       if (!node) {
@@ -613,6 +607,7 @@ function create(options) {
     }
     if (exportation.indexOf('#') === 0) { // variants
       setVariant(exportation.slice(1), content);
+      cacheKeys[exportation] = null;
       return true;
     }
     else if (!invalidFilename(name)) {
@@ -638,10 +633,10 @@ function create(options) {
    * @return {string} 返回编译后的内容，如果 isImport 为 true 时，不返回前后缀
    */
   function buildBlock(node, isImport) {
-    init();
     if (!node) {
       return '';
     }
+    init();
     if (node.pending) {
       var error = util.format('A circular reference. (%s:%d:%d)',
         filename, node.line || 0, node.col || 0
@@ -668,7 +663,7 @@ function create(options) {
     else {
       node.nodes.forEach(function (item) {
         var text = buildBlock(item);
-        if (!item.fixed) {
+        if (!item.fixed && item.type !== 'text') {
           fixed = false;
         }
         if (item.altered) {
@@ -739,7 +734,7 @@ function create(options) {
    */
   function build() {
     init();
-    if (tokens.completed) { // 已经被编译过
+    if (tokens.fixed) { // 已经被编译过
       return tokens.value;
     }
     return buildBlock(tokens);
