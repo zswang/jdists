@@ -1,3 +1,4 @@
+var colors = require('colors');
 var less = require('less');
 
 /**
@@ -10,13 +11,17 @@ var less = require('less');
  * @param {Function} scope.getDirname 获取当前目录
  */
 module.exports = function processor(content, attrs, scope) {
+  if (!content) {
+    return content;
+  }
   less.render(content, {
     paths: [scope.getDirname()],
     syncImport: true,
     relativeUrls: true
   }, function (error, output) {
     if (error) {
-      throw error;
+      console.error(colors.red(error));
+      return content;
     }
     else {
       content = output.css;

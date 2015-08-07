@@ -16,12 +16,22 @@ function cleanCRLF(text) {
  */
 
 jdists.registerProcessor();
+jdists.registerProcessor('number', 1);
 jdists.registerProcessor('none', 'function() { return ""; }');
 jdists.build('test/fixtures/coverage.html', {
   config: 'test/test.jdistsrc',
   remove: 'remove,test,quoted'
 });
+jdists.build('test/fixtures/ttt.js');
+jdists.build('test/fixtures/ttt.js', {
+  config: 'noexists'
+});
+jdists.build('test/fixtures/ttt.js', {
+  config: 'test/none.jdistsrc'
+});
 jdists.createScope().getScope();
+
+fs.unlinkSync('test/fixtures/ccc.js');
 
 describe('fixtures', function () {
   var dirname = 'test/fixtures';

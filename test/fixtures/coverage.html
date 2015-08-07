@@ -18,9 +18,10 @@
     scope.execImport(':none', ['varint']);
 
     scope.execExport();
+    scope.execExport('<tag>', 'ttt');
     scope.execExport('@none', 'ttt');
     scope.execExport(':none', 'ttt');
-    scope.execExport('ttt.js', 'ttt');
+    scope.execExport('ccc.js', '/* ccc */');
 
     scope.buildBlock();
 
@@ -49,6 +50,7 @@
   <!--jdists import="?cctv" /-->
 </body>
 <script>
+/*<jdists import="@input" />*/
 /*<jdists import="hello.min.js" />*/
 /*<jdists import="hello.min.js" />*/
 /*<jdists import="hello.js" />*/

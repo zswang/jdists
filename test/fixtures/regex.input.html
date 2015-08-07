@@ -23,5 +23,19 @@
   <!--jdists encoding="#define,regex" pattern="/\w+/g" replacement="#replacer">
   hello world!
   </jdists-->
+  <!--jdists encoding="regex" /-->
+  <!--jdists encoding="regex" pattern="/(/g" /-->
+  <!--jdists encoding="regex" pattern="/ok/g" replacement="yes" -->
+  ok, ok
+  <!--/jdists-->
+  <!--jdists encoding="regex" pattern="ok" replacement="yes" -->
+  ok, ok
+  <!--/jdists-->
+  <!--jdists encoding="regex" pattern="'ok'" replacement="yes" -->
+  ok, ok
+  <!--/jdists-->
+  <!--jdists encoding="regex" pattern='"ok"' replacement="yes" -->
+  ok, ok
+  <!--/jdists-->
 </body>
 </html>

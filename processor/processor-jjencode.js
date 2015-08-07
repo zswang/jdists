@@ -39,7 +39,7 @@ function jjencode(gv, text) {
       r += gv + "._$+";
       s = "";
     }
-    else if (n == 0x74) { // 'u'
+    else if (n == 0x74) { // 't'
       if (s) r += "\"" + s + "\"+";
       r += gv + ".__+";
       s = "";

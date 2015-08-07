@@ -28,7 +28,7 @@ module.exports = function processor(content, attrs, scope) {
       tags = tags.split(/\s*[,\n]\s*/);
     }
   } else {
-    tags = null;
+    tags = [];
   }
 
   var comments;

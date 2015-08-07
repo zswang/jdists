@@ -118,12 +118,14 @@ function build(filename, argv) {
 
     if (config.tags) {
       for (var name in config.tags) {
-        var item = config.tags[name];
-        if (item) {
-          tags[name] = item;
-        }
+        tags[name] = config.tags[name];
       }
     }
+  }
+  else {
+    console.error(
+      colors.red('Config file "%s" not exists.'), configFilename
+    );
   }
 
   var rootScope = scope.create({
@@ -156,13 +158,15 @@ function registerProcessor(encoding, processor) {
   if (typeof processor === 'function') {
     defaultProcessors[encoding] = processor;
     return true;
-  } else if (typeof processor === 'string' && processor) {
+  }
+  else if (typeof processor === 'string' && processor) {
     if (fs.existsSync(processor)) {
       return registerProcessor(
         encoding,
         scope.buildProcessor(fs.readFileSync(processor))
       );
-    } else {
+    }
+    else {
       return registerProcessor(
         encoding,
         scope.buildProcessor(processor)

@@ -1,3 +1,4 @@
+var colors = require('colors');
 var svgo = require('svgo');
 
 /**
@@ -6,13 +7,18 @@ var svgo = require('svgo');
  * @param {string} content 文本内容
  */
 module.exports = function (content) {
+  if (!content) {
+    return content;
+  }
   var space;
   var match = content.match(/^[^\n\S]+/);
   if (match) {
     space = match[0];
-  } else {
+  }
+  else {
     space = '';
   }
+
   new svgo({
     plugins: [{
       cleanupIDs: {
@@ -21,9 +27,11 @@ module.exports = function (content) {
     }]
   }).optimize(content, function (svg) {
     if (svg.error) {
-      return;
+      console.error(colors.red(svg.error));
+      return content;
     }
     content = svg.data;
   });
+
   return space + content;
 };

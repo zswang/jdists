@@ -336,7 +336,12 @@ function create(options) {
     }
 
     var body = execImport(encoding);
-
+    if (body.indexOf('function') < 0) {
+      console.error(colors.red('Invalid encoding %j.'), body);
+      return function (content) {
+        return content;
+      };
+    }
     result = buildProcessor(body);
     if (/^[#@]/.test(encoding)) { // 缓存编码
       cacheKeys[encoding] = guid++;
@@ -403,6 +408,7 @@ function create(options) {
     }
 
     var items;
+
     function scan(node) {
       if (check(node)) {
         if (items) {
@@ -610,7 +616,7 @@ function create(options) {
       cacheKeys[exportation] = null;
       return true;
     }
-    else if (!invalidFilename(name)) {
+    else if (!invalidFilename(exportation)) {
       var name = path.resolve(getDirname(), exportation);
       cacheKeys[name] = null;
       if (fs.existsSync(name)) {
@@ -621,6 +627,10 @@ function create(options) {
       fs.writeFileSync(name, content);
       scopes[name] = null;
       return true;
+    }
+    else {
+      console.error(colors.red('Export %j invalid.'), exportation);
+      return;
     }
   }
   instance.execExport = execExport;
@@ -658,7 +668,7 @@ function create(options) {
     var value = '';
     var fixed = true;
     if (!node.nodes) {
-      value = node.content || node.value;
+      value = '';
     }
     else {
       node.nodes.forEach(function (item) {
@@ -712,6 +722,9 @@ function create(options) {
       }
       else if (node.type !== 'single') { // 非空内容标签
         value = node.prefix + value + node.suffix;
+      }
+      else {
+        value = node.value;
       }
     }
     else {

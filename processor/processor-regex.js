@@ -1,3 +1,5 @@
+var colors = require('colors');
+
 /**
  * 字符截取
  *
@@ -13,14 +15,18 @@ module.exports = function processor(content, attrs, scope) {
   var pattern = scope.execImport(attrs.pattern);
   var replacement = scope.execImport(attrs.replacement);
   var regex;
-  if (/^\s*\/.*\/([img]{0,3})\s*$/.test(pattern)) {
+  if (/^\s*\/.*\/([img]{0,3})\s*$/.test(pattern) ||
+    /^(['"]).*\1$/.test(pattern)) {
     try {
       /*jslint evil: true */
       regex = new Function('return (' + pattern + ')')();
-    } catch (ex) {
-      regex = null;
     }
-  } else {
+    catch (ex) {
+      console.error(colors.red(ex.message));
+      return content;
+    }
+  }
+  else {
     regex = pattern;
   }
   if (!regex) {

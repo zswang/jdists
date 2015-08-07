@@ -5,9 +5,6 @@
  * @return {string} 返回编码后的内容
  */
 function encodeUnicode(str) {
-  if (!str) {
-    return str;
-  }
   return String(str).replace(/[^\x09-\x7f\ufeff]/g, function (all) {
     return '\\u' + (0x10000 + all.charCodeAt()).toString(16).substring(1);
   });
@@ -19,6 +16,9 @@ function encodeUnicode(str) {
  * @see http://ucren.com/blog/archives/549
  */
 module.exports = function (content) {
+  if (!content) {
+    return content;
+  }
   var t = parseInt('10000000', 2);
   content = encodeUnicode(content).replace(/[^]/g, function (all) {
     return (t + all.charCodeAt()).toString(2).substring(1).replace(/[^]/g, function (n) {
