@@ -122,7 +122,7 @@ function build(filename, argv) {
       }
     }
   }
-  else {
+  else if (configFilename !== '.jdistsrc') {
     console.error(
       colors.red('Config file "%s" not exists.'), configFilename
     );
