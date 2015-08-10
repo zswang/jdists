@@ -527,8 +527,8 @@ index.js              --- jdists 声明
 cli.js                --- jdists 控制台
 ```
 
-	[1]: https://github.com/taptapship/wiredep
-	[2]: https://github.com/jshint/jshint
-	[3]: https://github.com/jsdoc3/jsdoc
-	[4]: https://github.com/douglascrockford/JSDev
-	[5]: https://github.com/cbml/cbml
+[1]: https://github.com/taptapship/wiredep
+[2]: https://github.com/jshint/jshint
+[3]: https://github.com/jsdoc3/jsdoc
+[4]: https://github.com/douglascrockford/JSDev
+[5]: https://github.com/cbml/cbml
