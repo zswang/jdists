@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>jfogs</title>
+</head>
+<body>
+  <div></div>
+</body>
+<script>
+/*<jdists encoding="jfogs,uglify" cross="true" type="zero">*/
+  /**
+   * 贝赛尔公式，支持多维数组
+   *
+   * @param{Array[Array[number, ...],...]} items 每个参考点
+   * @param{number} rate 比率
+   * @return{number|Array[number, ...]} 返回
+   */
+  function bezier(items, rate) {
+    if (!items || !items.length) {
+      return;
+    }
+    var first = items[0];
+    var second = items[1];
+    var level = first instanceof Array ? first.length : 0; // 下标数,0为非数组
+    var i;
+    switch (items.length) {
+    case 1:
+      return level ? first.slice() : first; // 数组需要克隆，非数组直接返回
+    case 2:
+      if (level) { // 非数组
+        var result = [];
+        for (i = 0; i < level; i++) {
+          result[i] = bezier([first[i], second[i]], rate);
+        }
+        return result;
+      }
+      return first + (second - first) * rate;
+    default:
+      var temp = [];
+      for (i = 1; i < items.length; i++) {
+        temp.push(bezier([items[i - 1], items[i]], rate));
+      }
+      return bezier(temp, rate);
+    }
+  }
+  console.log(bezier([1, 5], 0.2));
+/*</jdists>*/
+</script>
+</html>
