@@ -8,13 +8,13 @@
   <div></div>
 </body>
 <script>
-/*<jdists encoding="jfogs,uglify" cross="true" type="zero">*/
+/*<jdists encoding="jfogs,uglify" type="zero">*/
   /**
    * 贝赛尔公式，支持多维数组
    *
-   * @param{Array[Array[number, ...],...]} items 每个参考点
-   * @param{number} rate 比率
-   * @return{number|Array[number, ...]} 返回
+   * @param {Array[Array[number, ...],...]} items 每个参考点
+   * @param {number} rate 比率
+   * @return {number|Array[number, ...]} 返回
    */
   function bezier(items, rate) {
     if (!items || !items.length) {
