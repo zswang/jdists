@@ -89,6 +89,8 @@ function create(options) {
   var tags = options.tags || {};
   var clean = options.clean;
   var removeList = options.removeList || [];
+  var fromString = options.fromString;
+  var contentString = options.content;
 
   var instance = {};
 
@@ -133,7 +135,11 @@ function create(options) {
     if (tokens) {
       return;
     }
-    tokens = cbml.parse(fs.readFileSync(filename));
+    if (fromString) {
+      tokens = cbml.parse(contentString);
+    } else {
+      tokens = cbml.parse(fs.readFileSync(filename));
+    }
     /*<debug>
     console.log(JSON.stringify(tokens, null, '  '));
     //</debug>*/

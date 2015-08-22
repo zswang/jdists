@@ -56,10 +56,12 @@ var defaultTrigger = 'release';
 
 /**
  * 编译 jdists 文件
- * @param {string} filename 文件名
+ *
+ * @param {string} filename 文件名或者是内容
  * @param {Object} argv 配置项
  * @param {boolean} argv.clean 是否清除连续空行，默认 true
  * @param {string} argv.remove 需要移除的标签列表，默认 "remove,test"
+ * @param {string} argv.fromString 当为 true 时 filename 参数则看作内容
  * @return {string} 返回编译后的结果
  */
 function build(filename, argv) {
@@ -128,7 +130,14 @@ function build(filename, argv) {
     );
   }
 
+  var content;
+  if (argv.fromString) {
+    content = filename;
+    filename = argv.path || '';
+  }
   var rootScope = scope.create({
+    fromString: argv.fromString,
+    content: content,
     clean: clean,
     removeList: removeList,
     excludeList: excludeList,

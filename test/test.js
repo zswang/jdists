@@ -31,6 +31,17 @@ jdists.build('test/fixtures/ttt.js', {
 });
 jdists.createScope().getScope();
 
+describe('coverage', function () {
+  it('fromString', function () {
+    assert.equal(
+      jdists.build('/*<jdists encoding="base64">hello</jdists>*/', {
+        fromString: true
+      }),
+      new Buffer('hello').toString('base64')
+    );
+  });
+});
+
 fs.unlinkSync('test/fixtures/ccc.js');
 
 describe('fixtures', function () {
