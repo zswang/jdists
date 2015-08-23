@@ -9,5 +9,21 @@
 </body>
 <script>
 !function(r,n,e,t,a,f,o,u,c){function i(o,u){if(o&&o[r]){var c,s=o[n],g=o[e],l=s instanceof Array?s[r]:n;switch(o[r]){case e:return l?s[t]():s;case a:if(l){var p=[];for(c=n;l>c;c++)p[c]=i([s[c],g[c]],u);return p}return s+(g-s)*u;default:var v=[];for(c=e;c<o[r];c++)v[f](i([o[c-e],o[c]],u));return i(v,u)}}}for(var s=arguments,g=0;g<s.length;g++)"string"==typeof s[g]&&(s[g]=s[g].replace(/./g,function(r){return{"‌":0,"‍":1}[r]}).replace(/.{7}/g,function(r){return String.fromCharCode(parseInt(r,2))}));console[o](i([e,u],c))}("‍‍‌‍‍‌‌‍‍‌‌‍‌‍‍‍‌‍‍‍‌‍‍‌‌‍‍‍‍‍‍‌‍‌‌‍‍‌‍‌‌‌",0,1,"‍‍‍‌‌‍‍‍‍‌‍‍‌‌‍‍‌‍‌‌‍‍‍‌‌‌‍‍‍‍‌‌‍‌‍",2,"‍‍‍‌‌‌‌‍‍‍‌‍‌‍‍‍‍‌‌‍‍‍‍‌‍‌‌‌","‍‍‌‍‍‌‌‍‍‌‍‍‍‍‍‍‌‌‍‍‍",5,.2);
+(function (_0, _1) {
+var _2 = arguments;
+var _4 = _2.length;
+var _3;
+for (_3 = 0; _3 < _4; _3++) {
+  if (typeof _2[_3] === 'string') {
+    _2[_3] = _2[_3].split('').reverse().join('');
+  }
+}
+for (_3 = 0; _3 < _4 / 2; _3++) {
+  var _5 = _2[_3];
+  _2[_3] = _2[_4 - _3 - 1];
+  _2[_4 - _3 - 1] = _5;
+}
+    console[_1](_0);
+})("gol", "!dlroW olleH");
 </script>
 </html>

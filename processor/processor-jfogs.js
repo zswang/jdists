@@ -5,7 +5,8 @@ var jfogs = require('jfogs');
  *
  * @param {string} content 文本内容
  * @param {Object} attrs 属性
- * @param {string} attrs.type 参数混淆方式
+ * @param {string} attrs.type 混淆方式 "zero" | "reverse"
+ * @param {string} attrs.prefix 参数名前缀
  * @param {Object} scope 作用域
  * @param {Function} scope.execImport 导入数据
  */
@@ -14,6 +15,7 @@ module.exports = function processor(content, attrs, scope) {
     return content;
   }
   return jfogs.obfuscate(content, {
-    type: scope.execImport(attrs.type)
+    type: scope.execImport(attrs.type),
+    prefix: scope.execImport(attrs.prefix)
   });
 };
