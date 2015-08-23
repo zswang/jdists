@@ -6,6 +6,7 @@
 
 [![Build Status](https://img.shields.io/travis/zswang/jdists/master.svg)](https://travis-ci.org/zswang/jdists)
 [![NPM version](https://img.shields.io/npm/v/jdists.svg)](http://badge.fury.io/js/jdists)
+[![Coverage Status](https://coveralls.io/repos/zswang/jdists/badge.svg?branch=master&service=github)](https://coveralls.io/github/zswang/jdists?branch=master)
 
 ![jdists logo](https://cloud.githubusercontent.com/assets/536587/9022251/4d33427c-38a1-11e5-98e5-37b6a1c69a85.png)
 
