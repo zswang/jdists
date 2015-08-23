@@ -20,6 +20,7 @@
 var colors = require('colors');
 var util = require('util');
 var path = require('path');
+var mkdirp = require('mkdirp');
 var jsets = require('jsets');
 var cbml = require('cbml');
 var fs = require('fs');
@@ -137,7 +138,8 @@ function create(options) {
     }
     if (fromString) {
       tokens = cbml.parse(contentString);
-    } else {
+    }
+    else {
       tokens = cbml.parse(fs.readFileSync(filename));
     }
     /*<debug>
@@ -626,6 +628,9 @@ function create(options) {
         console.warn(
           colors.blue('File "%s" overwrite.'), name
         );
+      }
+      else {
+        mkdirp(path.dirname(name));
       }
       fs.writeFileSync(name, content);
       scopes[name] = null;
