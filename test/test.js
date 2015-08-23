@@ -40,6 +40,15 @@ describe('coverage', function () {
       new Buffer('hello').toString('base64')
     );
   });
+
+  it('fromString empty', function () {
+    assert.equal(
+      jdists.build('', {
+        fromString: true
+      }),
+      ''
+    );
+  });
 });
 
 fs.unlinkSync('test/fixtures/ccc.js');
