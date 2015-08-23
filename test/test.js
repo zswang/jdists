@@ -3,6 +3,7 @@ var assert = require('should');
 var fs = require('fs');
 var util = require('util');
 var path = require('path');
+var rimraf = require('rimraf');
 
 /**
  * 清除 \r，为兼容 Windows 下的文本换行符 CRLF
@@ -48,6 +49,14 @@ describe('coverage', function () {
       }),
       ''
     );
+  });
+
+  it('execExport sync', function () {
+    jdists.build('/*<jdists encoding="base64" export="test/fixtures/a/b/h.txt">hello</jdists>*/', {
+      fromString: true
+    });
+    assert.ok(fs.existsSync('test/fixtures/a/b/h.txt'));
+    rimraf.sync('test/fixtures/a');
   });
 });
 

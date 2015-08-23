@@ -630,7 +630,7 @@ function create(options) {
         );
       }
       else {
-        mkdirp(path.dirname(name));
+        mkdirp.sync(path.dirname(name));
       }
       fs.writeFileSync(name, content);
       scopes[name] = null;

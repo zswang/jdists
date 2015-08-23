@@ -80,7 +80,7 @@ argv._.forEach(function (filename) {
 });
 var content = contents.join('\n');
 if (argv.output) {
-  mkdirp(path.dirname(argv.output));
+  mkdirp.sync(path.dirname(argv.output));
   fs.writeFileSync(argv.output, content);
   console.log(colors.green(util.format('%j jdists output complete.', filenames)));
 }

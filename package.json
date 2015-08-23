@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Code block processing tools",
   "main": "index.js",
   "bin": {
@@ -28,7 +28,8 @@
     "mocha": "2.0.1",
     "istanbul": "0.3.17",
     "should": "4.1.0",
-    "jshint": "2.8.0"
+    "jshint": "2.8.0",
+    "rimraf": "2.4.2"
   },
   "dependencies": {
     "cbml": "^0.1.0",

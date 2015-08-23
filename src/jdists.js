@@ -18,6 +18,7 @@
 /*</jdists>*/
 
 var fs = require('fs');
+var path = require('path');
 var scope = require('./scope');
 var colors = require('colors/safe');
 
@@ -133,7 +134,7 @@ function build(filename, argv) {
   var content;
   if (argv.fromString) {
     content = filename;
-    filename = argv.path || '';
+    filename = argv.path || 'none';
   }
   var rootScope = scope.create({
     fromString: argv.fromString,
