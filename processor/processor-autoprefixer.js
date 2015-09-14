@@ -1,5 +1,5 @@
 var postcss = require('postcss');
-var autoprefixer = require('autoprefixer-core');
+var autoprefixer = require('autoprefixer');
 
 /**
  * 自动添加 CSS 前缀
@@ -11,7 +11,7 @@ var autoprefixer = require('autoprefixer-core');
  * @param {Function} scope.execImport 导入数据
  * @return {string} 返回处理后的内容
  * @example
- * <~jdists encoding="autoprefixer"~>
+ * <~jdists encoding="autoprefixer" browsers="iOS >= 7,Firefox >= 20" ~>
  * @color blue;
  * .rotate {
  *   animation: rotate 3s ease-in infinite;
@@ -33,7 +33,7 @@ module.exports = function processor(content, attrs, scope) {
       attrs.browsers
     ).split(/\s*,\s*/);
   }
-  return postcss(autoprefixer).process(content, {
+  return postcss(autoprefixer({
     browsers: browsers
-  }).toString();
+  })).process(content).toString();
 };
