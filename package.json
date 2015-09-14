@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Code block processing tools",
   "main": "index.js",
   "bin": {
@@ -50,8 +50,7 @@
     "jhtmls": "^0.1.7",
     "jade": "^1.11.0",
     "ejs": "^1.0.0",
-    "jfogs": "^0.0.10",
-    "babel": "^5.8.23"
+    "jfogs": "^0.0.10"
   },
   "scripts": {
     "test": "istanbul cover --hook-run-in-context node_modules/mocha/bin/_mocha -- -R spec",
