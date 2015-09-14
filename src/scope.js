@@ -201,6 +201,13 @@ function create(options) {
    * @return {*} 返回变量值
    */
   var getVariant = jsets.createGetter(instance, function (name) {
+    if (!(name in variants)) {
+      console.warn(
+        colors.blue(
+          'Variant "%s" is not set.'
+        ), name
+      );
+    }
     return variants[name];
   }, true);
   instance.getVariant = getVariant;
@@ -279,7 +286,7 @@ function create(options) {
       console.error(
         colors.red('process() : Undefined "content" parameters.')
       );
-      return;
+      return '';
     }
     if (!encoding || encoding === 'original') {
       return content;
