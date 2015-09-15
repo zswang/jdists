@@ -2,5 +2,6 @@
   "dependencies": {
     "node-sass": "^3.2.0",
     "babel": "^5.8.23"
-  }
+  },
+  "private": true
 }

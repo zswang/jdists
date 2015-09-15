@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+  <h1></h1>
+</body>
+<script>
+'use strict';
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+var sqr = function sqr(x) {
+  return x * x;
+};
+var π2 = sqr(Math.PI);
+console.log(π2);
+var Cat = (function () {
+  function Cat(color) {
+    _classCallCheck(this, Cat);
+    this.color = color;
+    //...
+  }
+  _createClass(Cat, [{
+    key: 'color',
+    get: function get() {
+      return this.color;
+    },
+    set: function set(value) {
+      this.color = value;
+    }
+  }], [{
+    key: 'hello',
+    value: function hello(color) {
+      console.log('%c hello', 'color:' + color);
+    }
+  }]);
+  return Cat;
+})();
+Cat.hello('red');
+</script>
+</html>

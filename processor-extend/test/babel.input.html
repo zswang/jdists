@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+  <h1></h1>
+</body>
+<script>
+/*<jdists encoding="babel">*/
+let sqr = (x) => x * x;
+let π2 = sqr(Math.PI);
+console.log(π2);
+
+class Cat {
+  constructor(color) {
+    this.color = color;
+    //...
+  }
+  get color() {
+    return this.color;
+  }
+  set color(value) {
+    this.color = value;
+  }
+  static hello(color) {
+    console.log('%c hello', 'color:' + color);
+  }
+}
+
+Cat.hello('red');
+/*</jdists>*/
+</script>
+</html>
