@@ -33,6 +33,17 @@ jdists.build('test/fixtures/ttt.js', {
 jdists.createScope().getScope();
 
 describe('coverage', function () {
+  it('hook', function () {
+    assert.equal(
+      jdists.build('/*<jdists import="#hook"></jdists>*/', {
+        fromString: true
+      }, function (scope) {
+        scope.setVariant('hook', 'hello');
+      }),
+      'hello'
+    );
+  });
+
   it('fromString', function () {
     assert.equal(
       jdists.build('/*<jdists encoding="base64">hello</jdists>*/', {

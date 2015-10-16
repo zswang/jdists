@@ -63,9 +63,10 @@ var defaultTrigger = 'release';
  * @param {boolean} argv.clean 是否清除连续空行，默认 true
  * @param {string} argv.remove 需要移除的标签列表，默认 "remove,test"
  * @param {string} argv.fromString 当为 true 时 filename 参数则看作内容
+ * @param {Function} hook 预处理作用域
  * @return {string} 返回编译后的结果
  */
-function build(filename, argv) {
+function build(filename, argv, hook) {
   // 处理默认值
   argv = argv || {};
   argv.trigger = argv.trigger || defaultTrigger;
@@ -150,6 +151,10 @@ function build(filename, argv) {
     variants: variants,
     processors: processors
   });
+
+  if (typeof hook === 'function') {
+    hook(rootScope);
+  }
 
   return rootScope.build();
 }
