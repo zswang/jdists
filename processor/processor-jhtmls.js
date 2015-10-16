@@ -18,12 +18,14 @@ module.exports = function processor(content, attrs, scope) {
   var data;
   if (attrs.data) {
     /*jslint evil: true */
-    data = new Function(
-      'return (' +
-      scope.execImport(attrs.data) +
-      ');'
-    )();
-  } else {
+    data = scope.execImport(attrs.data);
+    if (typeof data === 'string') {
+      data = new Function(
+        'return (' + data + ');'
+      )();
+    }
+  }
+  else {
     data = null;
   }
   return scope.compile(render(data));

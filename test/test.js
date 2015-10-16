@@ -35,10 +35,12 @@ jdists.createScope().getScope();
 describe('coverage', function () {
   it('hook', function () {
     assert.equal(
-      jdists.build('/*<jdists import="#hook"></jdists>*/', {
+      jdists.build('/*<jdists encoding="ejs" data="#hook"><%- title%></jdists>*/', {
         fromString: true
       }, function (scope) {
-        scope.setVariant('hook', 'hello');
+        scope.setVariant('hook', {
+          title: 'hello'
+        });
       }),
       'hello'
     );
