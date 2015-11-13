@@ -76,6 +76,7 @@ describe('coverage', function () {
 fs.unlinkSync('test/fixtures/ccc.js');
 
 describe('fixtures', function () {
+  this.timeout(10000);
   var dirname = 'test/fixtures';
   var items = fs.readdirSync(dirname).filter(function (item) {
     return /\.input\.(\w+)$/.test(item);

@@ -28,5 +28,9 @@ module.exports = function processor(content, attrs, scope) {
   else {
     data = null;
   }
-  return scope.compile(render(data));
+  if (/^(off|false|no)$/.test(attrs.rework)) {
+    return render(data);
+  } else {
+    return scope.compile(render(data));
+  }
 };
