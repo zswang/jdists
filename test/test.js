@@ -31,11 +31,38 @@ jdists.build('test/fixtures/ttt.js', {
   config: 'test/none.jdistsrc'
 });
 jdists.createScope().getScope();
+jdists.createScope().contentScope('', 'hook.js');
 
 describe('coverage', function () {
-  it('hook', function () {
+  it('hook+ejs', function () {
     assert.equal(
       jdists.build('/*<jdists encoding="ejs" data="#hook"><%- title%></jdists>*/', {
+        fromString: true
+      }, function (scope) {
+        scope.setVariant('hook', {
+          title: 'hello'
+        });
+      }),
+      'hello'
+    );
+  });
+
+  it('hook+jhtmls', function () {
+    assert.equal(
+      jdists.build('/*<jdists encoding="jhtmls" data="#hook">#{title}</jdists>*/', {
+        fromString: true
+      }, function (scope) {
+        scope.setVariant('hook', {
+          title: 'hello'
+        });
+      }),
+      'hello'
+    );
+  });
+
+  it('hook+jade', function () {
+    assert.equal(
+      jdists.build('/*<jdists encoding="jade" data="#hook">=title</jdists>*/', {
         fromString: true
       }, function (scope) {
         scope.setVariant('hook', {

@@ -283,7 +283,7 @@ function create(options) {
    */
   function contentScope(content, file) {
     if (file) { // 已指定
-      file = path.resolve('', file);
+      file = path.resolve(getDirname(), file);
     } else { // 未指定
       file = filename;
     }

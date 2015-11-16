@@ -1,6 +1,6 @@
 /*<jdists encoding="fndep" depend="c">*/
 
-/*<function name="a">*/
+/*<function name="a" depend="b">*/
 function a() {
   console.log('a');
 }
@@ -24,4 +24,19 @@ function d() {
 }
 /*</function>*/
 
+/*</jdists>*/
+
+//------------
+
+/*<jdists encoding="fndep"></jdists>*/
+
+/*<jdists encoding="fndep" depend="e">*/
+  /*<function name="e" depend="e">*/
+  function e() {
+    console.log('e');
+  }
+  /*</function>*/
+/*</jdists>*/
+
+/*<jdists encoding="fndep" depend="f">*/
 /*</jdists>*/

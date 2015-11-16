@@ -1,3 +1,5 @@
+var colors = require('colors');
+
 /**
  * 处理函数依赖
  *
@@ -12,7 +14,7 @@ module.exports = function (content, attrs, scope) {
   var list = [];
   var contentScope = scope.contentScope(content);
   var fnNodes = {};
-  contentScope.querySelector('function*').forEach(function(node) {
+  contentScope.querySelector('function*').forEach(function (node) {
     fnNodes[node.attrs.name] = {
       node: node,
       require: 0
@@ -23,24 +25,31 @@ module.exports = function (content, attrs, scope) {
    *
    * @param {string} depend 依赖列表
    */
-  function record(depend) {
+  function record(depend, level) {
     if (!depend) {
       return;
     }
-    (depend || '').split(/\s*,\s*/).forEach(function(name) {
-      var node = fnNodes[name].node;
+    depend.split(/\s*,\s*/).forEach(function (name) {
+      var item = fnNodes[name];
+      if (!item) {
+        return;
+      }
+      var node = item.node;
+      if (node.pending) {
+        console.error(colors.red('A circular reference. name = %j'), name);
+        return;
+      }
       if (!fns[name]) {
         list.push(fnNodes[name]);
       }
       fns[name] = fnNodes[name];
-      fns[name].require++;
-      if (!node) {
-        return;
-      }
-      record(node.attrs.depend);
+      fns[name].require += level;
+      node.pending = true;
+      record(node.attrs.depend, level + 1);
+      node.pending = false;
     });
   }
-  record(attrs.depend);
+  record(attrs.depend, 0);
   list.sort(function (a, b) {
     return b.require - a.require;
   });
