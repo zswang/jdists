@@ -348,8 +348,8 @@ function create(options) {
     }
 
     var body = execImport(encoding);
-    if (body.indexOf('function') < 0) {
-      console.error(colors.red('Invalid encoding %j.'), body);
+    if (!body || body.indexOf('function') < 0) {
+      console.error(colors.red('Invalid encoding %j.'), encoding);
       return function (content) {
         return content;
       };
