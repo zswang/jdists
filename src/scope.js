@@ -251,7 +251,7 @@ function create(options) {
    * @param {string} filename 对应文件名
    * @return {jdistsScope} 返回文件对应的作用域
    */
-  function getScope(filename) {
+  function fileScope(filename) {
     filename = path.resolve('', filename || '');
     var result = scopes[filename];
     if (!result) {
@@ -271,7 +271,40 @@ function create(options) {
     }
     return result;
   }
-  instance.getScope = getScope;
+  instance.fileScope = fileScope;
+  instance.getScope = fileScope; // forward compatbility
+
+  /**
+   * 获取内容的作用域
+   *
+   * @param {string} content 对应文件名
+   * @param {string=} file 对应文件名
+   * @return {jdistsScope} 返回文件对应的作用域
+   */
+  function contentScope(content, file) {
+    if (file) { // 已指定
+      file = path.resolve('', file);
+    } else { // 未指定
+      file = filename;
+    }
+
+    return create({
+      fromString: true,
+      content: content,
+      clean: clean,
+      removeList: removeList,
+      excludeList: excludeList,
+      rootScope: rootScope,
+      filename: file,
+      argv: argv,
+      scopes: scopes,
+      processors: processors,
+      variants: variants,
+      cacheKeys: cacheKeys,
+      tags: tags
+    });
+  }
+  instance.contentScope = contentScope;
 
   /**
    * 将内容进行编码
@@ -576,7 +609,7 @@ function create(options) {
           return '';
         }
       }
-      scope = getScope(file);
+      scope = fileScope(file);
     }
     if (selector) {
       var node = scope.querySelector(selector);
