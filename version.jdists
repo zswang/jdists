@@ -1,6 +1,6 @@
 /*<jdists encoding='jhtmls' data='package.json' export='package.json'>*/
 main = 'lib/jdists.js';
-version = version.replace(/\d+$/, function (value) {
+version = version.replace(/-?\d+$/, function (value) {
   return parseInt(value) + 1;
 });
 !#{JSON.stringify(this, null, '  ')}
