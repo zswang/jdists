@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "1.3.3",
+  "version": "1.3.5",
   "description": "Code block processing tools",
   "main": "lib/jdists.js",
   "bin": {
@@ -47,11 +47,12 @@
     "js-yaml": "^3.4.6",
     "colors": "^1.0.3",
     "optimist": "^0.6.1",
-    "jhtmls": "^0.1.12",
+    "jhtmls": "^1.0.0",
     "jade": "^1.11.0",
     "ejs": "^1.0.0",
     "jfogs": "^0.0.12",
-    "metascript": "^1.0.0"
+    "metascript": "^1.0.0",
+    "jphps": "^0.0.9"
   },
   "scripts": {
     "_update_version": "jdists version.jdists",
