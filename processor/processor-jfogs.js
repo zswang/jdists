@@ -16,6 +16,7 @@ module.exports = function processor(content, attrs, scope) {
   }
   return jfogs.obfuscate(content, {
     type: scope.execImport(attrs.type),
+    breakout: /^(yes|on|ok|true)$/.test(scope.execImport(attrs.breakout)),
     prefix: scope.execImport(attrs.prefix)
   });
 };
