@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "1.3.6",
+  "version": "1.3.8",
   "description": "Code block processing tools",
   "main": "lib/jdists.js",
   "bin": {
@@ -55,7 +55,7 @@
     "jphps": "^0.0.9"
   },
   "scripts": {
-    "_update_version": "jdists version.jdists",
+    "_update_version": "node cli.js version.jdists",
     "_dist": "node cli.js src/jdists.js -o lib/jdists.js && node cli.js src/scope.js -o lib/scope.js",
     "dist": "npm run _update_version && npm run _dist && npm run test",
     "test": "istanbul cover --hook-run-in-context node_modules/mocha/bin/_mocha -- -R spec",
