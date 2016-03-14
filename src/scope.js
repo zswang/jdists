@@ -24,6 +24,7 @@ var mkdirp = require('mkdirp');
 var jsets = require('jsets');
 var cbml = require('cbml');
 var fs = require('fs');
+var url = require('url');
 var minimatch = require('minimatch');
 
 /**
@@ -246,6 +247,16 @@ function create(options) {
   instance.getDirname = getDirname;
 
   /**
+   * 获取当前文件名，相对工作目录
+   *
+   * @return {string} 返回当前文件所在目录
+   */
+  function getFilename() {
+    return url.format(path.relative('', filename));
+  }
+  instance.getFilename = getFilename;
+
+  /**
    * 获取一个文件的作用域
    *
    * @param {string} filename 对应文件名
@@ -314,7 +325,7 @@ function create(options) {
    * @param {Object} attrs 属性集合
    * @return {Function} 返回编码后的结果
    */
-  function process(content, encoding, attrs) {
+  function process(content, encoding, attrs, node) {
     if (typeof content === 'undefined') {
       console.error(
         colors.red('process() : Undefined "content" parameters.')
@@ -327,7 +338,7 @@ function create(options) {
     var items = encoding.split(/\s*,\s*/);
     if (items.length > 1) {
       items.forEach(function (item) {
-        content = process(content, item, attrs);
+        content = process(content, item, attrs, node);
       });
       return content;
     }
@@ -338,7 +349,7 @@ function create(options) {
       );
       return content;
     }
-    return processor(content, attrs, instance);
+    return processor(content, attrs, instance, node);
   }
   instance.process = process;
 
@@ -748,7 +759,7 @@ function create(options) {
       }
 
       value = process(value, node.attrs.encoding || tagInfo.encoding,
-        node.attrs);
+        node.attrs, node);
       if (/^\s+/.test(value)) {
         node.altered = true;
       }
