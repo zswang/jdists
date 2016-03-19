@@ -14,8 +14,8 @@ module.exports = function processor(content, attrs, scope, node) {
   }
   var perline = node.prefix.split(/\n/).length - 1; // 前缀字符占有的行数
 
-  var match1 = node.content.match(/\s+/); // 实际内容
-  var match2 = content.match(/\s+/); // 处理内容
+  var match1 = node.content.match(/^\s+/); // 实际内容
+  var match2 = content.match(/^\s+/); // 处理内容
 
   var l1 = match1 ? match1[0].split(/\n/).length - 1 : 0;
   var l2 = match2 ? match2[0].split(/\n/).length - 1 : 0;
