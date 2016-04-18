@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "1.3.12",
+  "version": "1.3.13",
   "description": "Code block processing tools",
   "main": "lib/jdists.js",
   "bin": {
@@ -52,7 +52,7 @@
     "ejs": "^1.0.0",
     "jfogs": "^0.0.15",
     "metascript": "^1.0.0",
-    "jphps": "^0.0.9"
+    "jphps": "^0.0.11"
   },
   "scripts": {
     "_update_version": "node cli.js version.jdists",
