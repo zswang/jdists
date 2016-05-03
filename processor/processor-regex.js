@@ -7,9 +7,11 @@ var colors = require('colors');
  * @param {Object} attrs 属性
  * @param {string} attrs.pattern 表达式
  * @param {string} attrs.replacement 替换内容
+ * @param {string} attrs.rework 是否重新编译
  * @param {Object} scope 作用域
  * @param {Function} scope.execImport 导入数据
  * @param {Function} scope.compile 变量 jdists 文本
+ * @param {Function} scope.isNo 测试文字是否表达为假
  */
 module.exports = function processor(content, attrs, scope) {
   var pattern = scope.execImport(attrs.pattern);
@@ -32,5 +34,10 @@ module.exports = function processor(content, attrs, scope) {
   if (!regex) {
     return content;
   }
-  return scope.compile(content.replace(regex, replacement || ''));
+  var result = content.replace(regex, replacement || '');
+  if (scope.isNo(attrs.rework)) {
+    return result;
+  } else {
+    return scope.compile(result);
+  }
 };

@@ -694,6 +694,16 @@ function create(options) {
   }
   instance.execExport = execExport;
 
+  function isYes(text) {
+    return /^(true|on|yes|ok)$/i.test(text);
+  }
+  instance.isYes = isYes;
+
+  function isNo(text) {
+    return /^(false|off|no)$/i.test(text);
+  }
+  instance.isNo = isNo;
+
   /**
    * 编译 CBML 标签节点
    *
@@ -726,10 +736,9 @@ function create(options) {
     node.pending = true;
     var value = '';
     var fixed = true;
-    if (!node.nodes) {
-      value = '';
-    }
-    else {
+    if (node.attrs && isYes(node.attrs.important)) {
+      value = node.content;
+    } else if (node.nodes) {
       node.nodes.forEach(function (item) {
         var text = buildBlock(item);
         if (!item.fixed && item.type !== 'text') {
