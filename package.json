@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "1.4.0",
+  "version": "2.0.0-alpha.2",
   "description": "Code block processing tools",
   "main": "lib/jdists.js",
   "bin": {
@@ -29,34 +29,24 @@
     "istanbul": "0.3.17",
     "should": "4.1.0",
     "jshint": "2.8.0",
-    "rimraf": "2.4.2"
+    "jdists": "1.4.0"
   },
   "dependencies": {
-    "cbml": "^0.2.7",
+    "cbml": "^0.2.8",
     "jsets": "^0.0.3",
     "mkdirp": "^0.5.1",
-    "JSDev": "^0.0.83",
     "minimatch": "^2.0.10",
-    "less": "^2.4.0",
-    "postcss": "^5.0.4",
-    "autoprefixer": "^6.1.2",
-    "clean-css": "^3.1.8",
-    "uglify-js": "^2.4.17",
-    "svgo": "^0.5.1",
     "glob": "^5.0.5",
-    "js-yaml": "^3.4.6",
     "colors": "^1.0.3",
     "optimist": "^0.6.1",
     "jhtmls": "^1.0.0",
-    "jade": "^1.11.0",
     "ejs": "^1.0.0",
     "jfogs": "^0.0.15",
-    "metascript": "^1.0.0",
     "jphps": "^0.0.11"
   },
   "scripts": {
-    "_update_version": "node cli.js version.jdists",
-    "_dist": "node cli.js src/jdists.js -o lib/jdists.js && node cli.js src/scope.js -o lib/scope.js",
+    "_update_version": "jdists version.jdists",
+    "_dist": "jdists src/jdists.js -o lib/jdists.js && jdists src/scope.js -o lib/scope.js",
     "dist": "npm run _update_version && npm run _dist && npm run test",
     "test": "istanbul cover --hook-run-in-context node_modules/mocha/bin/_mocha -- -R spec",
     "lint": "jshint src/*.js src/**/*.js processor/*.js processor-extend/*.js"
