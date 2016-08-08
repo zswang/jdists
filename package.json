@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Code block processing tools",
   "main": "lib/jdists.js",
   "bin": {
@@ -36,7 +36,7 @@
     "jsets": "^0.0.3",
     "mkdirp": "^0.5.1",
     "JSDev": "^0.0.83",
-    "minimatch": "^2.0.10",
+    "minimatch": "^3.0.2",
     "less": "^2.4.0",
     "postcss": "^5.0.4",
     "autoprefixer": "^6.1.2",
