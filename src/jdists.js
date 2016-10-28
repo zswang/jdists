@@ -131,6 +131,10 @@ function build(filename, argv, hook) {
     );
   }
 
+  if (typeof argv.clean !== 'undefined') {
+    clean = argv.clean;
+  }
+
   var content;
   if (argv.fromString) {
     content = filename;

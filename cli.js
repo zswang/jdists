@@ -17,18 +17,23 @@ var argv = optimist
   .string('h')
 
 .alias('o', 'output')
-  .describe('o', 'output file.')
+  .describe('o', 'output the file.')
   .string('o')
 
 .alias('r', 'remove')
-  .describe('r', 'remove block.')
+  .describe('r', 'remove the block.')
   .default('r', 'remove,test')
   .string('r')
 
 .alias('t', 'trigger')
-  .describe('t', 'trigger block.')
+  .describe('t', 'trigger the block.')
   .default('t', 'release')
   .string('t')
+
+.alias('C', 'notClean')
+  .describe('C', 'not clean continuous line.')
+  .default('C', false)
+  .boolean('C')
 
 .alias('config', 'c')
   .describe('c', 'path to config file.')
@@ -76,8 +81,12 @@ var contents = [];
 var filenames = [];
 argv._.forEach(function (filename) {
   filenames.push(filename);
+  if (argv.notClean === true) {
+    argv.clean = false;
+  }
   contents.push(jdists.build(filename, argv));
 });
+
 var content = contents.join('\n');
 if (argv.output) {
   mkdirp.sync(path.dirname(argv.output));

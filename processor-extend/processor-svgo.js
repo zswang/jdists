@@ -28,7 +28,7 @@ module.exports = function (content) {
   }).optimize(content, function (svg) {
     if (svg.error) {
       console.error(colors.red(svg.error));
-      return content;
+      throw svg.error;
     }
     content = svg.data;
   });

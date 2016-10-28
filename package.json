@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "2.0.0-alpha.2",
+  "version": "2.0.0-alpha.6",
   "description": "Code block processing tools",
   "main": "lib/jdists.js",
   "bin": {
@@ -25,23 +25,34 @@
   },
   "homepage": "https://github.com/zswang/jdists",
   "devDependencies": {
-    "mocha": "2.0.1",
+    "JSDev": "0.0.84",
+    "autoprefixer": "^6.4.1",
+    "clean-css": "^3.4.19",
     "istanbul": "0.3.17",
-    "should": "4.1.0",
+    "jade": "^1.11.0",
+    "jdists": "1.4.0",
+    "js-yaml": "^3.6.1",
     "jshint": "2.8.0",
-    "jdists": "1.4.0"
+    "less": "^2.7.1",
+    "metascript": "^1.0.0",
+    "mocha": "2.0.1",
+    "postcss": "^5.1.2",
+    "rimraf": "^2.5.4",
+    "should": "4.1.0",
+    "svgo": "^0.7.0",
+    "jfogs": "^0.0.15",
+    "uglify-js": "^2.7.3"
   },
   "dependencies": {
     "cbml": "^0.2.8",
     "jsets": "^0.0.3",
     "mkdirp": "^0.5.1",
-    "minimatch": "^2.0.10",
+    "minimatch": "^3.0.2",
     "glob": "^5.0.5",
     "colors": "^1.0.3",
     "optimist": "^0.6.1",
     "jhtmls": "^1.0.0",
     "ejs": "^1.0.0",
-    "jfogs": "^0.0.15",
     "jphps": "^0.0.11"
   },
   "scripts": {
@@ -49,6 +60,7 @@
     "_dist": "jdists src/jdists.js -o lib/jdists.js && jdists src/scope.js -o lib/scope.js",
     "dist": "npm run _update_version && npm run _dist && npm run test",
     "test": "istanbul cover --hook-run-in-context node_modules/mocha/bin/_mocha -- -R spec",
+    "mocha": "mocha",
     "lint": "jshint src/*.js src/**/*.js processor/*.js processor-extend/*.js"
   },
   "files": [

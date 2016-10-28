@@ -112,7 +112,7 @@ describe('fixtures', function () {
     it(input, function () {
       if (/\.throw\./.test(input)) { // 出现异常
         (function () {
-          jdists.build(path.join(dirname, input), {
+          var s = jdists.build(path.join(dirname, input), {
             output: output
           });
         }).should.throw();
