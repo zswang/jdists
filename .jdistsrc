@@ -6,6 +6,9 @@
     },
     "xor": {
       "encoding": "xor"
+    },
+    "toggle": {
+      "encoding": "toggle"
     }
   },
   "processors": {

@@ -94,6 +94,9 @@ function build(filename, argv, hook) {
         },
         "xor": {
           "encoding": "xor"
+        },
+        "toggle": {
+          "encoding": "toggle"
         }
       },
       "processors": {
