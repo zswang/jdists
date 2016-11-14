@@ -62,7 +62,7 @@
     "dist2": "npm run _dist && npm run test",
     "test": "istanbul cover --hook-run-in-context node_modules/mocha/bin/_mocha -- -R spec",
     "mocha": "mocha",
-    "lint": "jshint src/*.js src/**/*.js processor/*.js processor-extend/*.js"
+    "lint": "jshint src/*.js processor/*.js processor-extend/*.js"
   },
   "files": [
     "index.js",
