@@ -772,7 +772,15 @@ function create(options) {
       if (/^\s+/.test(value)) {
         node.altered = true;
       }
+
+      if (typeof value === 'object') {
+        value = JSON.stringify(value);
+      } else {
+        value = String(value);
+      }
+
       node.content = value;
+
       if (node.attrs.export && node.attrs.export !== '&') {
         execExport(node.attrs.export, value);
         value = '';

@@ -26,6 +26,7 @@ var colors = require('colors/safe');
 var defaultProcessors = {
   "glob": require('../processor/processor-glob'),
   "jhtmls": require('../processor/processor-jhtmls'),
+  "extract": require('../processor/processor-extract'),
 };
 /*</remove>*/
 
