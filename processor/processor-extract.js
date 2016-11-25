@@ -35,6 +35,7 @@ module.exports = function processor(content, attrs, scope) {
     return '';
   }
 
+  /*jslint evil: true */
   var data = new Function(
     'return (' + content + ');'
   )();
