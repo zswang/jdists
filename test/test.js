@@ -98,6 +98,27 @@ describe('coverage', function () {
     assert.ok(fs.existsSync('test/fixtures/a/b/h.txt'));
     rimraf.sync('test/fixtures/a');
   });
+
+  it('argv clean', function () {
+    assert.equal(
+      jdists.build('1\n\n2\n\n\n3', {
+        fromString: true,
+        clean: false
+      }),
+      '1\n\n2\n\n\n3'
+    );
+  });
+
+  it('.jdistsrc not exists.', function () {
+    var _existsSync = fs.existsSync;
+    fs.existsSync = function () {
+      return false;
+    };
+    jdists.build('1', {
+      fromString: true,
+    });
+    fs.existsSync = _existsSync;
+  });
 });
 
 fs.unlinkSync('test/fixtures/ccc.js');
