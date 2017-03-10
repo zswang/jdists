@@ -49,7 +49,7 @@ var argv = optimist
 if (argv._.length < 1) {
   if (argv.version) {
     var json = require('./package.json');
-    console.log(json.name + ' ' + json.version);
+    console.log(json.name + '@' + json.version);
     return;
   }
 

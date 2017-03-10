@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Code block processing tools",
   "main": "lib/jdists.js",
   "bin": {
@@ -30,7 +30,7 @@
     "clean-css": "^3.4.19",
     "istanbul": "0.3.17",
     "jade": "^1.11.0",
-    "jdists": "1.4.0",
+    "jdists": "2.0.0",
     "js-yaml": "^3.6.1",
     "jshint": "2.8.0",
     "less": "^2.7.1",
@@ -59,7 +59,6 @@
     "_update_version": "jdists version.jdists",
     "_dist": "jdists src/jdists.js -o lib/jdists.js && jdists src/scope.js -o lib/scope.js",
     "dist": "npm run _update_version && npm run _dist && npm run test",
-    "dist2": "npm run _dist && npm run test",
     "test": "istanbul cover --hook-run-in-context node_modules/mocha/bin/_mocha -- -R spec",
     "mocha": "mocha",
     "lint": "jshint src/*.js processor/*.js processor-extend/*.js"

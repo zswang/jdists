@@ -8,6 +8,6 @@
   <div></div>
 </body>
 <script>
-!function(){function e(e,t){return e.replace(/#\{(.*?)\}/g,function(e,n){return t&&n in t?t[n]:""})}var t=new Date;document.querySelector("div").innerHTML=e("<div>\n        <h1>#{title}</h1>\n        <label><em>#{date}</em></label>\n      </div>",{title:"uglify",date:[t.getFullYear(),t.getMonth()+101,t.getDate()+100].join("-").replace(/-1/g,"-")})}();
+!function(){var e=new Date;document.querySelector("div").innerHTML=function(e,t){return e.replace(/#\{(.*?)\}/g,function(e,n){return t&&n in t?t[n]:""})}("<div>\n        <h1>#{title}</h1>\n        <label><em>#{date}</em></label>\n      </div>",{title:"uglify",date:[e.getFullYear(),e.getMonth()+101,e.getDate()+100].join("-").replace(/-1/g,"-")})}();
 </script>
 </html>
