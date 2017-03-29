@@ -3,10 +3,10 @@
  *
  * @param {string} content 文本内容
  */
-module.exports = function (content) {
-  return content.replace(/`((\\.|[^])*?)`/g, function (all, text) {
+module.exports = function(content) {
+  return content.replace(/`((\\.|[^])*?)`/g, function(all, text) {
     function encode(str) {
-      return str.replace(/(\\.|[\n\r"])/g, function (char) {
+      return str.replace(/(\\.|[\n\r"])/g, function(char) {
         if (char.length === 2) {
           return char;
         }
@@ -15,14 +15,6 @@ module.exports = function (content) {
           '\r': '\\r',
           '"': '\\"'
         }[char];
-        switch (char) {
-          case '\n':
-            return '\\n';
-          case '\r':
-            return '\\r';
-          case '"':
-            return '\\"';
-        }
       });
     }
     var result = '"';
@@ -35,4 +27,4 @@ module.exports = function (content) {
     }
     return result + encode(text) + '"';
   });
-}；
+};
