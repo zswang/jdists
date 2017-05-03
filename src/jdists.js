@@ -22,6 +22,8 @@ var path = require('path');
 var scope = require('./scope');
 var colors = require('colors/safe');
 
+global.require = require; // ejs, jhtmls use
+
 /*<remove>*/
 var defaultProcessors = {
   "glob": require('../processor/processor-glob'),
