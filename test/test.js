@@ -73,6 +73,19 @@ describe('coverage', function () {
     );
   });
 
+  it('hook+handlebars', function () {
+    assert.equal(
+      jdists.build('/*<jdists encoding="handlebars" data="#hook">{{title}}</jdists>*/', {
+        fromString: true
+      }, function (scope) {
+        scope.setVariant('hook', {
+          title: 'hello'
+        });
+      }),
+      'hello'
+    );
+  });
+
   it('fromString', function () {
     assert.equal(
       jdists.build('/*<jdists encoding="base64">hello</jdists>*/', {

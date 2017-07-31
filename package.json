@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "2.1.4",
+  "version": "2.1.7",
   "description": "Code block processing tools",
   "main": "lib/jdists.js",
   "bin": {
@@ -28,9 +28,11 @@
     "JSDev": "0.0.84",
     "autoprefixer": "^6.4.1",
     "clean-css": "^3.4.19",
+    "handlebars": "^4.0.10",
     "istanbul": "0.3.17",
     "jade": "^1.11.0",
     "jdists": "2.0.17",
+    "jfogs": "^0.0.15",
     "js-yaml": "^3.6.1",
     "jshint": "2.8.0",
     "less": "^2.7.1",
@@ -40,7 +42,6 @@
     "rimraf": "^2.5.4",
     "should": "4.1.0",
     "svgo": "^0.7.0",
-    "jfogs": "^0.0.15",
     "uglify-js": "^2.7.3"
   },
   "dependencies": {
