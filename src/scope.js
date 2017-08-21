@@ -97,7 +97,7 @@ function create(options) {
   var instance = {};
 
   var argv = options.argv || {};
-  var env = options.env || {};
+  var env = options.env || process.env;
   var rootScope = options.rootScope || instance;
   var scopes = options.scopes || {};
   var processors = options.processors || {};
@@ -181,7 +181,7 @@ function create(options) {
    */
   var getArgument = jsets.createGetter(instance, function (name) {
     return argv[name];
-  }, true);
+  }, false);
   instance.getArgument = getArgument;
 
   /**
@@ -192,7 +192,7 @@ function create(options) {
    */
   var getEnvironment = jsets.createGetter(instance, function (name) {
     return env[name];
-  }, true);
+  }, false);
   instance.getEnvironment = getEnvironment;
 
   /**

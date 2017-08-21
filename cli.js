@@ -40,13 +40,26 @@ var argv = optimist
   .default('c', '.jdistsrc')
   .string('c')
 
+.alias('eval', 'e')
+  .describe('e', 'evaluate script')
+  .string('e')
+
 .alias('v', 'version')
   .describe('v', 'Print version number and exit.')
 
 .wrap(80)
   .argv;
 
-if (argv._.length < 1) {
+var contents = [];
+if (argv.eval) {
+  var oldFromString = argv.fromString;
+  argv.fromString = true;
+  var content = jdists.build(argv.eval, argv);
+  contents.push(content);
+  argv.fromString = oldFromString;
+}
+
+if (argv._.length < 1 && contents.length <= 0) {
   if (argv.version) {
     var json = require('./package.json');
     console.log(json.name + '@' + json.version);
@@ -77,7 +90,6 @@ Options:
   return;
 }
 
-var contents = [];
 var filenames = [];
 argv._.forEach(function (filename) {
   filenames.push(filename);
