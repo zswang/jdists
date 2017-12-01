@@ -46,15 +46,15 @@
   },
   "dependencies": {
     "cbml": "^0.2.8",
-    "jsets": "^0.0.3",
-    "mkdirp": "^0.5.1",
-    "minimatch": "^3.0.2",
-    "glob": "^5.0.5",
     "colors": "^1.0.3",
-    "optimist": "^0.6.1",
+    "ejs": "^2.5.7",
+    "glob": "^5.0.5",
     "jhtmls": "^1.2.2",
-    "ejs": "^1.0.0",
-    "jphps": "^0.0.11"
+    "jphps": "^0.0.11",
+    "jsets": "^0.0.3",
+    "minimatch": "^3.0.2",
+    "mkdirp": "^0.5.1",
+    "optimist": "^0.6.1"
   },
   "scripts": {
     "_update_version": "jdists version.jdists",
