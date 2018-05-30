@@ -97,7 +97,7 @@ function create(options) {
   var instance = {};
 
   var argv = options.argv || {};
-  var env = options.env || process.env;
+  var env = options.env || global.process.env;
   var rootScope = options.rootScope || instance;
   var scopes = options.scopes || {};
   var processors = options.processors || {};
