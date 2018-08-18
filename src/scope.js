@@ -611,7 +611,7 @@ function create(options) {
       }
       if (execExclude(file)) {
         if (!selector) {
-          return fs.readFileSync(file);
+          return String(fs.readFileSync(file));
         }
         else {
           console.error(

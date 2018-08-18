@@ -1,6 +1,6 @@
 {
   "name": "jdists",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Code block processing tools",
   "main": "lib/jdists.js",
   "bin": {
@@ -34,7 +34,7 @@
     "jdists": "2.0.17",
     "jfogs": "^0.0.15",
     "js-yaml": "^3.6.1",
-    "jshint": "^2.9.5",
+    "jshint": "^2.9.6",
     "less": "^3.0.4",
     "metascript": "^1.0.0",
     "mocha": "^5.2.0",

@@ -35,6 +35,8 @@ bower_components
 
 # test
 assets
+debug*
 
 # release
 release
+package-lock.json
